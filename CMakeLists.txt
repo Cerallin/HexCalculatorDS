@@ -13,6 +13,25 @@ set(DEVKITPRO $ENV{DEVKITPRO})
 set(LIBNDS ${DEVKITPRO}/libnds)
 
 # ----------------------------------------
+# Font tiles
+# ----------------------------------------
+
+find_program(GRIT grit REQUIRED)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
+    COMMAND ${GRIT}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-main-tilemap.png
+        -ftc
+        -gB4
+        -gTFF00FF
+        -m
+        -o mainFont
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-main-tilemap.png
+    COMMENT "Generating font tilemap"
+)
+
+# ----------------------------------------
 # Source files
 # ----------------------------------------
 
@@ -21,10 +40,14 @@ file(GLOB_RECURSE SOURCES
     source/*.cc
 )
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES})
+add_executable(${PROJECT_NAME}.elf 
+    ${SOURCES}
+    ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
+)
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
     include
+    ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBNDS}/include
 )
 
