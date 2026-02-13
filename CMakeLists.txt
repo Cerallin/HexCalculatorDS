@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.18)
 project(HexCalculatorDS VERSION 1.0.0 LANGUAGES C CXX)
 
 # ----------------------------------------
-# 基础路径
+# Environments
 # ----------------------------------------
 
 if(NOT DEFINED ENV{DEVKITPRO})
@@ -11,7 +11,6 @@ endif()
 
 set(DEVKITPRO $ENV{DEVKITPRO})
 set(LIBNDS ${DEVKITPRO}/libnds)
-set(CALICO ${DEVKITPRO}/calico)
 
 # ----------------------------------------
 # Source files
@@ -27,7 +26,6 @@ add_executable(${PROJECT_NAME}.elf ${SOURCES})
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
     include
     ${LIBNDS}/include
-    ${CALICO}/include
 )
 
 # ----------------------------------------
@@ -57,7 +55,7 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mthumb
     -mthumb-interwork
     -Wl,--gc-sections
-    -specs=${CALICO}/share/ds9.specs
+    -specs=ds_arm9.specs
 )
 
 set_target_properties(${PROJECT_NAME}.elf PROPERTIES
@@ -72,12 +70,10 @@ set_target_properties(${PROJECT_NAME}.elf PROPERTIES
 
 target_link_directories(${PROJECT_NAME}.elf PRIVATE
     ${LIBNDS}/lib
-    ${CALICO}/lib
 )
 
 target_link_libraries(${PROJECT_NAME}.elf
     nds9
-    calico_ds9
 )
 
 # ----------------------------------------
@@ -85,7 +81,6 @@ target_link_libraries(${PROJECT_NAME}.elf
 # ----------------------------------------
 
 find_program(NDSTOOL ndstool REQUIRED)
-find_program(GRIT grit REQUIRED)
 
 set(NDS_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.nds)
 
@@ -99,9 +94,8 @@ add_custom_command(
     COMMAND ${NDSTOOL}
         -c ${NDS_FILE}
         -9 $<TARGET_FILE:${PROJECT_NAME}.elf>
-        -7 ${CALICO}/bin/ds7_maine.elf
         -b ${GAME_ICON}
-        "${GAME_TITLE}\\;${GAME_SUBTITLE1}\\;${GAME_SUBTITLE2}"
+        "${GAME_TITLE}\;${GAME_SUBTITLE1}\;${GAME_SUBTITLE2}"
     DEPENDS ${PROJECT_NAME}.elf
     COMMENT "Generating NDS ROM"
 )

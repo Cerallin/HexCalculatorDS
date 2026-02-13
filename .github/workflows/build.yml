@@ -4,7 +4,11 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: "devkitpro/devkitarm:latest"
+    container:
+      image: ghcr.io/${{ github.repository }}/devkitarm:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout

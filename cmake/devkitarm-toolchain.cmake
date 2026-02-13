@@ -1,7 +1,6 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-# devkitPro 环境变量必须存在
 if(NOT DEFINED ENV{DEVKITPRO})
     message(FATAL_ERROR "DEVKITPRO not set")
 endif()
