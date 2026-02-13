@@ -4,6 +4,8 @@ An integer calculator for Nintendo DS.
 
 ## Proto design
 
+*Will change to real screen shots when all done.*
+
 ![](screenshots/HexCalculatorDS-main.png)
 
 ![](screenshots/HexCalculatorDS-sub.png)
