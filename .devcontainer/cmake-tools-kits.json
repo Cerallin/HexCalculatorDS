@@ -1,0 +1,17 @@
+[
+    {
+        "name": "System GCC",
+        "compilers": {
+            "C": "/usr/bin/gcc",
+            "CXX": "/usr/bin/g++"
+        },
+        "isTrusted": true
+    },
+    {
+        "name": "devkitARM",
+        "compilers": {
+            "C": "/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc",
+            "CXX": "/opt/devkitpro/devkitARM/bin/arm-none-eabi-g++"
+        }
+    }
+]

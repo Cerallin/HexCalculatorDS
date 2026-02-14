@@ -1,0 +1,24 @@
+{
+    "build": {
+        "dockerfile": "./Dockerfile"
+    },
+    "remoteUser": "user",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.hexeditor",
+                "streetsidesoftware.code-spell-checker",
+                "yzhang.markdown-all-in-one",
+                "eamodio.gitlens",
+                "Gruntfuggly.todo-tree"
+            ]
+        }
+    },
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/user/.ssh,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.gitconfig,target=/home/user/.gitconfig,type=bind,consistency=cached",
+        "source=${localWorkspaceFolder}/.devcontainer/cmake-tools-kits.json,target=/home/user/.local/share/CMakeTools/cmake-tools-kits.json,type=bind"
+    ]
+}
