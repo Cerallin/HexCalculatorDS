@@ -17,6 +17,7 @@ RUN apt-get install -y --no-install-recommends gdb cppcheck make
 RUN apt-get install -y --no-install-recommends cmake automake autoconf autoconf-archive autoconf-doc libtool
 RUN apt-get install -y --no-install-recommends libfreeimage3 libfreeimage-dev
 RUN apt-get install -y --no-install-recommends imagemagick
+RUN apt-get install -y --no-install-recommends clang-format
 
 # locale
 RUN apt-get install -y --no-install-recommends locales

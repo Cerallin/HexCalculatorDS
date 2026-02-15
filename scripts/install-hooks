@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for script in scripts/hooks/*; do
+    if [ -f "$script" ]; then
+        hook_name=$(basename "$script")
+        target=".git/hooks/$hook_name"
+        ln -sf "../../$script" "$target"
+        echo "Installed $hook_name hook."
+    fi
+done

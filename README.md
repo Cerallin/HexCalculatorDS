@@ -49,3 +49,28 @@ This software is under GPL-2.0-or-later license.
 
 - `libnds` v2.0.1
 - A **modified version** of `ark-pixel-font`
+
+## Develop
+
+### Devcontainer
+This project supports VS Code Dev Container. To run the devcontainer:
+
+- **Locally (with VS Code):**
+  1. Open the project folder in VS Code.
+  2. If prompted, click "Reopen in Container". Or use the command palette: `Dev Containers: Reopen in Container`.
+  3. The environment will be automatically set up and ready for development.
+
+- **GitHub Codespaces:**
+  1. Open the repository in GitHub.
+  2. Click the "Code" button and select "Open with Codespaces".
+  3. The workspace will launch in a cloud devcontainer with all dependencies pre-installed.
+
+### pre-commit
+A git pre-commit hook is configured. Before each commit, all staged C/C++ files are automatically formatted using clang-format, according to the rules defined in the .clang-format file.
+
+```sh
+# Install clang-format if not present
+sudo apt update && sudo apt install -y clang-format
+# Intall the hooks
+./scripts/install-hooks
+```
