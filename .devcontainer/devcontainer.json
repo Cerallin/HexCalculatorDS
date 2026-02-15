@@ -12,7 +12,8 @@
                 "streetsidesoftware.code-spell-checker",
                 "yzhang.markdown-all-in-one",
                 "eamodio.gitlens",
-                "Gruntfuggly.todo-tree"
+                "Gruntfuggly.todo-tree",
+                "cschlosser.doxdocgen"
             ]
         }
     },
