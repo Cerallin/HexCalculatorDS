@@ -1,17 +1,28 @@
 #!/bin/sh
-# Git pre-commit hook: format staged C/C++ files with clang-format
+# Git pre-commit hook: format staged C/C++ files, trim trailing spaces, and ensure final newline
 
-# Get list of staged C/C++ files
-FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|cc|cpp|h|hh|hpp)$')
+# Get list of staged text files
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|cc|cpp|h|hh|hpp|md|sh|txt|py|js|ts|json|yml|yaml|cmake)$')
 
 if [ -z "$FILES" ]; then
     exit 0
 fi
 
-# Format each file and re-add to staging
 for file in $FILES; do
     if [ -f "$file" ]; then
-        clang-format -i "$file"
+        # Format C/C++ files
+        case "$file" in
+            *.c|*.cc|*.cpp|*.h|*.hh|*.hpp)
+                clang-format -i "$file"
+                ;;
+        esac
+        # Trim trailing spaces and ensure final newline
+        tmpfile=$(mktemp)
+        # Remove trailing spaces
+        sed -e 's/[ \t]*$//' "$file" > "$tmpfile"
+        # Ensure final newline
+        tail -c1 "$tmpfile" | read -r _ || echo >> "$tmpfile"
+        mv "$tmpfile" "$file"
         git add "$file"
     fi
 done
