@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.18)
 project(HexCalculatorDS VERSION 1.0.0 LANGUAGES C CXX)
 
 # ----------------------------------------
+# Build types
+# ----------------------------------------
+
+set(CMAKE_C_FLAGS "-Wall")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wno-unused-variable -O2 -s -w -flto -ffast-math")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-DNDEBUG -g -O2")
+
+# ----------------------------------------
 # Environments
 # ----------------------------------------
 
@@ -64,13 +73,13 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     -mcpu=arm946e-s
     -mthumb
     -mthumb-interwork
-    -O2
     -ffunction-sections
     -fdata-sections
-    -fno-rtti
-    -fno-exceptions
-    -fno-unwind-tables
-    -fno-asynchronous-unwind-tables
+    
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-asynchronous-unwind-tables>
 )
 
 target_link_options(${PROJECT_NAME}.elf PRIVATE
