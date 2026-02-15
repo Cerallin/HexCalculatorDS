@@ -15,7 +15,7 @@ An integer calculator for Nintendo DS.
 ### v1.0.0
 
 - [ ] input by touching sub screen
-- [ ] update current number when 
+- [ ] update current number
 - [ ] implement operators except quotes
 - [ ] add quotes to the formula tree
 - [ ] switch depth: `QWORD`/`DWORD`/`WORD`/`BYTE`
@@ -25,6 +25,7 @@ An integer calculator for Nintendo DS.
 ### v2.0.0
 
 - [ ] scroll the formula
+- [ ] add color type for GBA/NDS 16-bit color
 - [ ] enable download play
 
 ### License
