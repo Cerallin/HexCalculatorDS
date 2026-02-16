@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.h"
+#include "traits.h"
 
 /**
  * @brief A simple circular queue implementation.
@@ -15,7 +16,7 @@
  * @tparam N The maximum number of elements the queue can hold.
  */
 template <typename T, size_t N>
-class CircularQueue {
+class CircularQueue : public NonCopyable {
   public:
     CircularQueue() : head(0), tail(0), size(0) {}
 
