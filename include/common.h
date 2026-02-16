@@ -6,12 +6,15 @@
  */
 #pragma once
 
+#include <cassert>
 #include <cmath>
 #include <cstdarg>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <type_traits>
 
 #include <nds.h>
 
@@ -21,7 +24,9 @@
 
 static inline void
 debugInit(void) {
+#ifndef NDEBUG
     consoleDebugInit(DebugDevice_NOCASH);
+#endif
 }
 
 static inline int

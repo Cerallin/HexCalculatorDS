@@ -24,6 +24,11 @@ enum NumberWidth {
     Byte = 8,
 };
 
+enum NumberSign {
+    Signed,
+    Unsigned,
+};
+
 enum Digit : int8_t {
     DigitEOS = -1,
     Digit0 = 0,
