@@ -123,15 +123,48 @@ class TreeNode {
         return right;
     }
 
+    TreeNode *
+    Parent() const {
+        return parent;
+    }
+
+    int
+    ChildCount() const {
+        int count = 0;
+
+        if (left != nullptr) {
+            count++;
+        }
+        if (right != nullptr) {
+            count++;
+        }
+
+        return count;
+    }
+
+    static void
+    ConnectLeft(TreeNode &parent, TreeNode &child) {
+        parent.left = &child;
+        child.parent = &parent;
+    }
+
+    static void
+    ConnectRight(TreeNode &parent, TreeNode &child) {
+        parent.right = &child;
+        child.parent = &parent;
+    }
+
     void
     Reset() {
         value = T(0);
         left = nullptr;
         right = nullptr;
+        parent = nullptr;
     }
 
   private:
     T value;
     TreeNode *left;
     TreeNode *right;
+    TreeNode *parent;
 };
