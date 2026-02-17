@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "event.h"
+#include "font.h"
 #include "number.h"
 
 namespace HexCalc {
@@ -67,11 +68,13 @@ struct Area {
 class BasicView {
   public:
     BasicView(Area area, ViewAlign align)
-        : viewArea(area), viewAlign(align), dirty(false) {}
+        : viewArea(area), viewAlign(align),
+          // Initially, the view needs to be rendered at least once.
+          dirty(true) {}
 
     void
     Update(void) {
-        dirty = true;
+        dirty = false;
     }
 
   private:
@@ -100,21 +103,52 @@ class TranscodeView : public BasicView {
   public:
     TranscodeView(Area area, ViewAlign align) : BasicView(area, align) {}
 
-    constexpr const char *
-    NumberBaseStr() {
-        switch (base) {
-        case Hexadecimal:
-            return "HEX";
-        case Decimal:
-            return "DEC";
-        case Octal:
-            return "OCT";
-        case Binary:
-            return "BIN";
-        default:
-            return "";
-        }
-    }
+  private:
+    template <NumberBase>
+    struct HeaderTraits {
+        static constexpr FontType font0 = FontEmpty;
+        static constexpr FontType font1 = FontEmpty;
+        static constexpr FontType font2 = FontEmpty;
+    };
+
+    static constexpr Glyph header[4] = {
+        Glyph::From(HeaderTraits<base>::font0),
+        Glyph::From(HeaderTraits<base>::font1),
+        Glyph::From(HeaderTraits<base>::font2),
+        InvalidGlyph,
+    };
+};
+
+template <>
+template <>
+struct TranscodeView<Hexadecimal>::HeaderTraits<Hexadecimal> {
+    static constexpr FontType font0 = Font6x8HH;
+    static constexpr FontType font1 = Font6x8EH;
+    static constexpr FontType font2 = Font6x8XH;
+};
+
+template <>
+template <>
+struct TranscodeView<Decimal>::HeaderTraits<Decimal> {
+    static constexpr FontType font0 = Font6x8DH;
+    static constexpr FontType font1 = Font6x8EH;
+    static constexpr FontType font2 = Font6x8CH;
+};
+
+template <>
+template <>
+struct TranscodeView<Octal>::HeaderTraits<Octal> {
+    static constexpr FontType font0 = Font6x8OH;
+    static constexpr FontType font1 = Font6x8CH;
+    static constexpr FontType font2 = Font6x8TH;
+};
+
+template <>
+template <>
+struct TranscodeView<Binary>::HeaderTraits<Binary> {
+    static constexpr FontType font0 = Font6x8BH;
+    static constexpr FontType font1 = Font6x8IH;
+    static constexpr FontType font2 = Font6x8NH;
 };
 
 class InputView {
