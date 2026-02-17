@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "display.h"
 #include "event.h"
 #include "formula.h"
 #include "model.h"
@@ -24,23 +25,7 @@ class ViewModel : private NonCopyable {
   public:
     using ViewAlign = MainView::ViewAlign;
 
-    ViewModel(void)
-        : // models
-          formulaModel(), valueModel(),
-          // main screen views
-          formulaView(Area(3, 0, 30, 2), ViewAlign::AlignRight),
-          valueView(Area(5, 0, 30, 3), ViewAlign::AlignRight),
-          // There's a gap between valueView and hexView
-          // TODO use an empty view for the gap
-          hexView(Area(7, 0, 30, 2), ViewAlign::AlignLeft),
-          decView(Area(9, 0, 30, 2), ViewAlign::AlignLeft),
-          octView(Area(11, 0, 30, 3), ViewAlign::AlignLeft),
-          // There's a gap between decView and octView
-          binView(Area(13, 0, 30, 8), ViewAlign::AlignLeft),
-          // subscreen view
-          inputView(),
-          // input state
-          previousKeys(0) {}
+    ViewModel(void);
 
     /**
      * @brief Dispatch events from event queue to models and views
@@ -59,6 +44,16 @@ class ViewModel : private NonCopyable {
     void UpdateViews(void);
 
   private:
+    /**
+     * @brief Main display on the top screen.
+     *
+     */
+    MainDisplay mainDisplay;
+    /**
+     * @brief Sub display on the bottom screen.
+     *
+     */
+    SubDisplay subDisplay;
     /**
      * @brief Formula tree
      *

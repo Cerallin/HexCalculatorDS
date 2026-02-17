@@ -10,6 +10,11 @@
 
 using namespace HexCalc;
 
+static constexpr auto
+align64(int x) {
+    return (x + 63) & ~63;
+};
+
 MainDisplay::MainDisplay(void) {
     videoSetMode(VideoMode);
     // F bank has 16 Kb, enough for <=256 tiles and 4 maps
@@ -17,7 +22,6 @@ MainDisplay::MainDisplay(void) {
 
     // https://mtheall.com/vram.html#T0=2&NT0=256&MB0=4&T1=2&NT1=256&MB1=5&T2=2&NT2=256&MB2=6&T3=2&NT3=256&MB3=7
     for (int i = 0; i < BGNum; i++) {
-        constexpr auto align64 = [](int x) { return (x + 63) & ~63; };
         constexpr int mapBaseBankSize = 2048; // 2 Kb
         constexpr int byte = 8;
         constexpr int baseOffset =

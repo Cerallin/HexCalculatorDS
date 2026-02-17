@@ -11,11 +11,15 @@
 
 namespace HexCalc {
 
+class Display : private NonCopyable {
+  public:
+};
+
 /**
  * @brief The main view of the calculator, which is displayed on the top screen.
  *
  */
-class MainDisplay : private NonCopyable {
+class MainDisplay : public Display {
   public:
     MainDisplay(void);
 
@@ -46,7 +50,7 @@ class MainDisplay : private NonCopyable {
  * screen.
  *
  */
-class SubDisplay : private NonCopyable {
+class SubDisplay : public Display {
   public:
     SubDisplay(void);
 

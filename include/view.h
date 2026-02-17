@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.h"
+#include "display.h"
 #include "event.h"
 #include "font.h"
 #include "number.h"
@@ -74,10 +75,11 @@ struct Area {
     }
 };
 
+template <typename DisplayType>
 class BasicView {
   public:
     // Initially, the view needs to be rendered at least once.
-    BasicView() : dirty(true) {}
+    BasicView(DisplayType &display) : dirty(true), display(display) {}
 
     HandleEventResult
     HandleEvent(const Event &e) {
@@ -91,6 +93,7 @@ class BasicView {
 
   private:
     bool dirty;
+    DisplayType &display;
 
     void
     MarkDirty(void) {
@@ -102,7 +105,7 @@ class BasicView {
  * @brief Basic view on the main screen.
  *
  */
-class MainView : public BasicView {
+class MainView : public BasicView<MainDisplay> {
   public:
     /**
      * @brief The alignment of the view text.
@@ -113,8 +116,8 @@ class MainView : public BasicView {
         AlignRight,
     };
 
-    MainView(Area area, ViewAlign align)
-        : BasicView(), viewArea(area), viewAlign(align) {}
+    MainView(Area area, ViewAlign align, MainDisplay &display)
+        : BasicView(display), viewArea(area), viewAlign(align) {}
 
   private:
     Area viewArea;
@@ -123,18 +126,21 @@ class MainView : public BasicView {
 
 class FormulaView : public MainView {
   public:
-    FormulaView(Area area, ViewAlign align) : MainView(area, align) {}
+    FormulaView(Area area, ViewAlign align, MainDisplay &display)
+        : MainView(area, align, display) {}
 };
 
 class ValueView : public MainView {
   public:
-    ValueView(Area area, ViewAlign align) : MainView(area, align) {}
+    ValueView(Area area, ViewAlign align, MainDisplay &display)
+        : MainView(area, align, display) {}
 };
 
 template <NumberBase base>
 class TranscodeView : public MainView {
   public:
-    TranscodeView(Area area, ViewAlign align) : MainView(area, align) {}
+    TranscodeView(Area area, ViewAlign align, MainDisplay &display)
+        : MainView(area, align, display) {}
 
   private:
     template <NumberBase>
@@ -184,14 +190,14 @@ struct TranscodeView<Binary>::HeaderTraits<Binary> {
     static constexpr FontType font2 = Font6x8NH;
 };
 
-class SubView : public BasicView {
+class SubView : public BasicView<SubDisplay> {
   public:
-    SubView() : BasicView() {}
+    SubView(SubDisplay &display) : BasicView(display) {}
 };
 
 class InputView : public SubView {
   public:
-    InputView() {}
+    InputView(SubDisplay &display) : SubView(display) {}
 
     HandleEventResult HandleEvent(const Event &e);
 };
