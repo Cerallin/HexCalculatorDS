@@ -13,15 +13,6 @@
 
 namespace HexCalc {
 
-/**
- * @brief The alignment of the view text.
- *
- */
-enum ViewAlign : uint8_t {
-    AlignLeft,
-    AlignRight,
-};
-
 struct Point {
     int16_t x;
     int16_t y;
@@ -85,10 +76,13 @@ struct Area {
 
 class BasicView {
   public:
-    BasicView(Area area, ViewAlign align)
-        : viewArea(area), viewAlign(align),
-          // Initially, the view needs to be rendered at least once.
-          dirty(true) {}
+    // Initially, the view needs to be rendered at least once.
+    BasicView() : dirty(true) {}
+
+    HandleEventResult
+    HandleEvent(const Event &e) {
+        return Ignored;
+    }
 
     void
     Update(void) {
@@ -96,8 +90,6 @@ class BasicView {
     }
 
   private:
-    Area viewArea;
-    ViewAlign viewAlign;
     bool dirty;
 
     void
@@ -106,20 +98,43 @@ class BasicView {
     }
 };
 
-class FormulaView : public BasicView {
+/**
+ * @brief Basic view on the main screen.
+ *
+ */
+class MainView : public BasicView {
   public:
-    FormulaView(Area area, ViewAlign align) : BasicView(area, align) {}
+    /**
+     * @brief The alignment of the view text.
+     *
+     */
+    enum ViewAlign : uint8_t {
+        AlignLeft,
+        AlignRight,
+    };
+
+    MainView(Area area, ViewAlign align)
+        : BasicView(), viewArea(area), viewAlign(align) {}
+
+  private:
+    Area viewArea;
+    ViewAlign viewAlign;
 };
 
-class ValueView : public BasicView {
+class FormulaView : public MainView {
   public:
-    ValueView(Area area, ViewAlign align) : BasicView(area, align) {}
+    FormulaView(Area area, ViewAlign align) : MainView(area, align) {}
+};
+
+class ValueView : public MainView {
+  public:
+    ValueView(Area area, ViewAlign align) : MainView(area, align) {}
 };
 
 template <NumberBase base>
-class TranscodeView : public BasicView {
+class TranscodeView : public MainView {
   public:
-    TranscodeView(Area area, ViewAlign align) : BasicView(area, align) {}
+    TranscodeView(Area area, ViewAlign align) : MainView(area, align) {}
 
   private:
     template <NumberBase>
@@ -169,7 +184,12 @@ struct TranscodeView<Binary>::HeaderTraits<Binary> {
     static constexpr FontType font2 = Font6x8NH;
 };
 
-class InputView {
+class SubView : public BasicView {
+  public:
+    SubView() : BasicView() {}
+};
+
+class InputView : public SubView {
   public:
     InputView() {}
 };

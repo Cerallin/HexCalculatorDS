@@ -22,18 +22,19 @@ namespace HexCalc {
  */
 class ViewModel : private NonCopyable {
   public:
+    using ViewAlign = MainView::ViewAlign;
+
     ViewModel(void)
         : // models
           formulaModel(), valueModel(),
-          // formula views
-          formulaView(Area(3, 0, 30, 1), AlignRight),
-          valueView(Area(5, 0, 30, 1), AlignRight),
-          // transcode views
-          hexView(Area(7, 0, 30, 1), AlignLeft),
-          decView(Area(9, 0, 30, 1), AlignLeft),
-          octView(Area(11, 0, 30, 1), AlignLeft),
-          binView(Area(13, 0, 30, 1), AlignLeft),
-          // input view
+          // main screen views
+          formulaView(Area(3, 0, 30, 1), ViewAlign::AlignRight),
+          valueView(Area(5, 0, 30, 1), ViewAlign::AlignRight),
+          hexView(Area(7, 0, 30, 1), ViewAlign::AlignLeft),
+          decView(Area(9, 0, 30, 1), ViewAlign::AlignLeft),
+          octView(Area(11, 0, 30, 1), ViewAlign::AlignLeft),
+          binView(Area(13, 0, 30, 1), ViewAlign::AlignLeft),
+          // subscreen view
           inputView(),
           // input state
           previousKeys(0) {}

@@ -19,6 +19,13 @@ ViewModel::DispatchEvents(void) {
         Dispatch(config, event);
         Dispatch(formulaModel, event);
         Dispatch(valueModel, event);
+        Dispatch(formulaView, event);
+        Dispatch(valueView, event);
+        Dispatch(hexView, event);
+        Dispatch(decView, event);
+        Dispatch(octView, event);
+        Dispatch(binView, event);
+        Dispatch(inputView, event);
     }
 }
 
