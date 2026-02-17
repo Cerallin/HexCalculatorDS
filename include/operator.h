@@ -27,7 +27,7 @@ enum OperatorType : uint8_t {
     BitwiseOr,    // |
     Multiply,     // *
     Divide,       // /
-    Add,          // +
+    Plus,          // +
     Minus,        // -
     Negate,       // +/-
     BitwiseNot,   // ~
@@ -53,7 +53,7 @@ OperatorPrecedence(OperatorType op) {
     case Modulo:
         return 2;
 
-    case Add:
+    case Plus:
     case Minus:
         return 3;
 
@@ -124,7 +124,7 @@ NumberDataType And(NumberDataType a, NumberDataType b);
 NumberDataType Or(NumberDataType a, NumberDataType b);
 NumberDataType Multiply(NumberDataType a, NumberDataType b);
 NumberDataType Divide(NumberDataType a, NumberDataType b);
-NumberDataType Add(NumberDataType a, NumberDataType b);
+NumberDataType Plus(NumberDataType a, NumberDataType b);
 NumberDataType Minus(NumberDataType a, NumberDataType b);
 
 }; // namespace Operator

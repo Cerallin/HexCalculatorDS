@@ -44,7 +44,7 @@ template <typename T>
 constexpr uint64_t
 _doOp(OperatorType op, T a, T b) {
     switch (op) {
-    case OperatorType::Add:
+    case OperatorType::Plus:
         return static_cast<uint64_t>(a + b);
     case OperatorType::Minus:
         return static_cast<uint64_t>(a - b);
@@ -183,8 +183,8 @@ Divide(NumberDataType a, NumberDataType b) {
 }
 
 NumberDataType
-Add(NumberDataType a, NumberDataType b) {
-    return _operateCalc(OperatorType::Add, a, b);
+Plus(NumberDataType a, NumberDataType b) {
+    return _operateCalc(OperatorType::Plus, a, b);
 }
 
 NumberDataType

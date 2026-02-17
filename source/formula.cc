@@ -220,8 +220,8 @@ evaluateNode(FormulaTreeNode &node) {
             case Divide:
                 data.SetNumber(Operator::Divide(lvalue, rvalue));
                 break;
-            case Add:
-                data.SetNumber(Operator::Add(lvalue, rvalue));
+            case Plus:
+                data.SetNumber(Operator::Plus(lvalue, rvalue));
                 break;
             case Minus:
                 data.SetNumber(Operator::Minus(lvalue, rvalue));

@@ -51,7 +51,7 @@ TEST(FormulaTree, TestInputSingleNumber) {
 }
 
 TEST(FormulaTree, TestInputSingleOperator) {
-    HexCalc::FormulaData op(HexCalc::OperatorType::Add);
+    HexCalc::FormulaData op(HexCalc::OperatorType::Plus);
     CHECK(formula->Input(op));
 }
 
@@ -61,7 +61,7 @@ TEST(FormulaTree, TestSimpleAdd) {
     // 1 + 2 = 3
     HexCalc::FormulaData n1(1);
     HexCalc::FormulaData n2(2);
-    HexCalc::FormulaData op(HexCalc::OperatorType::Add);
+    HexCalc::FormulaData op(HexCalc::OperatorType::Plus);
 
     CHECK(formula->Input(n1));
     CHECK(formula->Input(op));
@@ -119,7 +119,7 @@ TEST(FormulaTree, TestByteOverflow) {
 
     HexCalc::FormulaData n1(0xFD);
     HexCalc::FormulaData n2(0xAC);
-    HexCalc::FormulaData op(HexCalc::OperatorType::Add);
+    HexCalc::FormulaData op(HexCalc::OperatorType::Plus);
 
     CHECK(formula->Input(n1));
     CHECK(formula->Input(op));
@@ -148,7 +148,7 @@ TEST(FormulaTree, TestOperatorPrecedence) {
     using HexCalc::OperatorType;
 
     CHECK(formula->Input(HexCalc::FormulaData(1)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(2)));
     CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
     CHECK(formula->Input(HexCalc::FormulaData(6)));
@@ -164,7 +164,7 @@ TEST(FormulaTree, TestOperatorPrecedence2) {
     CHECK(formula->Input(HexCalc::FormulaData(2)));
     CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
     CHECK(formula->Input(HexCalc::FormulaData(3)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(99)));
 
     CHECK(formula->Evaluate());
@@ -177,7 +177,7 @@ TEST(FormulaTree, TestSimpleBrackets) {
 
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(1)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(2)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
@@ -193,13 +193,13 @@ TEST(FormulaTree, TestMoreBrackets) {
 
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(1)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(2)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(5)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(6)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
 
@@ -212,15 +212,15 @@ TEST(FormulaTree, TestNestedBrackets) {
     using HexCalc::OperatorType;
 
     CHECK(formula->Input(HexCalc::FormulaData(1)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(2)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(3)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
-    CHECK(formula->Input(HexCalc::FormulaData(Add)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(4)));
