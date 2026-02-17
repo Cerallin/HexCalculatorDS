@@ -68,7 +68,6 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
 # ----------------------------------------
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
-    __NDS__
     ARM9
 )
 
