@@ -192,6 +192,8 @@ class SubView : public BasicView {
 class InputView : public SubView {
   public:
     InputView() {}
+
+    HandleEventResult HandleEvent(const Event &e);
 };
 
 }; // namespace HexCalc
