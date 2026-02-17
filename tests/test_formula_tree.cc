@@ -232,7 +232,7 @@ TEST(FormulaTree, TestNestedBrackets) {
 }
 
 TEST(FormulaTree, TestComplexFormula) {
-    // ((4 - 1) x 2) Lsh ((75 AND 15 x 3) / 4) = -768
+    // ((4 - 1) x 2) Lsh ((75 AND 15 x 3) / 4) = 24
     using HexCalc::OperatorType;
 
     configNumber(Decimal, QWord, Signed);
