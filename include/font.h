@@ -114,14 +114,14 @@ constexpr int BarTileCount = 3;
 constexpr int BarTiles[BarTileCount] = {86, 87, 88};
 
 /**
- * @brief Glyph may have 1 or 2 tiles. If it has 1 tile, up is ignored.
+ * @brief Glyph may have 1 or 2 tiles. If it has 1 tile, upper is ignored.
  *
  */
 class Glyph {
   public:
-    constexpr Glyph(FontType up, FontType down, bool upHFlip = false,
+    constexpr Glyph(FontType upper, FontType lower, bool upHFlip = false,
                     bool downHFlip = false)
-        : up(up), down(down), upHFlip(upHFlip), upVFlip(false),
+        : upper(upper), lower(lower), upHFlip(upHFlip), upVFlip(false),
           downHFlip(downHFlip), downVFlip(false) {}
 
     /**
@@ -130,11 +130,21 @@ class Glyph {
      * @param font The font to load the glyph from.
      * @return The loaded glyph or InvalidGlyph if the font is invalid.
      */
-    static constexpr Glyph From(FontType font);
+    constexpr Glyph(FontType font);
+
+    FontType
+    Upper(void) const {
+        return this->upper;
+    }
+
+    FontType
+    Lower(void) const {
+        return this->lower;
+    }
 
   private:
-    FontType up;
-    FontType down;
+    FontType upper;
+    FontType lower;
 
     bool upHFlip;
     bool upVFlip;
@@ -144,145 +154,146 @@ class Glyph {
 
 constexpr Glyph InvalidGlyph = Glyph(FontEmpty, FontEmpty);
 
-constexpr Glyph
-Glyph::From(FontType font) {
+constexpr Glyph::Glyph(FontType font)
+    : upper(FontEmpty), lower(FontEmpty), upHFlip(false), upVFlip(false),
+      downHFlip(false), downVFlip(false) {
     switch (font) {
     case Font6x8A:
-        return Glyph(0, 1);
+        Glyph(0, 1);
     case Font6x8B:
-        return Glyph(2, 3);
+        Glyph(2, 3);
     case Font6x8C:
-        return Glyph(0, 4);
+        Glyph(0, 4);
     case Font6x8D:
-        return Glyph(22, 23);
+        Glyph(22, 23);
     case Font6x8E:
-        return Glyph(0, 5);
+        Glyph(0, 5);
     case Font6x8F:
-        return Glyph(7, 6);
+        Glyph(7, 6);
     case Font6x8Zero:
-        return Glyph(8, 9);
+        Glyph(8, 9);
     case Font6x8One:
-        return Glyph(11, 10);
+        Glyph(11, 10);
     case Font6x8Two:
-        return Glyph(8, 13);
+        Glyph(8, 13);
     case Font6x8Three:
-        return Glyph(8, 13);
+        Glyph(8, 13);
     case Font6x8Four:
-        return Glyph(15, 14);
+        Glyph(15, 14);
     case Font6x8Five:
-        return Glyph(16, 17);
+        Glyph(16, 17);
     case Font6x8Six:
-        return Glyph(8, 18);
+        Glyph(8, 18);
     case Font6x8Seven:
-        return Glyph(16, 19);
+        Glyph(16, 19);
     case Font6x8Eight:
-        return Glyph(8, 20);
+        Glyph(8, 20);
     case Font6x8Nine:
-        return Glyph(8, 21);
+        Glyph(8, 21);
     case Font6x8HH:
-        return Glyph(25, 24);
+        Glyph(25, 24);
     case Font6x8EH:
-        return Glyph(16, 26);
+        Glyph(16, 26);
     case Font6x8XH:
-        return Glyph(25, 27);
+        Glyph(25, 27);
     case Font6x8DH:
-        return Glyph(28, 29);
+        Glyph(28, 29);
     case Font6x8CH:
-        return Glyph(28, 30);
+        Glyph(28, 30);
     case Font6x8OH:
-        return Glyph(8, 31);
+        Glyph(8, 31);
     case Font6x8TH:
-        return Glyph(16, 32);
+        Glyph(16, 32);
     case Font6x8BH:
-        return Glyph(28, 33);
+        Glyph(28, 33);
     case Font6x8IH:
-        return Glyph(16, 34);
+        Glyph(16, 34);
     case Font6x8NH:
-        return Glyph(25, 35);
+        Glyph(25, 35);
     case Font6x8Equal:
-        return Glyph(0, 36);
+        Glyph(0, 36);
     case Font6x8Plus:
-        return Glyph(0, 37);
+        Glyph(0, 37);
     case Font6x8Minus:
-        return Glyph(0, 38);
+        Glyph(0, 38);
     case Font8x8A:
-        return Glyph(0, 39);
+        Glyph(0, 39);
     case Font8x8B:
-        return Glyph(40, 41);
+        Glyph(40, 41);
     case Font8x8C:
-        return Glyph(0, 42);
+        Glyph(0, 42);
     case Font8x8D:
-        return Glyph(40, 41, true, true);
+        Glyph(40, 41, true, true);
     case Font8x8E:
-        return Glyph(0, 43);
+        Glyph(0, 43);
     case Font8x8F:
-        return Glyph(45, 44);
+        Glyph(45, 44);
     case Font8x8One:
-        return Glyph(46, 47);
+        Glyph(46, 47);
     case Font8x8Two:
-        return Glyph(48, 49);
+        Glyph(48, 49);
     case Font8x8Three:
-        return Glyph(48, 50);
+        Glyph(48, 50);
     case Font8x8Comma:
-        return Glyph(51, 52);
+        Glyph(51, 52);
     case Font8x8Four:
-        return Glyph(53, 54);
+        Glyph(53, 54);
     case Font8x8Five:
-        return Glyph(55, 56);
+        Glyph(55, 56);
     case Font8x8Six:
-        return Glyph(57, 58);
+        Glyph(57, 58);
     case Font8x8Seven:
-        return Glyph(59, 60);
+        Glyph(59, 60);
     case Font8x8Eight:
-        return Glyph(61, 62);
+        Glyph(61, 62);
     case Font8x8Nine:
-        return Glyph(61, 63);
+        Glyph(61, 63);
     case Font8x8Zero:
-        return Glyph(61, 64);
+        Glyph(61, 64);
     case Font6x8Comma:
-        return Glyph(0, 65);
+        Glyph(0, 65);
     case FontColoredU:
-        return Glyph(66, 67);
+        Glyph(66, 67);
     case FontColoredI:
-        return Glyph(68, 69);
+        Glyph(68, 69);
     case FontColoredN:
-        return Glyph(70, 71);
+        Glyph(70, 71);
     case FontColoredT:
-        return Glyph(68, 72);
+        Glyph(68, 72);
     case FontColoredEight:
-        return Glyph(75, 74);
+        Glyph(75, 74);
     case FontColoredOne:
-        return Glyph(76, 77);
+        Glyph(76, 77);
     case FontColoredSix:
-        return Glyph(78, 80);
+        Glyph(78, 80);
     case FontColoredThree:
-        return Glyph(81, 82);
+        Glyph(81, 82);
     case FontColoredTwo:
-        return Glyph(81, 83);
+        Glyph(81, 83);
     case FontColoredFour:
-        return Glyph(84, 85);
+        Glyph(84, 85);
     case Font6x8LBrac:
-        return Glyph(89, 90);
+        Glyph(89, 90);
     case Font6x8RBrac:
-        return Glyph(91, 92);
+        Glyph(91, 92);
     case Font6x8LShift:
-        return Glyph(0, 103);
+        Glyph(0, 103);
     case Font6x8RShift:
-        return Glyph(0, 104);
+        Glyph(0, 104);
     case Font6x8O:
-        return Glyph(0, 101);
+        Glyph(0, 101);
     case Font6x8M:
-        return Glyph(0, 102);
+        Glyph(0, 102);
     case Font6x8And:
-        return Glyph(93, 94);
+        Glyph(93, 94);
     case Font6x8Or:
-        return Glyph(95, 96);
+        Glyph(95, 96);
     case Font6x8Multiply:
-        return Glyph(0, 97);
+        Glyph(0, 97);
     case Font6x8Divide:
-        return Glyph(0, 98);
+        Glyph(0, 98);
     default:
-        return InvalidGlyph;
+        InvalidGlyph;
     }
 }
 
