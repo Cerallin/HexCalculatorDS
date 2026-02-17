@@ -11,10 +11,12 @@
 namespace HexCalc {
 
 enum EventType {
-    InputEvent,        // when the user inputs a number or an operator
-    ClearEvent,        // when the user clears the formula
-    EvaluateEvent,     // when the user evaluates the formula
-    UpdateConfigEvent, // when the user changes the number base/width/sign
+    InputEvent,       // when the user inputs a number or an operator
+    ClearEvent,       // when the user clears the formula
+    EvaluateEvent,    // when the user evaluates the formula
+    UpdateBaseEvent,  // when the user changes the number base
+    UpdateWidthEvent, // when the user changes the number width
+    UpdateSignEvent,  // when the user changes the number sign
 };
 
 using EventDataType = int;
