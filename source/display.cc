@@ -27,16 +27,23 @@ MainDisplay::MainDisplay(void) {
         constexpr int baseOffset =
             ((align64(MaxTileNum) / byte) * Bpp * TileSize) / mapBaseBankSize;
         int mapBase = i + baseOffset;
-        this->bg[i] = bgInit(0, BgType, BgSize, mapBase, 0);
+        auto bg = bgInit(i, BgType, BgSize, mapBase, 0);
+        auto offsetX = i * 2;
+        layers[i] = Layer<MainDisplay>(bg, offsetX, 0);
+
+        // FIXME debug demo
+        layers[i].PutGlyph(3 + i, 3, Glyph(Font6x8A + i));
     }
 
     // copy font palette
     // TODO more themes
     dmaCopy(mainFontPal, BG_PALETTE, mainFontPalLen);
-    setBackdropColor(0xFFFF);
+    // FIXME magic number
+    setBackdropColor(0x7BFF);
 
     // cope font tiles
-    dmaCopy(mainFontTiles, bgGetGfxPtr(bg[0]), mainFontTilesLen);
+    dmaCopy(mainFontTiles, bgGetGfxPtr(this->layers[0].GetBg()),
+            mainFontTilesLen);
 }
 
 SubDisplay::SubDisplay(void) {
@@ -44,6 +51,7 @@ SubDisplay::SubDisplay(void) {
     videoSetModeSub(VideoMode);
     vramSetBankC(VRAM_C_SUB_BG_0x06200000);
     // use layer 3
-    this->bg = bgInitSub(3, SubType, SubSize, 0, 0);
+    auto bg = bgInitSub(3, SubType, SubSize, 0, 0);
+    layer = Layer<SubDisplay>(bg);
     // TODO load image
 }

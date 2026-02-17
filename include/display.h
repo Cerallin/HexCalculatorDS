@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.h"
+#include "layer.h"
 #include "traits.h"
 
 namespace HexCalc {
@@ -42,7 +43,7 @@ class MainDisplay : public Display {
     static constexpr int MaxTileNum = 256;
 
   private:
-    int bg[BGNum];
+    Layer<MainDisplay> layers[BGNum];
 };
 
 /**
@@ -63,7 +64,7 @@ class SubDisplay : public Display {
     static constexpr auto SubSize = BgSize_T_256x256;
 
   private:
-    int bg;
+    Layer<SubDisplay> layer;
 };
 
 }; // namespace HexCalc
