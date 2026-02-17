@@ -13,26 +13,115 @@
 
 namespace HexCalc {
 
+/**
+ * @brief The ViewModel class manages the state of the application, including
+ * the formula and value models, and the views that display them. It also
+ * handles user inputs and dispatches events to update the models and views
+ * accordingly.
+ *
+ */
 class ViewModel : private NonCopyable {
   public:
     ViewModel(void)
-        : mainView(), subView(), formulaModel(), displayModel(),
+        : // models
+          formulaModel(), valueModel(),
+          // formula views
+          formulaView(Area(3, 0, 30, 1), AlignRight),
+          valueView(Area(5, 0, 30, 1), AlignRight),
+          // transcode views
+          hexView(Area(7, 0, 30, 1), AlignLeft),
+          decView(Area(9, 0, 30, 1), AlignLeft),
+          octView(Area(11, 0, 30, 1), AlignLeft),
+          binView(Area(13, 0, 30, 1), AlignLeft),
+          // input view
+          inputView(),
+          // input state
           previousKeys(0) {}
 
+    /**
+     * @brief Dispatch events from event queue to models and views
+     *
+     */
     void DispatchEvents(void);
+    /**
+     * @brief Handle user inputs and generate events for models
+     *
+     */
     void HandleInputs(void);
+    /**
+     * @brief Update views according to the current state of models
+     *
+     */
     void UpdateViews(void);
 
   private:
-    // views
-    HexCalc::MainView mainView;
-    HexCalc::SubView subView;
-    // models
+    /**
+     * @brief Formula tree
+     *
+     */
     FormulaModel formulaModel;
-    DisplayModel displayModel;
+    /**
+     * @brief Curent input number or calculated result
+     *
+     */
+    ValueModel valueModel;
 
-    // input
+    /**
+     * @brief A single line of the formula on the main screen
+     *
+     */
+    FormulaView formulaView;
+    /**
+     * @brief Curent input or calculated result
+     *
+     */
+    ValueView valueView;
+    /**
+     * @brief Hexadecimal representation of value
+     *
+     */
+    TranscodeView<Hexadecimal> hexView;
+    /**
+     * @brief Decimal representation of value
+     *
+     */
+    TranscodeView<Decimal> decView;
+    /**
+     * @brief Octal representation of value
+     *
+     */
+    TranscodeView<Octal> octView;
+    /**
+     * @brief Binary representation of value
+     *
+     */
+    TranscodeView<Binary> binView;
+
+    /**
+     * @brief Input view on subscreen
+     *
+     */
+    InputView inputView;
+
+    /**
+     * @brief Previously input states
+     *
+     */
     uint32_t previousKeys;
+    // TODO previousTouch;
+
+    /**
+     * @brief Identify key inputs and generate events
+     *
+     * @return true if key pressed, false if no keys are pressed
+     */
+    bool handleKeyInputs(void);
+    /**
+     * @brief Handle touch screen with input view
+     *
+     * @return true if a button is touched, false otherwise
+     */
+    bool handleTouchScreen(void);
 };
 
 }; // namespace HexCalc

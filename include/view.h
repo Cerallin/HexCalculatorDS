@@ -7,60 +7,105 @@
 #pragma once
 
 #include "common.h"
-#include "traits.h"
+#include "event.h"
+#include "number.h"
 
 namespace HexCalc {
 
-/**
- * @brief The main view of the calculator, which is displayed on the top screen.
- *
- */
-class MainView : private NonCopyable {
-  public:
-    MainView(void);
-
-    template <typename ModelType>
-    void
-    Update(const ModelType &model) {
-        // TODO update the view with the model
-    }
-
-    static constexpr int Bpp = 4;
-    static constexpr int TileSize = 8 * 8;
-    /**
-     * @brief all 4 layers are text layers
-     *
-     */
-    static constexpr auto VideoMode = MODE_0_2D;
-    static constexpr auto BgType = BgType_Text4bpp;
-    static constexpr auto BgSize = BgSize_T_256x256;
-    static constexpr int BGNum = 4;
-    static constexpr int MaxTileNum = 256;
-
-  private:
-    int bg[BGNum];
-    int sub;
+enum ViewAlign : uint8_t {
+    AlignLeft,
+    AlignRight,
 };
 
-/**
- * @brief The sub view of the calculator, which is displayed on the bottom
- * screen.
- *
- */
-class SubView : private NonCopyable {
-  public:
-    SubView(void);
+struct Area {
+    /** position x */
+    int x;
+    /** position y */
+    int y;
 
-    /**
-     * @brief
-     *
-     */
-    static constexpr auto VideoMode = MODE_3_2D;
-    static constexpr auto SubType = BgType_Bmp8;
-    static constexpr auto SubSize = BgSize_T_256x256;
+    /** area width */
+    int w;
+    /** area height */
+    int h;
+
+    static Area
+    AreaByPoints(int x1, int x2, int y1, int y2) {
+        int x_min = std::min(x1, x2);
+        int x_max = std::max(x1, x2);
+        int y_min = std::min(y1, y2);
+        int y_max = std::max(y1, y2);
+
+        Area area(x_min, y_min, (x_max - x_min), (y_max - y_min));
+
+        return area;
+    }
+
+    Area(int x, int y, int w, int h) {
+        assert((w > 0) && (h > 0));
+
+        x = x;
+        y = y;
+        w = w;
+        h = h;
+    }
+};
+
+class BasicView {
+  public:
+    BasicView(Area area, ViewAlign align)
+        : viewArea(area), viewAlign(align), dirty(false) {}
+
+    void
+    Update(void) {
+        dirty = true;
+    }
 
   private:
-    int bg;
+    Area viewArea;
+    ViewAlign viewAlign;
+    bool dirty;
+
+    void
+    MarkDirty(void) {
+        dirty = true;
+    }
+};
+
+class FormulaView : public BasicView {
+  public:
+    FormulaView(Area area, ViewAlign align) : BasicView(area, align) {}
+};
+
+class ValueView : public BasicView {
+  public:
+    ValueView(Area area, ViewAlign align) : BasicView(area, align) {}
+};
+
+template <NumberBase base>
+class TranscodeView : public BasicView {
+  public:
+    TranscodeView(Area area, ViewAlign align) : BasicView(area, align) {}
+
+    constexpr const char *
+    NumberBaseStr() {
+        switch (base) {
+        case Hexadecimal:
+            return "HEX";
+        case Decimal:
+            return "DEC";
+        case Octal:
+            return "OCT";
+        case Binary:
+            return "BIN";
+        default:
+            return "";
+        }
+    }
+};
+
+class InputView {
+  public:
+    InputView() {}
 };
 
 }; // namespace HexCalc

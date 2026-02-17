@@ -35,7 +35,7 @@ FormulaModel::HandleEvent(const Event &e) {
 }
 
 HandleEventResult
-DisplayModel::HandleEvent(const Event &e) {
+ValueModel::HandleEvent(const Event &e) {
     if (e.type == InputEvent) {
         auto eventData = static_cast<InputEventData>(e.data);
 

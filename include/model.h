@@ -51,9 +51,9 @@ class FormulaModel {
  * @brief Number on the screen
  *
  */
-class DisplayModel {
+class ValueModel {
   public:
-    DisplayModel(void) : value(NumberZero) {}
+    ValueModel(void) : value(NumberZero) {}
 
     HandleEventResult HandleEvent(const Event &e);
 

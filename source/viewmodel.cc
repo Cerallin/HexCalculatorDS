@@ -10,30 +10,44 @@
 
 using namespace HexCalc;
 
+CircularQueue<Event, EventQueueSize> HexCalc::eventQueue;
+
 void
 ViewModel::DispatchEvents(void) {
     Event event;
     while (eventQueue.Dequeue(event)) {
         Dispatch(config, event);
         Dispatch(formulaModel, event);
-        Dispatch(displayModel, event);
+        Dispatch(valueModel, event);
     }
 }
 
-void
-HexCalc::ViewModel::HandleInputs(void) {
+bool
+ViewModel::handleKeyInputs(void) {
     scanKeys();
     uint32_t keys = keysDownRepeat();
 
     // TODO generate key events
 
-    // TODO handle touchScreen events
-
     previousKeys = keys;
+
+    return keys != 0;
+}
+
+bool
+ViewModel::handleTouchScreen(void) {
+    // TODO handle touchScreen events
+    return false;
 }
 
 void
-HexCalc::ViewModel::UpdateViews(void) {
-    mainView.Update(formulaModel);
-    mainView.Update(displayModel);
+ViewModel::HandleInputs(void) {
+    if (!handleKeyInputs()) {
+        handleTouchScreen();
+    }
+}
+
+void
+ViewModel::UpdateViews(void) {
+    // TODO update views
 }
