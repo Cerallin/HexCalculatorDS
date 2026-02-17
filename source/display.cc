@@ -27,6 +27,7 @@ MainDisplay::MainDisplay(void) {
     }
 
     // copy font palette
+    // TODO more themes
     dmaCopy(mainFontPal, BG_PALETTE, mainFontPalLen);
     setBackdropColor(0xFFFF);
 

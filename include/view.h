@@ -22,6 +22,24 @@ enum ViewAlign : uint8_t {
     AlignRight,
 };
 
+struct Point {
+    int16_t x;
+    int16_t y;
+
+    constexpr Point(touchPosition touchPosition)
+        : x(static_cast<int16_t>(touchPosition.px)),
+          y(static_cast<int16_t>(touchPosition.py)) {}
+
+    constexpr Point(int data)
+        : x(static_cast<int16_t>(data >> 16)),
+          y(static_cast<int16_t>(data & 0xFFFF)) {}
+
+    int
+    ToInt() const {
+        return (static_cast<int>(x) << 16) | static_cast<int>(y);
+    }
+};
+
 /**
  * @brief The area of a view. all values are int16_t, is enough for the current
  * screen resolution (256x192).

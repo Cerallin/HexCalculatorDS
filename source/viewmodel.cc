@@ -24,11 +24,15 @@ ViewModel::DispatchEvents(void) {
 
 bool
 ViewModel::handleKeyInputs(void) {
+    // TODO adjust keysSetRepeat()
     scanKeys();
     uint32_t keys = keysDownRepeat();
+    // Post an event if there are any keys pressed, otherwise do nothing.
+    if (keys == 0) {
+        return false;
+    }
 
-    // TODO generate key events
-
+    PostEvent(Event{EventDataType(keys), EventType::KeysPressedEvent});
     previousKeys = keys;
 
     return keys != 0;
@@ -36,12 +40,21 @@ ViewModel::handleKeyInputs(void) {
 
 bool
 ViewModel::handleTouchScreen(void) {
-    // TODO handle touchScreen events
-    return false;
+    touchPosition touchPosition;
+    touchRead(&touchPosition);
+    Point touchPoint(touchPosition);
+    // Post an event if there is a touch, otherwise do nothing.
+    if (touchPosition.px == 0 && touchPosition.py == 0) {
+        return false;
+    }
+    PostEvent(Event{touchPoint.ToInt(), EventType::TouchScreenEvent});
+    return true;
 }
 
 void
 ViewModel::HandleInputs(void) {
+    // First try to handle key inputs,
+    // if no keys are pressed, try to handle touch screen inputs.
     if (!handleKeyInputs()) {
         handleTouchScreen();
     }
