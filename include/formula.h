@@ -9,30 +9,11 @@
 #include "common.h"
 
 #include "number.h"
+#include "operator.h"
 #include "structure.h"
 #include "traits.h"
 
 namespace HexCalc {
-
-/**
- * @brief The operators supported by the calculator.
- *
- */
-enum OperatorType : uint8_t {
-    EQUAL,      // =
-    Bracket,    // ()
-    ShiftLeft,  // <<
-    ShiftRight, // >>
-    Modulo,     // %
-    BitwiseAnd, // &
-    BitwiseOr,  // |
-    Multiply,   // *
-    Divide,     // /
-    Add,        // +
-    Minus,      // -
-    Negate,     // +/-
-    BitwiseNot, // ~
-};
 
 /**
  * @brief A node in the formula tree, either a number or an operator.

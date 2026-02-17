@@ -10,21 +10,21 @@
 
 namespace HexCalc {
 
-enum NumberBase {
+enum NumberBase : uint8_t {
     Binary = 2,
     Octal = 8,
     Decimal = 10,
     Hexadecimal = 16,
 };
 
-enum NumberWidth {
+enum NumberWidth : uint8_t {
     QWord = 64,
     DWord = 32,
     Word = 16,
     Byte = 8,
 };
 
-enum NumberSign {
+enum NumberSign : uint8_t {
     Signed,
     Unsigned,
 };
