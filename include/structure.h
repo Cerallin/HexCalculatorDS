@@ -267,18 +267,19 @@ PostOrderTraversal(T *root, Func visit) {
     while (current != nullptr || !stack.Empty()) {
         if (current != nullptr) {
             stack.Push(current);
-            current = current->left;
+            current = current->Left();
         } else {
             T *peek;
             stack.Pop(peek); // temporary pop to inspect
 
-            if (peek->right != nullptr && lastVisited != peek->right) {
+            auto *right = peek->Right();
+            if (right != nullptr && lastVisited != right) {
                 // Right subtree not visited yet
-                stack.Push(peek);      // push back
-                current = peek->right; // traverse right
+                stack.Push(peek); // push back
+                current = right;  // traverse right
             } else {
                 // Visit node
-                visit(peek->value);
+                visit(*peek);
                 lastVisited = peek;
             }
         }
