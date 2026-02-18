@@ -120,9 +120,10 @@ constexpr int BarTiles[BarTileCount] = {86, 87, 88};
 class Glyph {
   public:
     constexpr Glyph(FontType upper, FontType lower, bool upHFlip = false,
-                    bool downHFlip = false)
+                    bool downHFlip = false, bool underBaseline = false)
         : upper(upper), lower(lower), upHFlip(upHFlip), upVFlip(false),
-          downHFlip(downHFlip), downVFlip(false) {}
+          downHFlip(downHFlip), downVFlip(false), underBaseline(underBaseline) {
+    }
 
     /**
      * @brief Load a glyph from a font.
@@ -142,6 +143,31 @@ class Glyph {
         return this->lower;
     }
 
+    bool
+    UpperHFlip(void) const {
+        return this->upHFlip;
+    }
+
+    bool
+    UpperVFlip(void) const {
+        return this->upVFlip;
+    }
+
+    bool
+    LowerHFlip(void) const {
+        return this->downHFlip;
+    }
+
+    bool
+    LowerVFlip(void) const {
+        return this->downVFlip;
+    }
+
+    bool
+    UnderBaseline(void) const {
+        return this->underBaseline;
+    }
+
   private:
     FontType upper;
     FontType lower;
@@ -150,150 +176,219 @@ class Glyph {
     bool upVFlip;
     bool downHFlip;
     bool downVFlip;
+    bool underBaseline;
 };
 
 constexpr Glyph InvalidGlyph = Glyph(FontEmpty, FontEmpty);
 
 constexpr Glyph::Glyph(FontType font)
     : upper(FontEmpty), lower(FontEmpty), upHFlip(false), upVFlip(false),
-      downHFlip(false), downVFlip(false) {
+      downHFlip(false), downVFlip(false), underBaseline(false) {
     switch (font) {
     case Font6x8A:
-        Glyph(0, 1);
+        *this = Glyph(0, 1);
+        break;
     case Font6x8B:
-        Glyph(2, 3);
+        *this = Glyph(2, 3);
+        break;
     case Font6x8C:
-        Glyph(0, 4);
+        *this = Glyph(0, 4);
+        break;
     case Font6x8D:
-        Glyph(22, 23);
+        *this = Glyph(22, 23);
+        break;
     case Font6x8E:
-        Glyph(0, 5);
+        *this = Glyph(0, 5);
+        break;
     case Font6x8F:
-        Glyph(7, 6);
+        *this = Glyph(7, 6);
+        break;
     case Font6x8Zero:
-        Glyph(8, 9);
+        *this = Glyph(8, 9);
+        break;
     case Font6x8One:
-        Glyph(11, 10);
+        *this = Glyph(11, 10);
+        break;
     case Font6x8Two:
-        Glyph(8, 13);
+        *this = Glyph(8, 12);
+        break;
     case Font6x8Three:
-        Glyph(8, 13);
+        *this = Glyph(8, 13);
+        break;
     case Font6x8Four:
-        Glyph(15, 14);
+        *this = Glyph(15, 14);
+        break;
     case Font6x8Five:
-        Glyph(16, 17);
+        *this = Glyph(16, 17);
+        break;
     case Font6x8Six:
-        Glyph(8, 18);
+        *this = Glyph(8, 18);
+        break;
     case Font6x8Seven:
-        Glyph(16, 19);
+        *this = Glyph(16, 19);
+        break;
     case Font6x8Eight:
-        Glyph(8, 20);
+        *this = Glyph(8, 20);
+        break;
     case Font6x8Nine:
-        Glyph(8, 21);
+        *this = Glyph(8, 21);
+        break;
     case Font6x8HH:
-        Glyph(25, 24);
+        *this = Glyph(25, 24);
+        break;
     case Font6x8EH:
-        Glyph(16, 26);
+        *this = Glyph(16, 26);
+        break;
     case Font6x8XH:
-        Glyph(25, 27);
+        *this = Glyph(25, 27);
+        break;
     case Font6x8DH:
-        Glyph(28, 29);
+        *this = Glyph(28, 29);
+        break;
     case Font6x8CH:
-        Glyph(28, 30);
+        *this = Glyph(8, 30);
+        break;
     case Font6x8OH:
-        Glyph(8, 31);
+        *this = Glyph(8, 31);
+        break;
     case Font6x8TH:
-        Glyph(16, 32);
+        *this = Glyph(16, 32);
+        break;
     case Font6x8BH:
-        Glyph(28, 33);
+        *this = Glyph(28, 33);
+        break;
     case Font6x8IH:
-        Glyph(16, 34);
+        *this = Glyph(16, 34);
+        break;
     case Font6x8NH:
-        Glyph(25, 35);
+        *this = Glyph(25, 35);
+        break;
     case Font6x8Equal:
-        Glyph(0, 36);
+        *this = Glyph(0, 36);
+        break;
     case Font6x8Plus:
-        Glyph(0, 37);
+        *this = Glyph(0, 37);
+        break;
     case Font6x8Minus:
-        Glyph(0, 38);
+        *this = Glyph(0, 38);
+        break;
     case Font8x8A:
-        Glyph(0, 39);
+        *this = Glyph(0, 39);
+        break;
     case Font8x8B:
-        Glyph(40, 41);
+        *this = Glyph(40, 41);
+        break;
     case Font8x8C:
-        Glyph(0, 42);
+        *this = Glyph(0, 42);
+        break;
     case Font8x8D:
-        Glyph(40, 41, true, true);
+        *this = Glyph(40, 41, true, true);
+        break;
     case Font8x8E:
-        Glyph(0, 43);
+        *this = Glyph(0, 43);
+        break;
     case Font8x8F:
-        Glyph(45, 44);
+        *this = Glyph(45, 44);
+        break;
     case Font8x8One:
-        Glyph(46, 47);
+        *this = Glyph(46, 47);
+        break;
     case Font8x8Two:
-        Glyph(48, 49);
+        *this = Glyph(48, 49);
+        break;
     case Font8x8Three:
-        Glyph(48, 50);
+        *this = Glyph(48, 50);
+        break;
     case Font8x8Comma:
-        Glyph(51, 52);
+        *this = Glyph(51, 52, underBaseline = true);
+        break;
     case Font8x8Four:
-        Glyph(53, 54);
+        *this = Glyph(53, 54);
+        break;
     case Font8x8Five:
-        Glyph(55, 56);
+        *this = Glyph(55, 56);
+        break;
     case Font8x8Six:
-        Glyph(57, 58);
+        *this = Glyph(48, 57, true);
+        break;
     case Font8x8Seven:
-        Glyph(59, 60);
+        *this = Glyph(55, 58, true);
+        break;
     case Font8x8Eight:
-        Glyph(61, 62);
+        *this = Glyph(59, 60);
+        break;
     case Font8x8Nine:
-        Glyph(61, 63);
+        *this = Glyph(59, 61);
+        break;
     case Font8x8Zero:
-        Glyph(61, 64);
+        *this = Glyph(59, 62);
+        break;
     case Font6x8Comma:
-        Glyph(0, 65);
+        *this = Glyph(0, 63);
+        break;
     case FontColoredU:
-        Glyph(66, 67);
+        *this = Glyph(64, 65);
+        break;
     case FontColoredI:
-        Glyph(68, 69);
+        *this = Glyph(66, 67);
+        break;
     case FontColoredN:
-        Glyph(70, 71);
+        *this = Glyph(68, 69);
+        break;
     case FontColoredT:
-        Glyph(68, 72);
+        *this = Glyph(66, 70);
+        break;
     case FontColoredEight:
-        Glyph(75, 74);
+        *this = Glyph(73, 72);
+        break;
     case FontColoredOne:
-        Glyph(76, 77);
+        *this = Glyph(74, 75);
+        break;
     case FontColoredSix:
-        Glyph(78, 80);
+        *this = Glyph(76, 78);
+        break;
     case FontColoredThree:
-        Glyph(81, 82);
+        *this = Glyph(76, 79, true);
+        break;
     case FontColoredTwo:
-        Glyph(81, 83);
+        *this = Glyph(76, 80, true);
+        break;
     case FontColoredFour:
-        Glyph(84, 85);
+        *this = Glyph(81, 82);
+        break;
     case Font6x8LBrac:
-        Glyph(89, 90);
+        *this = Glyph(86, 87);
+        break;
     case Font6x8RBrac:
-        Glyph(91, 92);
+        *this = Glyph(88, 89);
+        break;
     case Font6x8LShift:
-        Glyph(0, 103);
+        *this = Glyph(0, 100);
+        break;
     case Font6x8RShift:
-        Glyph(0, 104);
+        *this = Glyph(0, 101);
+        break;
     case Font6x8O:
-        Glyph(0, 101);
+        *this = Glyph(0, 98);
+        break;
     case Font6x8M:
-        Glyph(0, 102);
+        *this = Glyph(0, 99);
+        break;
     case Font6x8And:
-        Glyph(93, 94);
+        *this = Glyph(90, 91);
+        break;
     case Font6x8Or:
-        Glyph(95, 96);
+        *this = Glyph(92, 93);
+        break;
     case Font6x8Multiply:
-        Glyph(0, 97);
+        *this = Glyph(0, 94);
+        break;
     case Font6x8Divide:
-        Glyph(0, 98);
+        *this = Glyph(0, 95);
+        break;
     default:
-        InvalidGlyph;
+        *this = InvalidGlyph;
+        break;
     }
 }
 

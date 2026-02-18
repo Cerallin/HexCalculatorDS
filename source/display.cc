@@ -15,7 +15,14 @@ align64(int x) {
     return (x + 63) & ~63;
 };
 
-MainDisplay::MainDisplay(void) {
+MainDisplay::MainDisplay(void)
+    : // the offset is because of 6x8 tiles on 8x8 tile map
+      layers{
+          Layer<MainDisplay>(offsetX + 0, offsetY + 0),
+          Layer<MainDisplay>(offsetX + 2, offsetY + 0),
+          Layer<MainDisplay>(offsetX + 4, offsetY + 0),
+          Layer<MainDisplay>(offsetX + 6, offsetY + 0),
+      } {
     videoSetMode(VideoMode);
     // F bank has 16 Kb, enough for <=256 tiles and 4 maps
     vramSetBankF(VRAM_F_MAIN_BG_0x06000000);
@@ -27,23 +34,25 @@ MainDisplay::MainDisplay(void) {
         constexpr int baseOffset =
             ((align64(MaxTileNum) / byte) * Bpp * TileSize) / mapBaseBankSize;
         int mapBase = i + baseOffset;
-        auto bg = bgInit(i, BgType, BgSize, mapBase, 0);
-        auto offsetX = i * 2;
-        layers[i] = Layer<MainDisplay>(bg, offsetX, 0);
-
-        // FIXME debug demo
-        layers[i].PutGlyph(3 + i, 3, Glyph(Font6x8A + i));
+        layers[i].Init(i, mapBase, 0);
     }
 
     // copy font palette
     // TODO more themes
     dmaCopy(mainFontPal, BG_PALETTE, mainFontPalLen);
-    // FIXME magic number
-    setBackdropColor(0x7BFF);
+    constexpr auto bgColor = RGB15(31, 31, 30);
+    setBackdropColor(bgColor);
 
     // cope font tiles
     dmaCopy(mainFontTiles, bgGetGfxPtr(this->layers[0].GetBg()),
             mainFontTilesLen);
+}
+
+void
+MainDisplay::PutGlyph(int16_t x, int16_t y, const Glyph &glyph) {
+    assert(x % 2 == 0);
+    assert(y % 8 == 0);
+    getLayer(x).PutGlyph(x / 8, y / 8, glyph);
 }
 
 SubDisplay::SubDisplay(void) {

@@ -94,4 +94,10 @@ ViewModel::HandleInputs(void) {
 void
 ViewModel::UpdateViews(void) {
     // TODO update views
+    for (uint16_t x = 0; x < 32; x++) {
+        for (uint16_t y = 0; y < 12; y++) {
+            mainDisplay.PutGlyph(x * 8, y * 16, Glyph(x + y * 32));
+        }
+    }
+    bgUpdate();
 }

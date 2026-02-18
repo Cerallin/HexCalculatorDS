@@ -24,11 +24,7 @@ class MainDisplay : public Display {
   public:
     MainDisplay(void);
 
-    template <typename ModelType>
-    void
-    Update(const ModelType &model) {
-        // TODO update the view with the model
-    }
+    void PutGlyph(int16_t x, int16_t y, const Glyph &glyph);
 
     static constexpr int Bpp = 4;
     static constexpr int TileSize = 8 * 8;
@@ -42,8 +38,38 @@ class MainDisplay : public Display {
     static constexpr int BGNum = 4;
     static constexpr int MaxTileNum = 256;
 
+    /**
+     * @brief Global scroll offset X for all layers.
+     *
+     */
+    static constexpr uint16_t offsetX = 0;
+
+    /**
+     * @brief Global scroll offset Y for all layers.
+     *
+     */
+    static constexpr uint16_t offsetY = 0;
+
   private:
     Layer<MainDisplay> layers[BGNum];
+
+    constexpr Layer<MainDisplay> &
+    getLayer(int16_t x) {
+        assert(x % 2 == 0);
+        switch (x % 8) {
+        case 0:
+            return layers[0];
+        case 2:
+            return layers[1];
+        case 4:
+            return layers[2];
+        case 6:
+            return layers[3];
+        default:
+            // should never reach here
+            return layers[0];
+        }
+    }
 };
 
 /**
