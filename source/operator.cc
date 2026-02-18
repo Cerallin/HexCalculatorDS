@@ -10,6 +10,12 @@
 
 using namespace HexCalc;
 
+/**
+ * @brief Get the width mask for a given number width.
+ *
+ * @param w The number width.
+ * @return constexpr uint64_t The width mask.
+ */
 constexpr uint64_t
 _widthMask(NumberWidth w) {
     switch (w) {
@@ -26,8 +32,16 @@ _widthMask(NumberWidth w) {
     }
 }
 
+/**
+ * @brief Sign-extend a value to the specified width.
+ *
+ * @tparam T
+ * @param v
+ * @param w
+ * @return constexpr T
+ */
 template <typename T>
-constexpr T
+static constexpr T
 _signExtend(uint64_t v, NumberWidth w) {
     uint64_t mask = _widthMask(w);
     v &= mask;
@@ -69,7 +83,17 @@ _doOp(OperatorType op, T a, T b) {
     }
 }
 
-NumberDataType
+/**
+ * @brief Perform the specified operation on two numbers, taking into account
+ * the current configuration for sign and width.
+ *
+ * @param op The operator type to perform.
+ * @param a The first operand.
+ * @param b The second operand.
+ * @return NumberDataType The result of the operation, masked to fit the current
+ * width.
+ */
+static NumberDataType
 _operateCalc(OperatorType op, NumberDataType a, NumberDataType b) {
 
     auto sign = config.Sign();
@@ -141,7 +165,7 @@ _operateCalc(OperatorType op, NumberDataType a, NumberDataType b) {
         }
     }
 
-    // 最终按位宽截断
+    // Mask the result to fit the current width
     return result & mask;
 }
 

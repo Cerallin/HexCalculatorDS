@@ -52,7 +52,7 @@ FormulaTree::Input(const FormulaData &data) {
             // create a new node for the number
             auto &node = newNode();
             node.Assign(data);
-            
+
             auto op = currentNode->Get().GetOperator();
             if (Operator::Unary(op)) {
                 FormulaTreeNode::ConnectLeft(*currentNode, node);
@@ -123,7 +123,7 @@ FormulaTree::Input(const FormulaData &data) {
                 FormulaTreeNode::ConnectRight(parent, node);
             }
             FormulaTreeNode::ConnectLeft(node, *currentNode);
-        } else if (LowerThan(op, parent.Get().GetOperator())) {
+        } else if (Operator::LowerThan(op, parent.Get().GetOperator())) {
             // new operator has lower precedence than parent operator
             auto grandParent = parent.Parent();
             // new operator becomes the parent of the parent node

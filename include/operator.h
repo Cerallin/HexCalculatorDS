@@ -27,11 +27,13 @@ enum OperatorType : uint8_t {
     BitwiseOr,    // |
     Multiply,     // *
     Divide,       // /
-    Plus,          // +
+    Plus,         // +
     Minus,        // -
     Negate,       // +/-
     BitwiseNot,   // ~
 };
+
+namespace Operator {
 
 /**
  * @brief Lower value means higher precedence.
@@ -40,31 +42,31 @@ enum OperatorType : uint8_t {
  * @return constexpr int
  */
 constexpr int
-OperatorPrecedence(OperatorType op) {
+Precedence(OperatorType op) {
     switch (op) {
-    case Equal:
+    case OperatorType::Equal:
         return 0;
-    case LeftBracket:
-    case RightBracket:
+    case OperatorType::LeftBracket:
+    case OperatorType::RightBracket:
         return 1;
 
-    case Multiply:
-    case Divide:
-    case Modulo:
+    case OperatorType::Multiply:
+    case OperatorType::Divide:
+    case OperatorType::Modulo:
         return 2;
 
-    case Plus:
-    case Minus:
+    case OperatorType::Plus:
+    case OperatorType::Minus:
         return 3;
 
-    case LeftShift:
-    case RightShift:
+    case OperatorType::LeftShift:
+    case OperatorType::RightShift:
         return 4;
 
-    case BitwiseAnd:
+    case OperatorType::BitwiseAnd:
         return 5;
 
-    case BitwiseOr:
+    case OperatorType::BitwiseOr:
         return 6;
 
     default:
@@ -83,7 +85,7 @@ OperatorPrecedence(OperatorType op) {
  */
 static constexpr bool
 LowerThan(OperatorType lhs, OperatorType rhs) {
-    return OperatorPrecedence(lhs) >= OperatorPrecedence(rhs);
+    return Precedence(lhs) >= Precedence(rhs);
 }
 
 /**
@@ -97,11 +99,15 @@ LowerThan(OperatorType lhs, OperatorType rhs) {
  */
 static constexpr bool
 HigherThan(OperatorType lhs, OperatorType rhs) {
-    return OperatorPrecedence(lhs) < OperatorPrecedence(rhs);
+    return Precedence(lhs) < Precedence(rhs);
 }
 
-namespace Operator {
-
+/**
+ * @brief Check if the operator is a unary operator.
+ *
+ * @param op The operator to check.
+ * @return true if the operator is unary, false otherwise (is binary).
+ */
 constexpr bool
 Unary(OperatorType op) {
     switch (op) {
