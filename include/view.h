@@ -151,9 +151,9 @@ class TranscodeView : public MainView {
     };
 
     static constexpr Glyph header[4] = {
-        Glyph::From(HeaderTraits<base>::font0),
-        Glyph::From(HeaderTraits<base>::font1),
-        Glyph::From(HeaderTraits<base>::font2),
+        Glyph(HeaderTraits<base>::font0),
+        Glyph(HeaderTraits<base>::font1),
+        Glyph(HeaderTraits<base>::font2),
         InvalidGlyph,
     };
 };
