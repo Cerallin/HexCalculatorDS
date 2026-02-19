@@ -22,8 +22,8 @@ An integer calculator for Nintendo DS.
 
 - [ ] input by touching sub screen
 - [ ] update current number
-- [ ] implement operators except quotes
-- [ ] add quotes to the formula tree
+- [x] implement operators
+- [x] add quotes to the formula tree
 - [ ] switch depth: `QWORD`/`DWORD`/`WORD`/`BYTE`
 - [ ] switch sign: `signed`/`unsigned`
 - [ ] switch base: `hex`/`dec`/`oct`/`bin`

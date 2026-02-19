@@ -10,72 +10,11 @@
 #include "display.h"
 #include "event.h"
 #include "font.h"
+#include "input.h"
+#include "model.h"
 #include "number.h"
 
 namespace HexCalc {
-
-struct Point {
-    int16_t x;
-    int16_t y;
-
-    constexpr Point(int16_t x, int16_t y) : x(x), y(y) {}
-
-    constexpr Point(touchPosition touchPosition)
-        : x(static_cast<int16_t>(touchPosition.px)),
-          y(static_cast<int16_t>(touchPosition.py)) {}
-
-    constexpr Point(int data)
-        : x(static_cast<int16_t>(data >> 16)),
-          y(static_cast<int16_t>(data & 0xFFFF)) {}
-
-    int
-    ToInt() const {
-        return (static_cast<int>(x) << 16) | static_cast<int>(y);
-    }
-};
-
-/**
- * @brief The area of a view. all values are int16_t, is enough for the current
- * screen resolution (256x192).
- *
- */
-struct Area {
-    /** position x, can be negative */
-    int16_t x;
-    /** position y, can be negative */
-    int16_t y;
-    /** area width, must > 0 */
-    uint8_t w;
-    /** area height, must > 0 */
-    uint8_t h;
-
-    static Area
-    AreaByPoints(int16_t x1, int16_t x2, int16_t y1, int16_t y2) {
-        auto x_min = std::min(x1, x2);
-        auto x_max = std::max(x1, x2);
-        auto y_min = std::min(y1, y2);
-        auto y_max = std::max(y1, y2);
-
-        // The area width and height must be less than 256, otherwise it cannot
-        // be represented by uint8_t.
-        assert(x_max - x_min <= std::numeric_limits<uint8_t>::max());
-        assert(y_max - y_min <= std::numeric_limits<uint8_t>::max());
-
-        auto width = static_cast<uint8_t>(x_max - x_min);
-        auto height = static_cast<uint8_t>(y_max - y_min);
-
-        Area area(x_min, y_min, width, height);
-
-        return area;
-    }
-
-    Area(int16_t x, int16_t y, uint8_t w, uint8_t h) {
-        this->x = x;
-        this->y = y;
-        this->w = w;
-        this->h = h;
-    }
-};
 
 template <typename DisplayType>
 class BasicView {
@@ -83,9 +22,9 @@ class BasicView {
     // Initially, the view needs to be rendered at least once.
     BasicView(DisplayType &display) : dirty(true), display(display) {}
 
-    HandleEventResult
+    EventResult
     HandleEvent(const Event &e) {
-        return Ignored;
+        return Skipped;
     }
 
     void
@@ -130,20 +69,59 @@ class MainView : public BasicView<MainDisplay> {
 
 class FormulaView : public MainView<AlignRight> {
   public:
-    FormulaView(Area area, MainDisplay &display) : MainView(area, display) {}
+    FormulaView(MainDisplay &display, const FormulaModel &model)
+        : MainView(Area(line, 0, 30, height), display), model(model) {}
+
+    EventResult HandleEvent(const Event &e);
+
+    static constexpr int16_t height = 2;
+    static constexpr int16_t line = 2;
+
+  private:
+    const FormulaModel &model;
 };
 
 class ValueView : public MainView<AlignRight> {
   public:
-    ValueView(Area area, MainDisplay &display) : MainView(area, display) {}
+    ValueView(MainDisplay &display, const ValueModel &model)
+        : MainView(Area(line, 0, 30, height), display), model(model) {}
+
+    EventResult HandleEvent(const Event &e);
+
+    static constexpr int16_t height = 3;
+    static constexpr int16_t line = 2 + FormulaView::height;
+
+  private:
+    const ValueModel &model;
 };
 
 template <NumberBase base>
 class TranscodeView : public MainView<AlignLeft> {
   public:
-    TranscodeView(Area area, MainDisplay &display) : MainView(area, display) {}
+    TranscodeView(MainDisplay &display, const ValueModel &model)
+        : MainView(Area(line, 0, 30, height), display), model(model) {}
+
+    EventResult HandleEvent(const Event &e);
+
+    // hex: 2, dec: 2, oct: 3, bin: 8
+    static constexpr int16_t height = (base == Hexadecimal) ? 2
+                                      : (base == Decimal)   ? 2
+                                      : (base == Octal)     ? 3
+                                      : (base == Binary)    ? 8
+                                                            : /* default */ 2;
+    static constexpr int16_t gap = 1;
+    static constexpr int16_t line = gap + ValueView::line + ValueView::height +
+                                    ((base == Hexadecimal) ? 0
+                                     : (base == Decimal)   ? 2
+                                     : (base == Octal)     ? 4
+                                     : (base == Binary)    ? 7
+                                                           : 0);
 
   private:
+    EventResult HandleValueChanged(void);
+
+    const ValueModel &model;
+
     template <NumberBase>
     struct HeaderTraits {
         static constexpr FontType font0 = FontEmpty;
@@ -158,6 +136,11 @@ class TranscodeView : public MainView<AlignLeft> {
         InvalidGlyph,
     };
 };
+
+using HexView = TranscodeView<Hexadecimal>;
+using DecView = TranscodeView<Decimal>;
+using OctView = TranscodeView<Octal>;
+using BinView = TranscodeView<Binary>;
 
 template <>
 template <>
@@ -200,7 +183,7 @@ class InputView : public SubView {
   public:
     InputView(SubDisplay &display) : SubView(display) {}
 
-    HandleEventResult HandleEvent(const Event &e);
+    EventResult HandleEvent(const Event &e);
 };
 
 }; // namespace HexCalc

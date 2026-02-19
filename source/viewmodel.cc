@@ -7,78 +7,47 @@
 #include "viewmodel.h"
 #include "config.h"
 #include "event.h"
+#include "input.h"
 
 using namespace HexCalc;
 
-CircularQueue<Event, EventQueueSize> HexCalc::eventQueue;
-
 ViewModel::ViewModel(void)
-    : // displays
-      mainDisplay(), subDisplay(),
-      // models
-      formulaModel(), valueModel(),
-      // main screen views
-      formulaView(Area(3, 0, 30, 2), mainDisplay),
-      valueView(Area(5, 0, 30, 3), mainDisplay),
-      // There's a gap between valueView and hexView
-      // TODO use an empty view for the gap
-      hexView(Area(7, 0, 30, 2), mainDisplay),
-      decView(Area(9, 0, 30, 2), mainDisplay),
-      octView(Area(11, 0, 30, 3), mainDisplay),
-      // There's a gap between decView and octView
-      binView(Area(13, 0, 30, 8), mainDisplay),
-      // subscreen view
-      inputView(subDisplay),
-      // input state
-      previousKeys(0)
-//
-{
-    //
+    : eventBus(), formulaModel(eventBus), valueModel(eventBus),
+      previousKeys(0) {
+    eventBus.Subscribe(config);
+    eventBus.Subscribe(formulaModel);
+    eventBus.Subscribe(valueModel);
 }
 
 void
 ViewModel::DispatchEvents(void) {
-    Event event;
-    while (eventQueue.Dequeue(event)) {
-        Dispatch(config, event);
-        Dispatch(formulaModel, event);
-        Dispatch(valueModel, event);
-        Dispatch(formulaView, event);
-        Dispatch(valueView, event);
-        Dispatch(hexView, event);
-        Dispatch(decView, event);
-        Dispatch(octView, event);
-        Dispatch(binView, event);
-        Dispatch(inputView, event);
-    }
+    eventBus.DispatchPending();
 }
 
 bool
 ViewModel::handleKeyInputs(void) {
-    // TODO adjust keysSetRepeat()
-    scanKeys();
-    uint32_t keys = keysDownRepeat();
-    // Post an event if there are any keys pressed, otherwise do nothing.
-    if (keys == 0) {
+    auto keyInput = ReadKeyInput();
+    if (!keyInput.Active()) {
         return false;
     }
 
-    PostEvent(Event{EventDataType(keys), EventType::KeysPressedEvent});
-    previousKeys = keys;
+    eventBus.Post(Event{static_cast<EventDataType>(keyInput.keys),
+                        EventType::KeysPressedEvent});
+    previousKeys = keyInput.keys;
 
-    return keys != 0;
+    return true;
 }
 
 bool
 ViewModel::handleTouchScreen(void) {
-    touchPosition touchPosition;
-    touchRead(&touchPosition);
-    Point touchPoint(touchPosition);
-    // Post an event if there is a touch, otherwise do nothing.
-    if (touchPosition.px == 0 && touchPosition.py == 0) {
+    auto touchInput = ReadTouchInput();
+    if (!touchInput.Active()) {
         return false;
     }
-    PostEvent(Event{touchPoint.ToInt(), EventType::TouchScreenEvent});
+
+    eventBus.Post(
+        Event{static_cast<EventDataType>(touchInput.point.ToInt()),
+              EventType::TouchScreenEvent});
     return true;
 }
 
@@ -91,13 +60,27 @@ ViewModel::HandleInputs(void) {
     }
 }
 
-void
-ViewModel::UpdateViews(void) {
-    // TODO update views
-    for (uint16_t x = 0; x < 32; x++) {
-        for (uint16_t y = 0; y < 12; y++) {
-            mainDisplay.PutGlyph(x * 8, y * 16, Glyph(x + y * 32));
-        }
-    }
-    bgUpdate();
+EventBus &
+ViewModel::Bus(void) {
+    return eventBus;
+}
+
+FormulaModel &
+ViewModel::Formula(void) {
+    return formulaModel;
+}
+
+const FormulaModel &
+ViewModel::Formula(void) const {
+    return formulaModel;
+}
+
+ValueModel &
+ViewModel::Value(void) {
+    return valueModel;
+}
+
+const ValueModel &
+ViewModel::Value(void) const {
+    return valueModel;
 }

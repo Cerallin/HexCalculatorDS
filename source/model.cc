@@ -13,8 +13,9 @@ using namespace HexCalc;
  */
 uint64_t evaluateResult;
 
-HandleEventResult
+EventResult
 FormulaModel::HandleEvent(const Event &e) {
+    bool changed = false;
     if (e.type == InputEvent) {
         auto eventData = static_cast<InputEventData>(e.data);
 
@@ -23,19 +24,24 @@ FormulaModel::HandleEvent(const Event &e) {
         } else {
             formulaTree.Input(FormulaData(eventData.data.digit));
         }
+        changed = true;
     } else if (e.type == ClearEvent) {
         formulaTree.Clear();
+        changed = true;
     } else if (e.type == EvaluateEvent) {
-        if (!formulaTree.Evaluate()) {
-            // do nothing
-        }
+        changed = formulaTree.Evaluate();
     }
 
-    return Handled;
+    if (changed) {
+        NotifyChanged();
+    }
+
+    return Consumed;
 }
 
-HandleEventResult
+EventResult
 ValueModel::HandleEvent(const Event &e) {
+    bool changed = false;
     if (e.type == InputEvent) {
         auto eventData = static_cast<InputEventData>(e.data);
 
@@ -43,12 +49,28 @@ ValueModel::HandleEvent(const Event &e) {
             // do nothing
         } else {
             value = value * 16 + eventData.data.digit;
+            changed = true;
         }
     } else if (e.type == ClearEvent) {
         value = NumberZero;
+        changed = true;
     } else if (e.type == EvaluateEvent) {
         // do nothing
     }
 
-    return Handled;
+    if (changed) {
+        NotifyChanged();
+    }
+
+    return Consumed;
+}
+
+void
+FormulaModel::NotifyChanged(void) {
+    bus.Post(Event{0, FormulaChangedEvent});
+}
+
+void
+ValueModel::NotifyChanged(void) {
+    bus.Post(Event{0, ValueChangedEvent});
 }

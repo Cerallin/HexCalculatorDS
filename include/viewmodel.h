@@ -6,11 +6,9 @@
  */
 #pragma once
 
-#include "display.h"
 #include "event.h"
 #include "formula.h"
 #include "model.h"
-#include "view.h"
 
 namespace HexCalc {
 
@@ -35,23 +33,17 @@ class ViewModel : private NonCopyable {
      *
      */
     void HandleInputs(void);
-    /**
-     * @brief Update views according to the current state of models
-     *
-     */
-    void UpdateViews(void);
+    EventBus &Bus(void);
+
+    FormulaModel &Formula(void);
+    const FormulaModel &Formula(void) const;
+
+    ValueModel &Value(void);
+    const ValueModel &Value(void) const;
 
   private:
-    /**
-     * @brief Main display on the top screen.
-     *
-     */
-    MainDisplay mainDisplay;
-    /**
-     * @brief Sub display on the bottom screen.
-     *
-     */
-    SubDisplay subDisplay;
+    EventBus eventBus;
+
     /**
      * @brief Formula tree
      *
@@ -62,43 +54,6 @@ class ViewModel : private NonCopyable {
      *
      */
     ValueModel valueModel;
-
-    /**
-     * @brief A single line of the formula on the main screen
-     *
-     */
-    FormulaView formulaView;
-    /**
-     * @brief Curent input or calculated result
-     *
-     */
-    ValueView valueView;
-    /**
-     * @brief Hexadecimal representation of value
-     *
-     */
-    TranscodeView<Hexadecimal> hexView;
-    /**
-     * @brief Decimal representation of value
-     *
-     */
-    TranscodeView<Decimal> decView;
-    /**
-     * @brief Octal representation of value
-     *
-     */
-    TranscodeView<Octal> octView;
-    /**
-     * @brief Binary representation of value
-     *
-     */
-    TranscodeView<Binary> binView;
-
-    /**
-     * @brief Input view on subscreen
-     *
-     */
-    InputView inputView;
 
     /**
      * @brief Previously input states

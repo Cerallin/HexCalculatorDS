@@ -4,6 +4,7 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+#include "viewhost.h"
 #include "viewmodel.h"
 
 int
@@ -12,7 +13,8 @@ main(void) {
     debugInit();
     debugf("Hello world\n");
 
-    auto viewModel = HexCalc::ViewModel();
+    HexCalc::ViewModel viewModel;
+    HexCalc::ViewHost viewHost(viewModel);
 
     // main loop
     while (true) {
@@ -20,7 +22,8 @@ main(void) {
 
         viewModel.HandleInputs();
         viewModel.DispatchEvents();
-        viewModel.UpdateViews();
+
+        viewHost.Update();
     }
 
     return 0;

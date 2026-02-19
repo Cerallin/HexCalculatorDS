@@ -23,9 +23,9 @@ struct InputEventData {
     } data;
     bool isOp;
 
-    InputEventData(int value) {
-        data.digit = static_cast<Digit>(value & 0xFF);
-        isOp = ((value & 0x100) != 0);
+    InputEventData(EventDataType value) {
+      data.digit = static_cast<Digit>(value & 0xFF);
+      isOp = ((value & 0x100) != 0);
     }
 
     int
@@ -39,12 +39,21 @@ static_assert(sizeof(InputEventData) <= sizeof(EventDataType),
 
 class FormulaModel {
   public:
-    FormulaModel(void) : formulaTree() {}
+    explicit FormulaModel(EventBus &eventBus)
+        : formulaTree(), bus(eventBus) {}
 
-    HandleEventResult HandleEvent(const Event &e);
+    EventResult HandleEvent(const Event &e);
+
+    const FormulaTree &
+    Tree(void) const {
+        return formulaTree;
+    }
 
   private:
+    void NotifyChanged(void);
+
     FormulaTree formulaTree;
+    EventBus &bus;
 };
 
 /**
@@ -53,12 +62,21 @@ class FormulaModel {
  */
 class ValueModel {
   public:
-    ValueModel(void) : value(NumberZero) {}
+    explicit ValueModel(EventBus &eventBus)
+        : value(NumberZero), bus(eventBus) {}
 
-    HandleEventResult HandleEvent(const Event &e);
+    EventResult HandleEvent(const Event &e);
+
+    NumberDataType
+    Value(void) const {
+        return value;
+    }
 
   private:
+    void NotifyChanged(void);
+
     NumberDataType value;
+    EventBus &bus;
 };
 
 template <typename T>
@@ -66,7 +84,7 @@ class TranscodeModel {
   public:
     TranscodeModel(void) : value(NumberZero) {}
 
-    HandleEventResult HandleEvent(const Event &e);
+    EventResult HandleEvent(const Event &e);
 
     bool
     Selected(void) const {

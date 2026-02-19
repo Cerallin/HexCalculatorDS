@@ -61,7 +61,7 @@ class Config {
         : base(NumberBase::Decimal), width(NumberWidth::QWord), sign(Unsigned) {
     }
 
-    HandleEventResult HandleEvent(const Event &e);
+    EventResult HandleEvent(const Event &e);
 
     NumberBase
     Base(void) const {
