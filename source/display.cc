@@ -18,10 +18,10 @@ align64(int x) {
 MainDisplay::MainDisplay(void)
     : // the offset is because of 6x8 tiles on 8x8 tile map
       layers{
-          Layer<MainDisplay>(offsetX - 0, offsetY + 0),
-          Layer<MainDisplay>(offsetX - 2, offsetY + 0),
-          Layer<MainDisplay>(offsetX - 4, offsetY + 0),
-          Layer<MainDisplay>(offsetX - 6, offsetY + 0),
+          Layer<MainDisplay>(offsetX - (0 * OffsetPerBG), offsetY + 0),
+          Layer<MainDisplay>(offsetX - (1 * OffsetPerBG), offsetY + 0),
+          Layer<MainDisplay>(offsetX - (2 * OffsetPerBG), offsetY + 0),
+          Layer<MainDisplay>(offsetX - (3 * OffsetPerBG), offsetY + 0),
       } {
     videoSetMode(VideoMode);
     // F bank has 16 Kb, enough for <=256 tiles and 4 maps
@@ -49,12 +49,12 @@ MainDisplay::MainDisplay(void)
 }
 
 void
-MainDisplay::PutGlyph(int16_t x, int16_t y, const Glyph &glyph) {
-    assert(x % 2 == 0);
-    assert(y % 8 == 0);
-    auto _idx = (x / 2) % 4;
-    auto layer = layers[_idx];
-    layer.PutGlyph(x / 8, y / 8, glyph);
+MainDisplay::PutGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
+    assert(x % OffsetPerBG == 0);
+    assert(y % TileHeight == 0);
+    auto _idx = (x / OffsetPerBG) % BGNum;
+    auto &layer = layers[_idx];
+    layer.PutGlyph(x / TileWidth, y / TileHeight, glyph);
 }
 
 SubDisplay::SubDisplay(void) {

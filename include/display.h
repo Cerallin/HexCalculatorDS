@@ -24,10 +24,32 @@ class MainDisplay : public Display {
   public:
     MainDisplay(void);
 
-    void PutGlyph(int16_t x, int16_t y, const Glyph &glyph);
+    void PutGlyph(int16_t x, int16_t y, const Glyph &glyph) const;
+
+    /**
+     * @brief Print a line of glyphs.
+     *
+     * @tparam CharWidth The width of each character in pixels. It can be 6
+     * or 8.
+     * @param glyphArray Array of glyphs to print
+     * @param length Length of the glyph array
+     * @param skip Number of glyphs to skip at the beginning of the line
+     * @param line Column to print the line on
+     */
+    template <int CharWidth = 6>
+    void
+    PrintLine(const Glyph *glyphArray, size_t length, int skip,
+              int line) const {
+        for (size_t i = 0; i < length; i++) {
+            this->PutGlyph((skip + i) * CharWidth, line * TileHeight,
+                           glyphArray[i]);
+        }
+    }
 
     static constexpr int Bpp = 4;
-    static constexpr int TileSize = 8 * 8;
+    static constexpr int TileWidth = 8;
+    static constexpr int TileHeight = 8;
+    static constexpr int TileSize = TileWidth * TileHeight;
     /**
      * @brief all 4 layers are text layers
      *
@@ -36,6 +58,7 @@ class MainDisplay : public Display {
     static constexpr auto BgType = BgType_Text4bpp;
     static constexpr auto BgSize = BgSize_T_256x256;
     static constexpr int BGNum = 4;
+    static constexpr int OffsetPerBG = TileWidth / BGNum;
     static constexpr int MaxTileNum = 256;
 
     /**
