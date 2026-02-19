@@ -15,7 +15,7 @@ template <typename DisplayType>
 class Layer {
   public:
     Layer(int16_t offsetX = 0, int16_t offsetY = 0)
-        : bg(-1), offsetX(offsetX), offsetY(offsetY) {}
+        : bg(-1), mapPtr(nullptr), offsetX(offsetX), offsetY(offsetY) {}
 
     void
     Init(int layer, int mapBase, int tileBase) {
@@ -23,6 +23,7 @@ class Layer {
         constexpr auto bgSize = DisplayType::BgSize;
 
         bg = bgInit(layer, bgType, bgSize, mapBase, 0);
+        mapPtr = bgGetMapPtr(bg);
         bgScroll(bg, offsetX, offsetY);
     }
 
@@ -33,15 +34,14 @@ class Layer {
 
     void
     Put(uint8_t x, uint8_t y, uint16_t tile, bool hFlip = false,
-        bool vFlip = false) {
-        uint16_t *mapPtr = bgGetMapPtr(bg);
+        bool vFlip = false) const {
         debugf("Put tile %d at (%d, %d) on bg %d\n", tile, x, y, bg);
         mapPtr[(y * Width) + x] =
             tile | (hFlip ? BIT(10) : 0) | (vFlip ? BIT(11) : 0);
     }
 
     void
-    PutGlyph(uint8_t x, uint8_t y, const Glyph &glyph) {
+    PutGlyph(uint8_t x, uint8_t y, const Glyph &glyph) const {
         auto _y = glyph.UnderBaseline() ? (y + 1) : (y);
         this->Put(x, _y, glyph.Upper(), glyph.UpperHFlip(), glyph.UpperVFlip());
         this->Put(x, _y + 1, glyph.Lower(), glyph.LowerHFlip(),
@@ -50,17 +50,19 @@ class Layer {
 
     void
     Clear(void) {
-        uint16_t *mapPtr = bgGetMapPtr(bg);
         dmaFillHalfWords(0, mapPtr, Width * Height * sizeof(uint16_t));
     }
 
+    static constexpr int TileWidth = DisplayType::TileWidth;
+    static constexpr int TileHeight = DisplayType::TileHeight;
+    static constexpr size_t Width = SCREEN_WIDTH / TileWidth;
+    static constexpr size_t Height = SCREEN_HEIGHT / TileHeight;
+
   private:
     int bg;
+    uint16_t *mapPtr;
     int16_t offsetX;
     int16_t offsetY;
-
-    static constexpr int Width = SCREEN_WIDTH / 8;
-    static constexpr int Height = SCREEN_HEIGHT / 8;
 };
 
 }; // namespace HexCalc
