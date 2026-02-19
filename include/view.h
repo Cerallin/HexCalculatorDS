@@ -72,8 +72,13 @@ class MainView : public BasicView<Class, MainDisplay> {
 
 class FormulaView : public MainView<FormulaView, AlignRight> {
   public:
+    static constexpr auto TileHeight = MainDisplay::TileHeight;
+    static constexpr auto TileWidth = MainDisplay::TileWidth;
+
     FormulaView(MainDisplay &display, const FormulaModel &model)
-        : MainView(Area(0, line * 8, lineWidth * 8, height * 8), display),
+        : MainView(Area(0, line * TileHeight, lineWidth * TileWidth,
+                        height * TileHeight),
+                   display),
           model(model) {}
 
     EventResult HandleEvent(const Event &e);
@@ -84,14 +89,31 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr int16_t line = 2;
     static constexpr int16_t lineWidth = 30;
 
+    /**
+     * @brief 6x8 font.
+     *
+     */
+    static constexpr size_t CharWidth = 6;
+
+    /**
+     * @brief 6x8 font.
+     *
+     */
+    static constexpr size_t CharHeight = 8;
+
   private:
     const FormulaModel &model;
 };
 
 class ValueView : public MainView<ValueView, AlignRight> {
   public:
+    static constexpr auto TileHeight = MainDisplay::TileHeight;
+    static constexpr auto TileWidth = MainDisplay::TileWidth;
+
     ValueView(MainDisplay &display, const ValueModel &model)
-        : MainView(Area(0, line * 8, lineWidth * 8, height * 8), display),
+        : MainView(Area(0, line * TileHeight, lineWidth * TileWidth,
+                        height * TileHeight),
+                   display),
           model(model) {}
 
     EventResult HandleEvent(const Event &e);
@@ -101,6 +123,19 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr int16_t height = 3;
     static constexpr int16_t line = 2 + FormulaView::height;
     static constexpr int16_t lineWidth = 30;
+    
+    /**
+     * @brief 6x8 font.
+     *
+     */
+    static constexpr size_t CharWidth = 8;
+
+    /**
+     * @brief 6x8 font.
+     *
+     */
+    static constexpr size_t CharHeight = 8;
+
 
   private:
     const ValueModel &model;
@@ -109,9 +144,14 @@ class ValueView : public MainView<ValueView, AlignRight> {
 template <NumberBase base>
 class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
   public:
+    static constexpr auto TileHeight = MainDisplay::TileHeight;
+    static constexpr auto TileWidth = MainDisplay::TileWidth;
+
     TranscodeView(MainDisplay &display, const ValueModel &model)
-        : MainView<TranscodeView<base>, AlignLeft>(
-              Area(0, line * 8, lineWidth * 8, height * 8), display),
+        : MainView<TranscodeView<base>, AlignLeft>(Area(0, line * TileHeight,
+                                                        lineWidth * TileWidth,
+                                                        height * TileHeight),
+                                                   display),
           model(model) {}
 
     EventResult
@@ -143,8 +183,6 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     static constexpr int16_t lineWidth = 30;
 
   private:
-    EventResult handleValueChanged(void);
-
     const ValueModel &model;
 
     template <NumberBase>
@@ -160,6 +198,14 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
         Glyph(HeaderTraits<base>::font2),
         InvalidGlyph,
     };
+    
+    /**
+     * @brief Handle ValueChanged Event.
+     *
+     * @return EventResult Consumed if the event is handled and the view needs
+     * to be updated, Skipped if the event is not relevant to this view.
+     */
+    EventResult handleValueChanged(void);
 };
 
 using HexView = TranscodeView<Hexadecimal>;
