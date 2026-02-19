@@ -54,7 +54,7 @@ enum FontChar : FontType {
      * @brief FontChar used for transcode view headers.
      *
      */
-    Font6x8HH = 56,
+    Font6x8HH = 33,
     Font6x8EH,
     Font6x8XH,
     Font6x8DH,
@@ -70,7 +70,7 @@ enum FontChar : FontType {
      * @brief FontChar used for value view.
      *
      */
-    Font8x8Zero = 80,
+    Font8x8Zero = 64,
     Font8x8One,
     Font8x8Two,
     Font8x8Three,
@@ -114,7 +114,7 @@ constexpr int BarTileCount = 3;
 constexpr int BarTiles[BarTileCount] = {86, 87, 88};
 
 /**
- * @brief Glyph may have 1 or 2 tiles. If it has 1 tile, upper is ignored.
+ * @brief Glyph may have 1 or 2 tiles.
  *
  */
 class Glyph {
@@ -124,6 +124,9 @@ class Glyph {
         : upper(upper), lower(lower), upHFlip(upHFlip), upVFlip(false),
           downHFlip(downHFlip), downVFlip(false), underBaseline(underBaseline) {
     }
+    constexpr Glyph(void)
+        : upper(FontEmpty), lower(FontEmpty), upHFlip(false), upVFlip(false),
+          downHFlip(false), downVFlip(false), underBaseline(false) {}
 
     /**
      * @brief Load a glyph from a font.
@@ -179,7 +182,7 @@ class Glyph {
     bool underBaseline;
 };
 
-constexpr Glyph InvalidGlyph = Glyph(FontEmpty, FontEmpty);
+constexpr Glyph InvalidGlyph = Glyph();
 
 constexpr Glyph::Glyph(FontType font)
     : upper(FontEmpty), lower(FontEmpty), upHFlip(false), upVFlip(false),
@@ -300,7 +303,7 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(48, 50);
         break;
     case Font8x8Comma:
-        *this = Glyph(51, 52, underBaseline = true);
+        *this = Glyph(51, 52, false, false, true);
         break;
     case Font8x8Four:
         *this = Glyph(53, 54);
