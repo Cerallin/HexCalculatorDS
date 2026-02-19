@@ -61,6 +61,37 @@ struct Area {
         : x(px), y(py), w(width), h(height) {}
 };
 
+/**
+ * @brief Area space for 6x8 font glyphs. Each unit corresponds to a 6x8 pixel
+ * area on the screen, which is the size of a single glyph.
+ *
+ */
+struct Area6x8 {
+    int8_t x;
+    int8_t y;
+    uint8_t w;
+    uint8_t h;
+
+    Area6x8(Area area)
+        : x(area.x / 6), y(area.y / 8), w(area.w / 6),
+          h(area.h / (lineHeight * 8)) {}
+
+    static constexpr uint8_t lineHeight = 2;
+};
+
+struct Area8x8 {
+    int8_t x;
+    int8_t y;
+    uint8_t w;
+    uint8_t h;
+
+    Area8x8(Area area)
+        : x(area.x / 8), y(area.y / 8), w(area.w / 8),
+          h(area.h / (lineHeight * 8)) {}
+
+    static constexpr uint8_t lineHeight = 2;
+};
+
 struct KeyInput {
     uint32_t keys;
 

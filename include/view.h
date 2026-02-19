@@ -16,7 +16,7 @@
 
 namespace HexCalc {
 
-template <typename DisplayType>
+template <typename Class, typename DisplayType>
 class BasicView {
   public:
     // Initially, the view needs to be rendered at least once.
@@ -29,6 +29,9 @@ class BasicView {
 
     void
     Update(void) {
+        if (dirty) {
+            static_cast<Class *>(this)->ForceUpdate();
+        }
         dirty = false;
     }
 
@@ -36,7 +39,7 @@ class BasicView {
     DisplayType &display;
 
     void
-    MarkDirty(void) {
+    markDirty(void) {
         dirty = true;
     }
 
@@ -57,51 +60,70 @@ enum ViewAlign : uint8_t {
  * @brief Basic view on the main screen.
  *
  */
-template <ViewAlign Align>
-class MainView : public BasicView<MainDisplay> {
+template <typename Class, ViewAlign Align>
+class MainView : public BasicView<Class, MainDisplay> {
   public:
     MainView(Area area, MainDisplay &display)
-        : BasicView(display), viewArea(area) {}
+        : BasicView<Class, MainDisplay>(display), viewArea(area) {}
 
-  private:
+  protected:
     Area viewArea;
 };
 
-class FormulaView : public MainView<AlignRight> {
+class FormulaView : public MainView<FormulaView, AlignRight> {
   public:
     FormulaView(MainDisplay &display, const FormulaModel &model)
-        : MainView(Area(line, 0, 30, height), display), model(model) {}
+        : MainView(Area(0, line * 8, lineWidth * 8, height * 8), display),
+          model(model) {}
 
     EventResult HandleEvent(const Event &e);
 
+    void ForceUpdate(void);
+
     static constexpr int16_t height = 2;
     static constexpr int16_t line = 2;
+    static constexpr int16_t lineWidth = 30;
 
   private:
     const FormulaModel &model;
 };
 
-class ValueView : public MainView<AlignRight> {
+class ValueView : public MainView<ValueView, AlignRight> {
   public:
     ValueView(MainDisplay &display, const ValueModel &model)
-        : MainView(Area(line, 0, 30, height), display), model(model) {}
+        : MainView(Area(0, line * 8, lineWidth * 8, height * 8), display),
+          model(model) {}
 
     EventResult HandleEvent(const Event &e);
 
+    void ForceUpdate(void);
+
     static constexpr int16_t height = 3;
     static constexpr int16_t line = 2 + FormulaView::height;
+    static constexpr int16_t lineWidth = 30;
 
   private:
     const ValueModel &model;
 };
 
 template <NumberBase base>
-class TranscodeView : public MainView<AlignLeft> {
+class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
   public:
     TranscodeView(MainDisplay &display, const ValueModel &model)
-        : MainView(Area(line, 0, 30, height), display), model(model) {}
+        : MainView<TranscodeView<base>, AlignLeft>(
+              Area(0, line * 8, lineWidth * 8, height * 8), display),
+          model(model) {}
 
-    EventResult HandleEvent(const Event &e);
+    EventResult
+    HandleEvent(const Event &e) {
+        if (e.type != EventType::ValueChangedEvent) {
+            return Skipped;
+        }
+
+        return handleValueChanged();
+    }
+
+    void ForceUpdate(void);
 
     // hex: 2, dec: 2, oct: 3, bin: 8
     static constexpr int16_t height = (base == Hexadecimal) ? 2
@@ -109,16 +131,19 @@ class TranscodeView : public MainView<AlignLeft> {
                                       : (base == Octal)     ? 3
                                       : (base == Binary)    ? 8
                                                             : /* default */ 2;
-    static constexpr int16_t gap = 1;
-    static constexpr int16_t line = gap + ValueView::line + ValueView::height +
+    static constexpr int16_t columnGap = 2;
+    static constexpr int16_t lineGap = 1;
+    static constexpr int16_t line = lineGap + ValueView::line +
+                                    ValueView::height +
                                     ((base == Hexadecimal) ? 0
                                      : (base == Decimal)   ? 2
                                      : (base == Octal)     ? 4
                                      : (base == Binary)    ? 7
                                                            : 0);
+    static constexpr int16_t lineWidth = 30;
 
   private:
-    EventResult HandleValueChanged(void);
+    EventResult handleValueChanged(void);
 
     const ValueModel &model;
 
@@ -174,16 +199,19 @@ struct TranscodeView<Binary>::HeaderTraits<Binary> {
     static constexpr FontType font2 = Font6x8NH;
 };
 
-class SubView : public BasicView<SubDisplay> {
+template <typename Class>
+class SubView : public BasicView<Class, SubDisplay> {
   public:
-    SubView(SubDisplay &display) : BasicView(display) {}
+    SubView(SubDisplay &display) : BasicView<Class, SubDisplay>(display) {}
 };
 
-class InputView : public SubView {
+class InputView : public SubView<InputView> {
   public:
     InputView(SubDisplay &display) : SubView(display) {}
 
     EventResult HandleEvent(const Event &e);
+
+    void ForceUpdate(void);
 };
 
 }; // namespace HexCalc

@@ -52,24 +52,6 @@ class MainDisplay : public Display {
 
   private:
     Layer<MainDisplay> layers[BGNum];
-
-    constexpr Layer<MainDisplay> &
-    getLayer(int16_t x) {
-        assert(x % 2 == 0);
-        switch (x % 8) {
-        case 0:
-            return layers[0];
-        case 2:
-            return layers[1];
-        case 4:
-            return layers[2];
-        case 6:
-            return layers[3];
-        default:
-            // should never reach here
-            return layers[0];
-        }
-    }
 };
 
 /**

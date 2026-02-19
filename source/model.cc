@@ -33,10 +33,15 @@ FormulaModel::HandleEvent(const Event &e) {
     }
 
     if (changed) {
-        NotifyChanged();
+        notifyChanged();
     }
 
     return Consumed;
+}
+
+void
+FormulaModel::notifyChanged(void) {
+    bus.Post(Event{0, FormulaChangedEvent});
 }
 
 EventResult
@@ -59,18 +64,13 @@ ValueModel::HandleEvent(const Event &e) {
     }
 
     if (changed) {
-        NotifyChanged();
+        notifyChanged();
     }
 
     return Consumed;
 }
 
 void
-FormulaModel::NotifyChanged(void) {
-    bus.Post(Event{0, FormulaChangedEvent});
-}
-
-void
-ValueModel::NotifyChanged(void) {
+ValueModel::notifyChanged(void) {
     bus.Post(Event{0, ValueChangedEvent});
 }

@@ -24,8 +24,8 @@ struct InputEventData {
     bool isOp;
 
     InputEventData(EventDataType value) {
-      data.digit = static_cast<Digit>(value & 0xFF);
-      isOp = ((value & 0x100) != 0);
+        data.digit = static_cast<Digit>(value & 0xFF);
+        isOp = ((value & 0x100) != 0);
     }
 
     int
@@ -39,8 +39,7 @@ static_assert(sizeof(InputEventData) <= sizeof(EventDataType),
 
 class FormulaModel {
   public:
-    explicit FormulaModel(EventBus &eventBus)
-        : formulaTree(), bus(eventBus) {}
+    explicit FormulaModel(EventBus &eventBus) : formulaTree(), bus(eventBus) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -50,7 +49,7 @@ class FormulaModel {
     }
 
   private:
-    void NotifyChanged(void);
+    void notifyChanged(void);
 
     FormulaTree formulaTree;
     EventBus &bus;
@@ -73,7 +72,7 @@ class ValueModel {
     }
 
   private:
-    void NotifyChanged(void);
+    void notifyChanged(void);
 
     NumberDataType value;
     EventBus &bus;

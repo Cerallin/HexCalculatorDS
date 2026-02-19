@@ -17,6 +17,8 @@ ViewModel::ViewModel(void)
     eventBus.Subscribe(config);
     eventBus.Subscribe(formulaModel);
     eventBus.Subscribe(valueModel);
+
+    eventBus.Post(Event{0, EventType::ClearEvent});
 }
 
 void
@@ -45,9 +47,8 @@ ViewModel::handleTouchScreen(void) {
         return false;
     }
 
-    eventBus.Post(
-        Event{static_cast<EventDataType>(touchInput.point.ToInt()),
-              EventType::TouchScreenEvent});
+    eventBus.Post(Event{static_cast<EventDataType>(touchInput.point.ToInt()),
+                        EventType::TouchScreenEvent});
     return true;
 }
 

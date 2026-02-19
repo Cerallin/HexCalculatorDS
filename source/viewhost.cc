@@ -35,10 +35,13 @@ ViewHost::RegisterViews(ViewModel &viewModel) {
 void
 ViewHost::Update(void) {
     // TODO render dirty views instead of drawing placeholder glyphs
-    for (uint16_t x = 0; x < 32; x++) {
-        for (uint16_t y = 0; y < 12; y++) {
-            mainDisplay.PutGlyph(x * 8, y * 16, Glyph(x + y * 32));
-        }
-    }
+    formulaView.Update();
+    valueView.Update();
+    hexView.Update();
+    decView.Update();
+    octView.Update();
+    binView.Update();
+    inputView.Update();
+
     bgUpdate();
 }
