@@ -18,15 +18,15 @@ ViewModel::ViewModel(void)
       // models
       formulaModel(), valueModel(),
       // main screen views
-      formulaView(Area(3, 0, 30, 2), ViewAlign::AlignRight, mainDisplay),
-      valueView(Area(5, 0, 30, 3), ViewAlign::AlignRight, mainDisplay),
+      formulaView(Area(3, 0, 30, 2), mainDisplay),
+      valueView(Area(5, 0, 30, 3), mainDisplay),
       // There's a gap between valueView and hexView
       // TODO use an empty view for the gap
-      hexView(Area(7, 0, 30, 2), ViewAlign::AlignLeft, mainDisplay),
-      decView(Area(9, 0, 30, 2), ViewAlign::AlignLeft, mainDisplay),
-      octView(Area(11, 0, 30, 3), ViewAlign::AlignLeft, mainDisplay),
+      hexView(Area(7, 0, 30, 2), mainDisplay),
+      decView(Area(9, 0, 30, 2), mainDisplay),
+      octView(Area(11, 0, 30, 3), mainDisplay),
       // There's a gap between decView and octView
-      binView(Area(13, 0, 30, 8), ViewAlign::AlignLeft, mainDisplay),
+      binView(Area(13, 0, 30, 8), mainDisplay),
       // subscreen view
       inputView(subDisplay),
       // input state

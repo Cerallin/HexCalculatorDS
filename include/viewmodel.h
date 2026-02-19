@@ -23,8 +23,6 @@ namespace HexCalc {
  */
 class ViewModel : private NonCopyable {
   public:
-    using ViewAlign = MainView::ViewAlign;
-
     ViewModel(void);
 
     /**

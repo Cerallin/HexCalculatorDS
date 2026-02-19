@@ -18,6 +18,8 @@ struct Point {
     int16_t x;
     int16_t y;
 
+    constexpr Point(int16_t x, int16_t y) : x(x), y(y) {}
+
     constexpr Point(touchPosition touchPosition)
         : x(static_cast<int16_t>(touchPosition.px)),
           y(static_cast<int16_t>(touchPosition.py)) {}
@@ -91,56 +93,55 @@ class BasicView {
         dirty = false;
     }
 
-  private:
-    bool dirty;
+  protected:
     DisplayType &display;
 
     void
     MarkDirty(void) {
         dirty = true;
     }
+
+  private:
+    bool dirty;
+};
+
+/**
+ * @brief The alignment of the view text.
+ *
+ */
+enum ViewAlign : uint8_t {
+    AlignLeft,
+    AlignRight,
 };
 
 /**
  * @brief Basic view on the main screen.
  *
  */
+template <ViewAlign Align>
 class MainView : public BasicView<MainDisplay> {
   public:
-    /**
-     * @brief The alignment of the view text.
-     *
-     */
-    enum ViewAlign : uint8_t {
-        AlignLeft,
-        AlignRight,
-    };
-
-    MainView(Area area, ViewAlign align, MainDisplay &display)
-        : BasicView(display), viewArea(area), viewAlign(align) {}
+    MainView(Area area, MainDisplay &display)
+        : BasicView(display), viewArea(area) {}
 
   private:
     Area viewArea;
-    ViewAlign viewAlign;
 };
 
-class FormulaView : public MainView {
+class FormulaView : public MainView<AlignRight> {
   public:
-    FormulaView(Area area, ViewAlign align, MainDisplay &display)
-        : MainView(area, align, display) {}
+    FormulaView(Area area, MainDisplay &display) : MainView(area, display) {}
 };
 
-class ValueView : public MainView {
+class ValueView : public MainView<AlignRight> {
   public:
-    ValueView(Area area, ViewAlign align, MainDisplay &display)
-        : MainView(area, align, display) {}
+    ValueView(Area area, MainDisplay &display) : MainView(area, display) {}
 };
 
 template <NumberBase base>
-class TranscodeView : public MainView {
+class TranscodeView : public MainView<AlignLeft> {
   public:
-    TranscodeView(Area area, ViewAlign align, MainDisplay &display)
-        : MainView(area, align, display) {}
+    TranscodeView(Area area, MainDisplay &display) : MainView(area, display) {}
 
   private:
     template <NumberBase>
