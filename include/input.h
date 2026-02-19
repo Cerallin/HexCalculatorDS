@@ -72,7 +72,7 @@ struct Area6x8 {
     uint8_t w;
     uint8_t h;
 
-    Area6x8(Area area)
+    explicit Area6x8(Area area)
         : x(area.x / 6), y(area.y / 8), w(area.w / 6),
           h(area.h / (lineHeight * 8)) {}
 
@@ -85,7 +85,7 @@ struct Area8x8 {
     uint8_t w;
     uint8_t h;
 
-    Area8x8(Area area)
+    explicit Area8x8(Area area)
         : x(area.x / 8), y(area.y / 8), w(area.w / 8),
           h(area.h / (lineHeight * 8)) {}
 
