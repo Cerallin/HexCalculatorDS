@@ -77,16 +77,11 @@ static constexpr NumberDataType NumberZero = NumberDataType(0);
  * @tparam width The width of the number in bits (8, 16, 32, or 64).
  * @tparam sign The sign of the number (signed or unsigned).
  */
-template <NumberWidth width, NumberSign sign>
 class Number {
   public:
     constexpr Number(void) : Number(0) {}
-    constexpr explicit Number(uint64_t v) : value(v) {
-        static_assert(width == Byte || width == Word || width == DWord ||
-                          width == QWord,
-                      "Invalid width");
-        static_assert(sign == Signed || sign == Unsigned, "Invalid sign");
-    }
+    constexpr explicit Number(uint64_t v, NumberSign sign = Unsigned)
+        : value(v), sign(sign) {}
 
     constexpr uint64_t
     Raw() const noexcept {
@@ -115,7 +110,7 @@ class Number {
         size_t count = 0;
         constexpr auto maxDigits = MaxDigits<base>();
         DigitArray<maxDigits> digits;
-        if constexpr (sign == Signed) {
+        if (sign == Signed) { // signed
             int64_t v = static_cast<int64_t>(value);
             digits.isNegative = (v < 0);
             if (v < 0) {
@@ -130,7 +125,7 @@ class Number {
                 count++;
             }
             digits.size = count;
-        } else {
+        } else { // unsigned
             uint64_t v = value;
             for (size_t i = 0; i < maxDigits; ++i) {
                 if (v == 0) {
@@ -147,5 +142,6 @@ class Number {
 
   private:
     NumberDataType value{};
+    NumberSign sign;
 };
 }; // namespace HexCalc

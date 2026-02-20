@@ -13,7 +13,7 @@ TEST_GROUP(Number){};
 
 TEST(Number, TestQwordHexadecimal) {
     constexpr uint64_t testValue = 0x0d000721;
-    HexCalc::Number<HexCalc::QWord, HexCalc::Unsigned> num(testValue);
+    HexCalc::Number num(testValue);
     auto res = num.Transcode<HexCalc::Hexadecimal>();
     CHECK_EQUAL(7, res.size);
 
@@ -25,28 +25,28 @@ TEST(Number, TestQwordHexadecimal) {
 
 TEST(Number, TestDwordDecimal) {
     constexpr uint64_t testValue = 1234567890;
-    HexCalc::Number<HexCalc::DWord, HexCalc::Unsigned> num(testValue);
+    HexCalc::Number num(testValue);
     auto res = num.Transcode<HexCalc::Decimal>();
     CHECK_EQUAL(10, res.size);
 }
 
 TEST(Number, TestWordOctal) {
     constexpr uint64_t testValue = 01234567;
-    HexCalc::Number<HexCalc::Word, HexCalc::Unsigned> num(testValue);
+    HexCalc::Number num(testValue);
     auto res = num.Transcode<HexCalc::Octal>();
     CHECK_EQUAL(7, res.size);
 }
 
 TEST(Number, TestByteBinary) {
     constexpr uint64_t testValue = 0b10010011;
-    HexCalc::Number<HexCalc::Byte, HexCalc::Unsigned> num(testValue);
+    HexCalc::Number num(testValue);
     auto res = num.Transcode<HexCalc::Binary>();
     CHECK_EQUAL(8, res.size);
 }
 
 TEST(Number, TestNegativeDecimal) {
     constexpr int64_t testValue = -1234567890;
-    HexCalc::Number<HexCalc::QWord, HexCalc::Signed> num(testValue);
+    HexCalc::Number num(testValue, HexCalc::Signed);
     auto res = num.Transcode<HexCalc::Decimal>();
     CHECK(res.isNegative);
     CHECK_EQUAL(10, res.size);
