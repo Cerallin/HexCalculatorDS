@@ -76,7 +76,7 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
     FormulaView(MainDisplay &display, const FormulaModel &model)
-        : MainView(Area(0, line * TileHeight, lineWidth * TileWidth,
+        : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
           model(model) {}
@@ -84,6 +84,8 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     EventResult HandleEvent(const Event &e);
 
     void ForceUpdate(void);
+
+    static constexpr int16_t offsetX = 2;
 
     static constexpr int16_t height = 2;
     static constexpr int16_t line = 2;
@@ -111,7 +113,7 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
     ValueView(MainDisplay &display, const ValueModel &model)
-        : MainView(Area(0, line * TileHeight, lineWidth * TileWidth,
+        : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
           model(model) {}
@@ -120,10 +122,12 @@ class ValueView : public MainView<ValueView, AlignRight> {
 
     void ForceUpdate(void);
 
+    static constexpr int16_t offsetX = 2;
+
     static constexpr int16_t height = 3;
     static constexpr int16_t line = 2 + FormulaView::height;
     static constexpr int16_t lineWidth = 30;
-    
+
     /**
      * @brief 6x8 font.
      *
@@ -136,7 +140,6 @@ class ValueView : public MainView<ValueView, AlignRight> {
      */
     static constexpr size_t CharHeight = 8;
 
-
   private:
     const ValueModel &model;
 };
@@ -148,10 +151,11 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
     TranscodeView(MainDisplay &display, const ValueModel &model)
-        : MainView<TranscodeView<base>, AlignLeft>(Area(0, line * TileHeight,
-                                                        lineWidth * TileWidth,
-                                                        height * TileHeight),
-                                                   display),
+        : MainView<TranscodeView<base>, AlignLeft>(
+              //
+              Area(0, line * TileHeight, lineWidth * TileWidth,
+                   height * TileHeight),
+              display),
           model(model) {}
 
     EventResult
@@ -182,6 +186,30 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
                                                            : 0);
     static constexpr int16_t lineWidth = 30;
 
+    /**
+     * @brief 6x8 font.
+     *
+     */
+    static constexpr size_t CharWidth = 6;
+
+    /**
+     * @brief 6x8 font.
+     *
+     */
+    static constexpr size_t CharHeight = 8;
+
+    /**
+     * @brief The number of glyphs to skip at the beginning of the header line.
+     *
+     */
+    static constexpr int headerSkip = 2;
+
+    /**
+     * @brief The gap between the header and the number.
+     *
+     */
+    static constexpr int numberGap = 2;
+
   private:
     const ValueModel &model;
 
@@ -192,13 +220,13 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
         static constexpr FontType font2 = FontEmpty;
     };
 
-    static constexpr Glyph header[4] = {
+    static constexpr Glyph header[] = {
         Glyph(HeaderTraits<base>::font0),
         Glyph(HeaderTraits<base>::font1),
         Glyph(HeaderTraits<base>::font2),
-        InvalidGlyph,
     };
-    
+    static constexpr int headerLength = sizeof(header) / sizeof(Glyph);
+
     /**
      * @brief Handle ValueChanged Event.
      *
@@ -206,6 +234,9 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
      * to be updated, Skipped if the event is not relevant to this view.
      */
     EventResult handleValueChanged(void);
+
+    void printHeader(void) const;
+    void printNumber(void) const;
 };
 
 using HexView = TranscodeView<Hexadecimal>;
