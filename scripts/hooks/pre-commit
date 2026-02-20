@@ -8,8 +8,11 @@ if [ -z "$FILES" ]; then
     exit 0
 fi
 
+FORMATTED_FILES=""
+
 for file in $FILES; do
     if [ -f "$file" ]; then
+        original_hash=$(git hash-object "$file")
         # Format C/C++ files
         case "$file" in
             *.c|*.cc|*.cpp|*.h|*.hh|*.hpp)
@@ -23,8 +26,21 @@ for file in $FILES; do
         # Ensure final newline
         tail -c1 "$tmpfile" | read -r _ || echo >> "$tmpfile"
         mv "$tmpfile" "$file"
-        git add "$file"
+        updated_hash=$(git hash-object "$file")
+        if [ "$original_hash" != "$updated_hash" ]; then
+            FORMATTED_FILES="$FORMATTED_FILES $file"
+            git add "$file"
+        fi
     fi
 done
+
+if [ -n "$FORMATTED_FILES" ]; then
+    echo ""
+    echo "Formatting hook updated and re-staged the following files:"
+    for formatted in $FORMATTED_FILES; do
+        echo "  - $formatted"
+    done
+    echo ""
+fi
 
 exit 0
