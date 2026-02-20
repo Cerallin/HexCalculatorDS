@@ -55,9 +55,9 @@ struct UpdateSignEventData {
     }
 };
 
-class Config {
+class ConfigModel {
   public:
-    Config(void)
+    ConfigModel(void)
         : base(NumberBase::Decimal), width(NumberWidth::QWord), sign(Unsigned) {
     }
 
@@ -84,6 +84,6 @@ class Config {
     NumberSign sign;
 };
 
-extern Config config;
+extern ConfigModel config;
 
 }; // namespace HexCalc
