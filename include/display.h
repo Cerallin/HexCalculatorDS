@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.h"
+#include "input.h"
 #include "layer.h"
 #include "traits.h"
 
@@ -24,7 +25,7 @@ class MainDisplay : public Display {
   public:
     MainDisplay(void);
 
-    void PutGlyph(int16_t x, int16_t y, const Glyph &glyph) const;
+    void PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const;
 
     /**
      * @brief Print a line of glyphs.
@@ -39,10 +40,14 @@ class MainDisplay : public Display {
     template <int CharWidth = 6>
     void
     PrintLine(const Glyph *glyphArray, size_t length, int skip,
-              int line) const {
+              Point &start) const {
+        auto x = start.x;
+        auto y = start.y;
+        debugf("PrintLine: start=(%d, %d), skip=%d, length=%d\n", x, y, skip,
+               length);
         for (size_t i = 0; i < length; i++) {
-            this->PutGlyph((skip + i) * CharWidth, line * TileHeight,
-                           glyphArray[i]);
+            auto x = start.x + (skip + i) * CharWidth;
+            this->PrintGlyph(x, y, glyphArray[i]);
         }
     }
 

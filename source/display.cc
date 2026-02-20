@@ -49,7 +49,7 @@ MainDisplay::MainDisplay(void)
 }
 
 void
-MainDisplay::PutGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
+MainDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
     auto _idx = (x / OffsetPerBG) % BGNum;
