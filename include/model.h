@@ -78,21 +78,4 @@ class ValueModel {
     EventBus &bus;
 };
 
-template <typename T>
-class TranscodeModel {
-  public:
-    TranscodeModel(void) : value(NumberZero) {}
-
-    EventResult HandleEvent(const Event &e);
-
-    bool
-    Selected(void) const {
-        // TODO not implemented yet
-        return false;
-    }
-
-  private:
-    NumberDataType value;
-};
-
 }; // namespace HexCalc
