@@ -6,8 +6,8 @@
  */
 #pragma once
 
+#include "commands.h"
 #include "event.h"
-#include "formula.h"
 #include "model.h"
 
 namespace HexCalc {
@@ -43,6 +43,12 @@ class ViewModel : private NonCopyable {
 
   private:
     EventBus eventBus;
+
+    /**
+     * @brief Commands that can be triggered by user inputs
+     *
+     */
+    Commands commands;
 
     /**
      * @brief Formula tree

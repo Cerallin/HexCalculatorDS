@@ -11,14 +11,7 @@ using namespace HexCalc;
 
 EventResult
 InputView::HandleEvent(const Event &e) {
-    EventResult res = Skipped;
-    if (e.type == EventType::TouchScreenEvent) {
-        Point touchPoint(e.data);
-        // TODO handle touch event
-        debugf("TouchScreenEvent: x=%d, y=%d\n", touchPoint.x, touchPoint.y);
-        res = Consumed;
-    }
-    return res;
+    return Skipped;
 }
 
 void
@@ -180,9 +173,23 @@ TranscodeView<base>::handleBaseChanged(void) {
     BasicView<TranscodeView<base>, MainDisplay>::markDirty();
     debugf("TranscodeView(%d) base changed\n", static_cast<int>(base));
 
-    for (size_t i = 0; i < BarTileCount; i++) {
+    // Clear indicator Area
+    constexpr size_t indicatorAreaY = 8 * MainDisplay::TileHeight;
+    constexpr size_t indicatorAreaHeight = 15;
+    for (size_t j = 0; j < indicatorAreaHeight; j++) {
         this->display.template PutTile(
-            barOffsetX + viewArea.x, viewArea.y + i * TileHeight, BarTiles[i]);
+            barOffsetX, indicatorAreaY + (j * TileHeight), FontEmpty);
+    }
+
+    // Draw the indicator bar
+    Area6x8 area(viewArea);
+    auto middleH = (area.y + (area.h / 2)) * CharHeight;
+    if constexpr (base == Binary) {
+        middleH += CharHeight;
+    }
+    for (size_t i = 0; i < BarTileCount; i++) {
+        this->display.template PutTile(barOffsetX + viewArea.x,
+                                       middleH + i * TileHeight, BarTiles[i]);
     }
 
     return Consumed;

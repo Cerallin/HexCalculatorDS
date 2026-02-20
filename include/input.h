@@ -99,6 +99,66 @@ struct KeyInput {
     Active(void) const {
         return keys != 0;
     }
+
+    bool
+    PressedUp(void) const {
+        return keys & KEY_UP;
+    }
+
+    bool
+    PressedDown(void) const {
+        return keys & KEY_DOWN;
+    }
+
+    bool
+    PressedLeft(void) const {
+        return keys & KEY_LEFT;
+    }
+
+    bool
+    PressedRight(void) const {
+        return keys & KEY_RIGHT;
+    }
+
+    bool
+    PressedA(void) const {
+        return keys & KEY_A;
+    }
+
+    bool
+    PressedB(void) const {
+        return keys & KEY_B;
+    }
+
+    bool
+    PressedSelect(void) const {
+        return keys & KEY_SELECT;
+    }
+
+    bool
+    PressedX(void) const {
+        return keys & KEY_X;
+    }
+
+    bool
+    PressedY(void) const {
+        return keys & KEY_Y;
+    }
+
+    bool
+    PressedL(void) const {
+        return keys & KEY_L;
+    }
+
+    bool
+    PressedR(void) const {
+        return keys & KEY_R;
+    }
+
+    bool
+    PressedStart(void) const {
+        return keys & KEY_START;
+    }
 };
 
 struct TouchInput {

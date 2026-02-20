@@ -12,8 +12,11 @@
 using namespace HexCalc;
 
 ViewModel::ViewModel(void)
-    : eventBus(), formulaModel(eventBus), valueModel(eventBus),
-      previousKeys(0) {
+    : eventBus(),
+      // commands
+      commands(eventBus),
+      // models
+      formulaModel(eventBus), valueModel(eventBus) {
     eventBus.Subscribe(config);
     eventBus.Subscribe(formulaModel);
     eventBus.Subscribe(valueModel);
@@ -33,8 +36,30 @@ ViewModel::handleKeyInputs(void) {
         return false;
     }
 
-    eventBus.Post(Event{static_cast<EventDataType>(keyInput.keys),
-                        EventType::KeysPressedEvent});
+    if (keyInput.PressedUp()) {
+        commands.SwitchBaseUpper();
+    } else if (keyInput.PressedDown()) {
+        commands.SwitchBaseLower();
+    } else if (keyInput.PressedLeft()) {
+        // do nothing for now
+    } else if (keyInput.PressedRight()) {
+        // do nothing for now
+    } else if (keyInput.PressedA()) {
+        // TODO input previous selected button
+    } else if (keyInput.PressedB()) {
+        commands.InputOperatorBackspace();
+    } else if (keyInput.PressedX()) {
+        commands.InputOperatorClear();
+    } else if (keyInput.PressedY()) {
+        // TODO switch width
+    } else if (keyInput.PressedStart()) {
+        commands.InputOperatorEqual();
+    } else if (keyInput.PressedL()) {
+        // TODO
+    } else if (keyInput.PressedR()) {
+        // TODO
+    }
+
     previousKeys = keyInput.keys;
 
     return true;
@@ -46,10 +71,8 @@ ViewModel::handleTouchScreen(void) {
     if (!touchInput.Active()) {
         return false;
     }
-
-    eventBus.Post(Event{static_cast<EventDataType>(touchInput.point.ToInt()),
-                        EventType::TouchScreenEvent});
-    return true;
+    // TODO: handle touch input and post TouchScreenEvent
+    return false;
 }
 
 void

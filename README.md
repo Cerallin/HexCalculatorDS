@@ -28,6 +28,11 @@ An integer calculator for Nintendo DS.
 - [ ] switch sign: `signed`/`unsigned`
 - [ ] switch base: `hex`/`dec`/`oct`/`bin`
 
+### v1.1.0
+
+- [ ] Add background to configView (the `UINT32` on topleft)
+- [ ] Modify the font shadows
+
 ### v2.0.0
 
 - [ ] scroll the formula
