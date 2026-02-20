@@ -82,10 +82,9 @@ FormulaView::ForceUpdate(void) {
         Glyph(Font6x8Equal),    // =
     };
     constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
-    for (int16_t i = area.y; i < area.y + area.h; i++) {
-        display.PrintLine<CharWidth>(demoGlyphs, glyphCount,
-                                     area.w - glyphCount, i);
-    }
+    Point start(viewArea.x, viewArea.y);
+    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, area.w - glyphCount,
+                                 start);
 }
 
 EventResult
@@ -131,10 +130,9 @@ ValueView::ForceUpdate(void) {
         Glyph(Font8x8Zero),  // 0
     };
     constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
-    for (int16_t i = area.y; i < area.y + area.h; i++) {
-        display.PrintLine<CharWidth>(demoGlyphs, glyphCount,
-                                     area.w - glyphCount, i);
-    }
+    Point start(viewArea.x, viewArea.y);
+    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, area.w - glyphCount,
+                                 start);
 }
 
 template <NumberBase base>
@@ -146,28 +144,165 @@ TranscodeView<base>::handleValueChanged(void) {
     return Skipped;
 }
 
+template <NumberBase base>
+void
+HexCalc::TranscodeView<base>::printHeader(void) const {
+    auto &viewArea = this->viewArea;
+    Area6x8 area(viewArea);
+    auto middleH = (area.y + area.h / 2) * CharHeight;
+    Point start(viewArea.x, middleH);
+    this->display.template PrintLine<CharWidth>(header, headerLength,
+                                                headerSkip, start);
+}
+
+template <>
+void
+TranscodeView<Hexadecimal>::printNumber(void) const {
+    // CEAD BEAF 0D00 0721
+    Glyph demoGlyphs[] = {
+        Glyph(Font6x8C),     // C
+        Glyph(Font6x8E),     // E
+        Glyph(Font6x8A),     // A
+        Glyph(Font6x8D),     // D
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8B),     // B
+        Glyph(Font6x8E),     // E
+        Glyph(Font6x8A),     // A
+        Glyph(Font6x8F),     // F
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Zero),  // 0
+        Glyph(Font6x8D),     // D
+        Glyph(Font6x8Zero),  // 0
+        Glyph(Font6x8Zero),  // 0
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Zero),  // 0
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8Two),   // 2
+        Glyph(Font6x8One),   // 1
+    };
+    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    Point start(viewArea.x +
+                    (headerSkip + headerLength + numberGap) * CharWidth,
+                viewArea.y);
+    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
+}
+
+template <>
+void
+TranscodeView<Decimal>::printNumber(void) const {
+
+    // -3,553,974,871,878,793,439
+    Glyph demoGlyphs[] = {
+        Glyph(Font6x8Minus), // -
+        Glyph(Font6x8Three), // 3
+        Glyph(Font6x8Comma), // ,
+        Glyph(Font6x8Five),  // 5
+        Glyph(Font6x8Five),  // 5
+        Glyph(Font6x8Three), // 3
+        Glyph(Font6x8Comma), // ,
+        Glyph(Font6x8Nine),  // 9
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8Four),  // 4
+        Glyph(Font6x8Comma), // ,
+        Glyph(Font6x8Eight), // 8
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8One),   // 1
+        Glyph(Font6x8Comma), // ,
+        Glyph(Font6x8Eight), // 8
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8Eight), // 8
+        Glyph(Font6x8Comma), // ,
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8Nine),  // 9
+        Glyph(Font6x8Three), // 3
+        Glyph(Font6x8Comma), // ,
+        Glyph(Font6x8Four),  // 4
+        Glyph(Font6x8Three), // 3
+        Glyph(Font6x8Nine),  // 9
+    };
+    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    Point start(viewArea.x +
+                    (headerSkip + headerLength + numberGap) * CharWidth,
+                viewArea.y);
+    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
+}
+
+template <>
+void
+TranscodeView<Octal>::printNumber(void) const {
+    // 1 472 555 752 741 500 003 441
+    Glyph demoGlyphs[] = {
+        Glyph(Font6x8One),   // 1
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Four),  // 4
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8Two),   // 2
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Five),  // 5
+        Glyph(Font6x8Five),  // 5
+        Glyph(Font6x8Five),  // 5
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8Five),  // 5
+        Glyph(Font6x8Two),   // 2
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Seven), // 7
+        Glyph(Font6x8Four),  // 4
+        Glyph(Font6x8One),   // 1
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Five),  // 5
+        Glyph(Font6x8Zero),  // 0
+        Glyph(Font6x8Zero),  // 0
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Zero),  // 0
+        Glyph(Font6x8Zero),  // 0
+        Glyph(Font6x8Three), // 3
+        Glyph(FontEmpty),    //
+        Glyph(Font6x8Four),  // 4
+        Glyph(Font6x8Four),  // 4
+        Glyph(Font6x8One),   // 1
+    };
+    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    Point start(viewArea.x +
+                    (headerSkip + headerLength + numberGap) * CharWidth,
+                viewArea.y);
+    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
+}
+
+template <>
+void
+TranscodeView<Binary>::printNumber(void) const {}
+
 template <>
 void
 TranscodeView<Hexadecimal>::ForceUpdate(void) {
     debugf("HexView refreshed\n");
+    printHeader();
+    printNumber();
 }
 
 template <>
 void
 TranscodeView<Decimal>::ForceUpdate(void) {
     debugf("DecView refreshed\n");
+    printHeader();
+    printNumber();
 }
 
 template <>
 void
 TranscodeView<Octal>::ForceUpdate(void) {
     debugf("OctView refreshed\n");
+    printHeader();
+    printNumber();
 }
 
 template <>
 void
 TranscodeView<Binary>::ForceUpdate(void) {
     debugf("BinView refreshed\n");
+    printHeader();
+    printNumber();
 }
 
 template class TranscodeView<Hexadecimal>;

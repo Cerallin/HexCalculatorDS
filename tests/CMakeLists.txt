@@ -47,3 +47,24 @@ target_link_libraries(test_formula_tree PRIVATE
 )
 
 add_test(NAME test_formula_tree COMMAND test_formula_tree)
+
+# ===========================================
+# test number transcoding
+# ===========================================
+
+add_executable(test_number_transcoding
+    test_number_transcoding.cc
+)
+
+target_include_directories(test_number_transcoding PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../source
+)
+
+target_link_libraries(test_number_transcoding PRIVATE
+    CppUTest
+    CppUTestExt
+)
+
+add_test(NAME test_number_transcoding COMMAND test_number_transcoding)

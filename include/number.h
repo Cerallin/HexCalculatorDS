@@ -49,46 +49,103 @@ enum Digit : int8_t {
     DigitF = 15,
 };
 
-template <int N>
+template <size_t N>
 struct DigitArray {
-    Digit digits[N];
-    constexpr DigitArray() : digits{} {
-        for (int i = 0; i < N; ++i) {
-            digits[i] = DigitEOS;
-        }
+    constexpr DigitArray(void) : digits{}, size(0), isNegative(false) {}
+
+    auto &
+    operator[](size_t index) {
+        return digits[index];
     }
+
+    const auto &
+    operator[](size_t index) const {
+        return digits[index];
+    }
+
+    Digit digits[N];
+    size_t size;
+    bool isNegative;
 };
 
 using NumberDataType = uint64_t;
 static constexpr NumberDataType NumberZero = NumberDataType(0);
 
 /**
- * @brief A number with a specified base and width.
+ * @brief A number with a specified width and sign.
  *
- * @tparam base The base of the number (2, 8, 10, or 16).
  * @tparam width The width of the number in bits (8, 16, 32, or 64).
+ * @tparam sign The sign of the number (signed or unsigned).
  */
-template <NumberBase base>
+template <NumberWidth width, NumberSign sign>
 class Number {
   public:
     constexpr Number(void) : Number(0) {}
     constexpr explicit Number(uint64_t v) : value(v) {
-        static_assert(base == Binary || base == Octal || base == Decimal ||
-                          base == Hexadecimal,
-                      "Invalid base");
+        static_assert(width == Byte || width == Word || width == DWord ||
+                          width == QWord,
+                      "Invalid width");
+        static_assert(sign == Signed || sign == Unsigned, "Invalid sign");
     }
-
-    template <NumberBase otherBase>
-    constexpr Number(const Number<otherBase> &other) noexcept
-        : value(other.Raw()) {}
 
     constexpr uint64_t
     Raw() const noexcept {
         return value;
     }
 
+    /**
+     * @brief Get max digits for the number based on its width and sign.
+     *
+     * @tparam base
+     * @return constexpr size_t
+     */
+    template <NumberBase base>
+    static constexpr size_t
+    MaxDigits(void) {
+        static_assert(base == Binary || base == Octal || base == Decimal ||
+                          base == Hexadecimal,
+                      "Invalid base");
+        // consider 64 for binary and 22 for other bases
+        return (base == Binary) ? 64 : 22;
+    }
+
+    template <NumberBase base>
+    auto
+    Transcode() const {
+        size_t count = 0;
+        constexpr auto maxDigits = MaxDigits<base>();
+        DigitArray<maxDigits> digits;
+        if constexpr (sign == Signed) {
+            int64_t v = static_cast<int64_t>(value);
+            digits.isNegative = (v < 0);
+            if (v < 0) {
+                v = -v;
+            }
+            for (size_t i = 0; i < maxDigits; ++i) {
+                if (v == 0) {
+                    break;
+                }
+                digits[i] = static_cast<Digit>(v % base);
+                v /= base;
+                count++;
+            }
+            digits.size = count;
+        } else {
+            uint64_t v = value;
+            for (size_t i = 0; i < maxDigits; ++i) {
+                if (v == 0) {
+                    break;
+                }
+                digits[i] = static_cast<Digit>(v % base);
+                v /= base;
+                count++;
+            }
+            digits.size = count;
+        }
+        return digits;
+    }
+
   private:
     NumberDataType value{};
 };
-
 }; // namespace HexCalc
