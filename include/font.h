@@ -110,8 +110,8 @@ enum FontChar : FontType {
  * @brief The sign of selected transcode number base.
  *
  */
-constexpr int BarTileCount = 3;
-constexpr int BarTiles[BarTileCount] = {86, 87, 88};
+constexpr size_t BarTileCount = 3;
+constexpr FontType BarTiles[BarTileCount] = {83, 84, 85};
 
 /**
  * @brief Glyph may have 1 or 2 tiles.

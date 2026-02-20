@@ -25,7 +25,24 @@ class MainDisplay : public Display {
   public:
     MainDisplay(void);
 
+    /**
+     * @brief Print a glyph at the given position.
+     *
+     * @param x The x-coordinate of the position
+     * @param y The y-coordinate of the position
+     * @param glyph The glyph to print
+     */
     void PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const;
+
+    /**
+     * @brief Print a tile at the given position.
+     *
+     * @param x The x-coordinate of the position
+     * @param y The y-coordinate of the position
+     * @param tile The tile to print
+     */
+    void PutTile(int16_t x, int16_t y, FontType tile, bool hFlip = false,
+                 bool vFlip = false) const;
 
     /**
      * @brief Print a line of glyphs.
@@ -35,7 +52,7 @@ class MainDisplay : public Display {
      * @param glyphArray Array of glyphs to print
      * @param length Length of the glyph array
      * @param skip Number of glyphs to skip at the beginning of the line
-     * @param line Column to print the line on
+     * @param start The starting point to print the line
      */
     template <int CharWidth = 6>
     void
@@ -48,6 +65,21 @@ class MainDisplay : public Display {
         for (size_t i = 0; i < length; i++) {
             auto x = start.x + (skip + i) * CharWidth;
             this->PrintGlyph(x, y, glyphArray[i]);
+        }
+    }
+
+    template <typename Iterable, int CharWidth = 6>
+    void
+    PrintLine(const Iterable &glyphRange, int skip, Point &start) const {
+        auto x = start.x;
+        auto y = start.y;
+        size_t index = 0;
+        debugf("PrintLine(range): start=(%d, %d), skip=%d, length=%zu\n", x, y,
+               skip, index);
+        for (const auto &glyph : glyphRange) {
+            auto glyphX = start.x + (skip + index) * CharWidth;
+            this->PrintGlyph(glyphX, y, glyph);
+            index++;
         }
     }
 

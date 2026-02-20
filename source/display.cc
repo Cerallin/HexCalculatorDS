@@ -57,6 +57,16 @@ MainDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
     layer.PutGlyph(x / TileWidth, y / TileHeight, glyph);
 }
 
+void
+MainDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
+                     bool vFlip) const {
+    assert(x % OffsetPerBG == 0);
+    assert(y % TileHeight == 0);
+    auto _idx = (x / OffsetPerBG) % BGNum;
+    auto &layer = layers[_idx];
+    layer.Put(x / TileWidth, y / TileHeight, tile, hFlip, vFlip);
+}
+
 SubDisplay::SubDisplay(void) {
     // button style & animation will be handled by modifing palette
     videoSetModeSub(VideoMode);

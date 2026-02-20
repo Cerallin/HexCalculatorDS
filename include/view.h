@@ -189,15 +189,18 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
               Area(0, line * TileHeight, lineWidth * TileWidth,
                    height * TileHeight),
               display),
-          model(model) {}
+          model(model), selected(false) {}
 
     EventResult
     HandleEvent(const Event &e) {
-        if (e.type != EventType::ValueChangedEvent) {
-            return Skipped;
+        if ((e.type == EventType::UpdateBaseEvent) ||
+            (e.type == EventType::ClearEvent)) {
+            return handleBaseChanged();
+        } else if (e.type == EventType::ValueChangedEvent) {
+            return handleValueChanged();
         }
 
-        return handleValueChanged();
+        return Skipped;
     }
 
     void ForceUpdate(void);
@@ -244,8 +247,6 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     static constexpr int numberGap = 2;
 
   private:
-    const ValueModel &model;
-
     template <NumberBase>
     struct HeaderTraits {
         static constexpr FontType font0 = FontEmpty;
@@ -259,6 +260,19 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
         Glyph(HeaderTraits<base>::font2),
     };
     static constexpr int headerLength = sizeof(header) / sizeof(Glyph);
+
+    static constexpr int barOffsetX = 2;
+
+    const ValueModel &model;
+    bool selected;
+
+    /**
+     * @brief Handle UpdateBase Event.
+     *
+     * @return EventResult Consumed if the event is handled and the view needs
+     * to be updated, Skipped if the event is not relevant to this view.
+     */
+    EventResult handleBaseChanged(void);
 
     /**
      * @brief Handle ValueChanged Event.

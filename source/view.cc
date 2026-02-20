@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "view.h"
+#include "config.h"
 
 using namespace HexCalc;
 
@@ -166,6 +167,25 @@ ValueView::ForceUpdate(void) {
     Point start(viewArea.x, viewArea.y);
     display.PrintLine<CharWidth>(demoGlyphs, glyphCount, area.w - glyphCount,
                                  start);
+}
+
+template <NumberBase base>
+EventResult
+TranscodeView<base>::handleBaseChanged(void) {
+    if (base != config.Base()) {
+        return Skipped;
+    }
+
+    auto &viewArea = this->viewArea;
+    BasicView<TranscodeView<base>, MainDisplay>::markDirty();
+    debugf("TranscodeView(%d) base changed\n", static_cast<int>(base));
+
+    for (size_t i = 0; i < BarTileCount; i++) {
+        this->display.template PutTile(
+            barOffsetX + viewArea.x, viewArea.y + i * TileHeight, BarTiles[i]);
+    }
+
+    return Consumed;
 }
 
 template <NumberBase base>
