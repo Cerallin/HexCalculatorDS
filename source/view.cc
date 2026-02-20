@@ -371,6 +371,7 @@ template <>
 void
 TranscodeView<Hexadecimal>::ForceUpdate(void) {
     debugf("HexView refreshed\n");
+    handleBaseChanged();
     printHeader();
     printNumber();
 }
@@ -379,6 +380,7 @@ template <>
 void
 TranscodeView<Decimal>::ForceUpdate(void) {
     debugf("DecView refreshed\n");
+    handleBaseChanged();
     printHeader();
     printNumber();
 }
@@ -387,6 +389,7 @@ template <>
 void
 TranscodeView<Octal>::ForceUpdate(void) {
     debugf("OctView refreshed\n");
+    handleBaseChanged();
     printHeader();
     printNumber();
 }
@@ -395,6 +398,7 @@ template <>
 void
 TranscodeView<Binary>::ForceUpdate(void) {
     debugf("BinView refreshed\n");
+    handleBaseChanged();
     printHeader();
     printNumber();
 }
