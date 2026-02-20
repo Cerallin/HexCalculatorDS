@@ -68,50 +68,50 @@ void
 FormulaView::ForceUpdate(void) {
     debugf("FormulaView refreshed\n");
     Area6x8 area(viewArea);
-    Glyph demoGlyphs[] = {
-        Glyph(Font6x8LBrac),    // (
-        Glyph(Font6x8One),      // 1
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8Multiply), // x
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8Two),      // 2
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8Divide),   // /
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8C),        // C
-        Glyph(Font6x8E),        // E
-        Glyph(Font6x8RBrac),    // )
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8And),      // &
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8A),        // A
-        Glyph(Font6x8F),        // F
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8RShift),   // >>
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8C),        // C
-        Glyph(Font6x8C),        // C
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8LShift),   // <<
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8Two),      // 2
-        Glyph(Font6x8Five),     // 5
-        Glyph(Font6x8Six),      // 6
-        Glyph(Font6x8Zero),     // 0
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8Or),       // |
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8Zero),     // 0
-        Glyph(Font6x8Seven),    // 7
-        Glyph(Font6x8Two),      // 2
-        Glyph(Font6x8One),      // 1
-        Glyph(FontEmpty),       //
-        Glyph(Font6x8Equal),    // =
-    };
-    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    GlyphArray<40> demoGlyphs;
+    demoGlyphs.Insert(Glyph(Font6x8LBrac));    // (
+    demoGlyphs.Insert(Glyph(Font6x8One));      // 1
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8Multiply)); // x
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8Two));      // 2
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8Divide));   // /
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8C));        // C
+    demoGlyphs.Insert(Glyph(Font6x8E));        // E
+    demoGlyphs.Insert(Glyph(Font6x8RBrac));    // )
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8And));      // &
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8A));        // A
+    demoGlyphs.Insert(Glyph(Font6x8F));        // F
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8RShift));   // >>
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8C));        // C
+    demoGlyphs.Insert(Glyph(Font6x8C));        // C
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8LShift));   // <<
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8Two));      // 2
+    demoGlyphs.Insert(Glyph(Font6x8Five));     // 5
+    demoGlyphs.Insert(Glyph(Font6x8Six));      // 6
+    demoGlyphs.Insert(Glyph(Font6x8Zero));     // 0
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8Or));       // |
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8Zero));     // 0
+    demoGlyphs.Insert(Glyph(Font6x8Seven));    // 7
+    demoGlyphs.Insert(Glyph(Font6x8Two));      // 2
+    demoGlyphs.Insert(Glyph(Font6x8One));      // 1
+    demoGlyphs.Insert(Glyph(FontEmpty));       //
+    demoGlyphs.Insert(Glyph(Font6x8Equal));    // =
+
+    GlyphArray6x8 glyphs(demoGlyphs);
+
     Point start(viewArea.x, viewArea.y);
-    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, area.w - glyphCount,
-                                 start);
+    display.PrintLine(glyphs, area.w - 38, start, glyphs.CharWidth);
 }
 
 EventResult
@@ -122,44 +122,45 @@ ValueView::HandleEvent(const Event &e) {
 
     BasicView::markDirty();
     auto value = vm.GetNumber();
-    debugf("ValueView updated: %08llx\n",
-           static_cast<unsigned long long>(value));
+    if (config.Base() == Hexadecimal) {
+        debugf("ValueView updated: %016llx\n",
+               static_cast<unsigned long long>(value));
+    } else if (config.Base() == Decimal) {
+        debugf("ValueView updated: %lld\n", static_cast<long long>(value));
+    } else if (config.Base() == Octal) {
+        debugf("ValueView updated: %llo\n",
+               static_cast<unsigned long long>(value));
+    } else if (config.Base() == Binary) {
+        debugf("ValueView updated: %064llb\n",
+               static_cast<unsigned long long>(value));
+    } else {
+        debugf("ValueView updated: %llu\n",
+               static_cast<unsigned long long>(value));
+    }
+
     return Consumed;
 }
 
 void
 ValueView::ForceUpdate(void) {
     debugf("ValueView refreshed\n");
-    debugf("viewArea: x=%d, y=%d, w=%d, h=%d\n", viewArea.x, viewArea.y,
-           viewArea.w, viewArea.h);
 
     Area8x8 area(viewArea);
 
-    debugf("area: x=%d, y=%d, w=%d, h=%d\n", area.x, area.y, area.w, area.h);
-    // TODO render value to glyphs
-    Glyph demoGlyphs[] = {
-        Glyph(Font8x8A),     // A
-        Glyph(Font8x8B),     // B
-        Glyph(Font8x8C),     // C
-        Glyph(Font8x8D),     // D
-        Glyph(Font8x8E),     // E
-        Glyph(Font8x8F),     // F
-        Glyph(Font8x8One),   // 1
-        Glyph(Font8x8Two),   // 2
-        Glyph(Font8x8Three), // 3
-        Glyph(Font8x8Comma), // ,
-        Glyph(Font8x8Four),  // 4
-        Glyph(Font8x8Five),  // 5
-        Glyph(Font8x8Six),   // 6
-        Glyph(Font8x8Seven), // 7
-        Glyph(Font8x8Eight), // 8
-        Glyph(Font8x8Nine),  // 9
-        Glyph(Font8x8Zero),  // 0
-    };
-    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    Number number(vm.GetNumber(), config.Sign());
+
+    auto digits = number.Transcode<Decimal, Number::MaxDisplayDigits>();
+
     Point start(viewArea.x, viewArea.y);
-    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, area.w - glyphCount,
-                                 start);
+
+    if (MainView::viewAlign == AlignLeft) {
+        GlyphArray8x8 glyphs(digits, true);
+        display.PrintLine(glyphs, 0, start, glyphs.CharWidth);
+    } else { // align right
+        GlyphArray8x8 glyphs(digits);
+        int skip = area.w - digits.size;
+        display.PrintLine(glyphs, skip, start, glyphs.CharWidth);
+    }
 }
 
 template <NumberBase base>
@@ -218,152 +219,57 @@ HexCalc::TranscodeView<base>::printHeader(void) const {
                                                 headerSkip, start);
 }
 
-template <>
+template <NumberBase base>
 void
-TranscodeView<Hexadecimal>::printNumber(void) const {
-    // CEAD BEAF 0D00 0721
-    Glyph demoGlyphs[] = {
-        Glyph(Font6x8C),     // C
-        Glyph(Font6x8E),     // E
-        Glyph(Font6x8A),     // A
-        Glyph(Font6x8D),     // D
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8B),     // B
-        Glyph(Font6x8E),     // E
-        Glyph(Font6x8A),     // A
-        Glyph(Font6x8F),     // F
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Zero),  // 0
-        Glyph(Font6x8D),     // D
-        Glyph(Font6x8Zero),  // 0
-        Glyph(Font6x8Zero),  // 0
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Zero),  // 0
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8Two),   // 2
-        Glyph(Font6x8One),   // 1
-    };
-    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
-    Point start(viewArea.x +
-                    (headerSkip + headerLength + numberGap) * CharWidth,
-                viewArea.y);
-    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
-}
+TranscodeView<base>::printNumber(void) const {
+    Number number(vm.GetNumber(), config.Sign());
+    auto digits = number.Transcode<base, Number::MaxDisplayDigits>();
+    using GlyphArrayType = std::conditional_t<
+        (base == Hexadecimal), HexGlyphArray6x8,
+        std::conditional_t<(base == Decimal), DecGlyphArray6x8,
+                           std::conditional_t<(base == Octal), OctGlyphArray6x8,
+                                              HexGlyphArray6x8>>>;
+    GlyphArray6x8 glyphArray(digits, false);
+    GlyphArrayType glyphs(glyphArray);
 
-template <>
-void
-TranscodeView<Decimal>::printNumber(void) const {
-
-    // -3,553,974,871,878,793,439
-    Glyph demoGlyphs[] = {
-        Glyph(Font6x8Minus), // -
-        Glyph(Font6x8Three), // 3
-        Glyph(Font6x8Comma), // ,
-        Glyph(Font6x8Five),  // 5
-        Glyph(Font6x8Five),  // 5
-        Glyph(Font6x8Three), // 3
-        Glyph(Font6x8Comma), // ,
-        Glyph(Font6x8Nine),  // 9
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8Four),  // 4
-        Glyph(Font6x8Comma), // ,
-        Glyph(Font6x8Eight), // 8
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8One),   // 1
-        Glyph(Font6x8Comma), // ,
-        Glyph(Font6x8Eight), // 8
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8Eight), // 8
-        Glyph(Font6x8Comma), // ,
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8Nine),  // 9
-        Glyph(Font6x8Three), // 3
-        Glyph(Font6x8Comma), // ,
-        Glyph(Font6x8Four),  // 4
-        Glyph(Font6x8Three), // 3
-        Glyph(Font6x8Nine),  // 9
-    };
-    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
-    Point start(viewArea.x +
+    Point start(this->viewArea.x +
                     (headerSkip + headerLength + numberGap) * CharWidth,
-                viewArea.y);
-    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
-}
-
-template <>
-void
-TranscodeView<Octal>::printNumber(void) const {
-    // 1 472 555 752 741 500 003 441
-    Glyph demoGlyphs[] = {
-        Glyph(Font6x8One),   // 1
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Four),  // 4
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8Two),   // 2
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Five),  // 5
-        Glyph(Font6x8Five),  // 5
-        Glyph(Font6x8Five),  // 5
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8Five),  // 5
-        Glyph(Font6x8Two),   // 2
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Seven), // 7
-        Glyph(Font6x8Four),  // 4
-        Glyph(Font6x8One),   // 1
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Five),  // 5
-        Glyph(Font6x8Zero),  // 0
-        Glyph(Font6x8Zero),  // 0
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Zero),  // 0
-        Glyph(Font6x8Zero),  // 0
-        Glyph(Font6x8Three), // 3
-        Glyph(FontEmpty),    //
-        Glyph(Font6x8Four),  // 4
-        Glyph(Font6x8Four),  // 4
-        Glyph(Font6x8One),   // 1
-    };
-    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
-    Point start(viewArea.x +
-                    (headerSkip + headerLength + numberGap) * CharWidth,
-                viewArea.y);
-    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
+                this->viewArea.y);
+    this->display.PrintLine(glyphs, 0, start, glyphs.CharWidth);
 }
 
 template <>
 void
 TranscodeView<Binary>::printNumber(void) const {
     // 1001 1010 1000 0010
-    Glyph demoGlyphs[] = {
-        Glyph(Font6x8One),  // 1
-        Glyph(Font6x8Zero), // 0
-        Glyph(Font6x8Zero), // 0
-        Glyph(Font6x8One),  // 1
-        Glyph(FontEmpty),   //
-        Glyph(Font6x8One),  // 1
-        Glyph(Font6x8Zero), // 0
-        Glyph(Font6x8One),  // 1
-        Glyph(Font6x8Zero), // 0
-        Glyph(FontEmpty),   //
-        Glyph(Font6x8One),  // 1
-        Glyph(Font6x8Zero), // 0
-        Glyph(Font6x8Zero), // 0
-        Glyph(Font6x8Zero), // 0
-        Glyph(FontEmpty),   //
-        Glyph(Font6x8Zero), // 0
-        Glyph(Font6x8Zero), // 0
-        Glyph(Font6x8One),  // 1
-        Glyph(Font6x8Zero), // 0
-    };
+    GlyphArray<20> demoGlyphs;
+    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
+    demoGlyphs.Insert(Glyph(FontEmpty));   //
+    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(FontEmpty));   //
+    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(FontEmpty));   //
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
+    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
 
-    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    GlyphArray6x8 glyphs(demoGlyphs);
+
     for (int i = 0; i < 4; i++) {
         Point start(viewArea.x +
                         (headerSkip + headerLength + numberGap) * CharWidth,
                     viewArea.y + i * 2 * CharHeight);
-        display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
+        display.PrintLine(glyphs, 0, start, glyphs.CharWidth);
     }
 }
 

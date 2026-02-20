@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.h"
+#include "structure.h"
 
 namespace HexCalc {
 
@@ -83,15 +84,11 @@ class Number {
     constexpr explicit Number(uint64_t v, NumberSign sign = Unsigned)
         : value(v), sign(sign) {}
 
-    constexpr uint64_t
-    Raw() const noexcept {
-        return value;
-    }
-
     static constexpr size_t MaxBinDigits = 64;
     static constexpr size_t MaxOctDigits = 22;
     static constexpr size_t MaxDecDigits = 22;
     static constexpr size_t MaxHexDigits = 22;
+    static constexpr size_t MaxDisplayDigits = 22;
 
     /**
      * @brief Get max digits for the number based on its width and sign.
@@ -112,26 +109,25 @@ class Number {
                               std::max(MaxDecDigits, MaxHexDigits));
     }
 
-    template <NumberBase base>
+    template <NumberBase base, size_t N = MaxDigits<base>()>
     auto
     Transcode() const {
         if (value == 0) {
-            DigitArray<MaxDigits<base>()> digits;
+            DigitArray<N> digits;
             digits[0] = Digit0;
             digits.size = 1;
             return digits;
         }
 
         size_t count = 0;
-        constexpr auto maxDigits = MaxDigits<base>();
-        DigitArray<maxDigits> digits;
+        DigitArray<N> digits;
         if (sign == Signed) { // signed
-            int64_t v = static_cast<int64_t>(value);
+            int64_t v = static_cast<size_t>(value);
             digits.isNegative = (v < 0);
             if (v < 0) {
                 v = -v;
             }
-            for (size_t i = 0; i < maxDigits; ++i) {
+            for (size_t i = 0; i < N; ++i) {
                 if (v == 0) {
                     break;
                 }
@@ -142,7 +138,7 @@ class Number {
             digits.size = count;
         } else { // unsigned
             uint64_t v = value;
-            for (size_t i = 0; i < maxDigits; ++i) {
+            for (size_t i = 0; i < N; ++i) {
                 if (v == 0) {
                     break;
                 }

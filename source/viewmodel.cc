@@ -22,16 +22,16 @@ ViewModel::ViewModel(void)
     eventBus.Subscribe(valueModel);
 
     // FIXME just for testing, should be removed later
-    commands.InputNumberC();
-    commands.InputNumberE();
-    commands.InputNumberA();
-    commands.InputNumberD();
-    commands.InputNumberB();
-    commands.InputNumberE();
-    commands.InputNumberA();
-    commands.InputNumberF();
+    commands.InputNumber1();
+    commands.InputNumber2();
+    commands.InputNumber3();
+    commands.InputNumber4();
+    commands.InputNumber5();
+    commands.InputNumber6();
+    commands.InputNumber7();
+    commands.InputNumber8();
+    commands.InputNumber9();
     commands.InputNumber0();
-    commands.InputNumberD();
     commands.InputNumber0();
     commands.InputNumber0();
     commands.InputNumber0();

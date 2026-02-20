@@ -9,6 +9,8 @@
 #include "number.h"
 #include "operator.h"
 
+#include <iterator>
+
 namespace HexCalc {
 
 using FontType = uint8_t;
@@ -180,32 +182,6 @@ class Glyph {
     bool downHFlip;
     bool downVFlip;
     bool underBaseline;
-};
-
-template <size_t N>
-class GlyphArray {
-  public:
-    constexpr GlyphArray(void) : glyphs{}, size(0) {}
-
-    const Glyph *
-    Raw(void) const {
-        return glyphs;
-    }
-
-    bool
-    Insert(const Glyph &glyph) {
-        if (size >= N) {
-            return false;
-        }
-
-        glyphs[size++] = glyph;
-
-        return true;
-    }
-
-  private:
-    Glyph glyphs[N];
-    size_t size;
 };
 
 constexpr Glyph InvalidGlyph = Glyph();

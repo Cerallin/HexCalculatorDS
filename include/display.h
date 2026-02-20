@@ -13,9 +13,7 @@
 
 namespace HexCalc {
 
-class Display : private NonCopyable {
-  public:
-};
+class Display : private NonCopyable {};
 
 /**
  * @brief The main view of the calculator, which is displayed on the top screen.
@@ -68,9 +66,10 @@ class MainDisplay : public Display {
         }
     }
 
-    template <typename Iterable, int CharWidth = 6>
+    template <typename Iterable>
     void
-    PrintLine(const Iterable &glyphRange, int skip, Point &start) const {
+    PrintLine(const Iterable &glyphRange, int skip, Point &start,
+              int CharWidth) const {
         auto x = start.x;
         auto y = start.y;
         size_t index = 0;
