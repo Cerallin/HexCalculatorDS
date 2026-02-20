@@ -35,11 +35,10 @@ class ViewModel : private NonCopyable {
     void HandleInputs(void);
     EventBus &Bus(void);
 
-    FormulaModel &Formula(void);
-    const FormulaModel &Formula(void) const;
-
-    ValueModel &Value(void);
-    const ValueModel &Value(void) const;
+    auto
+    GetNumber(void) const {
+        return valueModel.Value();
+    }
 
   private:
     EventBus eventBus;

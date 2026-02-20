@@ -10,12 +10,10 @@ using namespace HexCalc;
 
 ViewHost::ViewHost(ViewModel &viewModel)
     : mainDisplay(), subDisplay(), configView(mainDisplay),
-      formulaView(mainDisplay, viewModel.Formula()),
-      valueView(mainDisplay, viewModel.Value()),
-      hexView(mainDisplay, viewModel.Value()),
-      decView(mainDisplay, viewModel.Value()),
-      octView(mainDisplay, viewModel.Value()),
-      binView(mainDisplay, viewModel.Value()), inputView(subDisplay) {
+      formulaView(mainDisplay, viewModel), valueView(mainDisplay, viewModel),
+      hexView(mainDisplay, viewModel), decView(mainDisplay, viewModel),
+      octView(mainDisplay, viewModel), binView(mainDisplay, viewModel),
+      inputView(subDisplay) {
     RegisterViews(viewModel);
 }
 

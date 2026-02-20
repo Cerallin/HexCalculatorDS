@@ -121,7 +121,7 @@ ValueView::HandleEvent(const Event &e) {
     }
 
     BasicView::markDirty();
-    auto value = model.Value();
+    auto value = vm.GetNumber();
     debugf("ValueView updated: %08llx\n",
            static_cast<unsigned long long>(value));
     return Consumed;

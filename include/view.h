@@ -13,6 +13,7 @@
 #include "input.h"
 #include "model.h"
 #include "number.h"
+#include "viewmodel.h"
 
 namespace HexCalc {
 
@@ -66,6 +67,8 @@ class MainView : public BasicView<Class, MainDisplay> {
     MainView(Area area, MainDisplay &display)
         : BasicView<Class, MainDisplay>(display), viewArea(area) {}
 
+    static constexpr auto viewAlign = Align;
+
   protected:
     Area viewArea;
 };
@@ -108,11 +111,11 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
-    FormulaView(MainDisplay &display, const FormulaModel &model)
+    FormulaView(MainDisplay &display, const ViewModel &vm)
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
-          model(model) {}
+          vm(vm) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -137,7 +140,7 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr size_t CharHeight = 8;
 
   private:
-    const FormulaModel &model;
+    const ViewModel &vm;
 };
 
 class ValueView : public MainView<ValueView, AlignRight> {
@@ -145,11 +148,11 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
-    ValueView(MainDisplay &display, const ValueModel &model)
+    ValueView(MainDisplay &display, const ViewModel &vm)
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
-          model(model) {}
+          vm(vm) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -174,7 +177,7 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr size_t CharHeight = 8;
 
   private:
-    const ValueModel &model;
+    const ViewModel &vm;
 };
 
 template <NumberBase base>
@@ -183,13 +186,13 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
-    TranscodeView(MainDisplay &display, const ValueModel &model)
+    TranscodeView(MainDisplay &display, const ViewModel &vm)
         : MainView<TranscodeView<base>, AlignLeft>(
               //
               Area(0, line * TileHeight, lineWidth * TileWidth,
                    height * TileHeight),
               display),
-          model(model), selected(false) {}
+          vm(vm), selected(false) {}
 
     EventResult
     HandleEvent(const Event &e) {
@@ -263,7 +266,7 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
 
     static constexpr int barOffsetX = 2;
 
-    const ValueModel &model;
+    const ViewModel &vm;
     bool selected;
 
     /**

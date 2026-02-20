@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "model.h"
+#include "config.h"
 
 using namespace HexCalc;
 
@@ -53,14 +54,14 @@ ValueModel::HandleEvent(const Event &e) {
         if (eventData.isOp) {
             // do nothing
         } else {
-            value = value * 16 + eventData.data.digit;
+            value = value * config.Base() + eventData.data.digit;
             changed = true;
         }
     } else if (e.type == ClearEvent) {
         value = NumberZero;
         changed = true;
     } else if (e.type == EvaluateEvent) {
-        // do nothing
+        // TODO evaluate the formula and update the value
     }
 
     if (changed) {

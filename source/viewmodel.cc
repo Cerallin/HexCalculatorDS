@@ -21,7 +21,23 @@ ViewModel::ViewModel(void)
     eventBus.Subscribe(formulaModel);
     eventBus.Subscribe(valueModel);
 
-    eventBus.Post(Event{0, EventType::ClearEvent});
+    // FIXME just for testing, should be removed later
+    commands.InputNumberC();
+    commands.InputNumberE();
+    commands.InputNumberA();
+    commands.InputNumberD();
+    commands.InputNumberB();
+    commands.InputNumberE();
+    commands.InputNumberA();
+    commands.InputNumberF();
+    commands.InputNumber0();
+    commands.InputNumberD();
+    commands.InputNumber0();
+    commands.InputNumber0();
+    commands.InputNumber0();
+    commands.InputNumber7();
+    commands.InputNumber2();
+    commands.InputNumber1();
 }
 
 void
@@ -87,24 +103,4 @@ ViewModel::HandleInputs(void) {
 EventBus &
 ViewModel::Bus(void) {
     return eventBus;
-}
-
-FormulaModel &
-ViewModel::Formula(void) {
-    return formulaModel;
-}
-
-const FormulaModel &
-ViewModel::Formula(void) const {
-    return formulaModel;
-}
-
-ValueModel &
-ViewModel::Value(void) {
-    return valueModel;
-}
-
-const ValueModel &
-ViewModel::Value(void) const {
-    return valueModel;
 }
