@@ -35,7 +35,6 @@ class Layer {
     void
     Put(uint8_t x, uint8_t y, uint16_t tile, bool hFlip = false,
         bool vFlip = false) const {
-        debugf("Put tile %d at (%d, %d) on bg %d\n", tile, x, y, bg);
         mapPtr[(y * Width) + x] =
             tile | (hFlip ? BIT(10) : 0) | (vFlip ? BIT(11) : 0);
     }
