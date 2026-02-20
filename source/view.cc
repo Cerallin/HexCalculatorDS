@@ -150,6 +150,9 @@ HexCalc::TranscodeView<base>::printHeader(void) const {
     auto &viewArea = this->viewArea;
     Area6x8 area(viewArea);
     auto middleH = (area.y + area.h / 2) * CharHeight;
+    if constexpr (base == Binary) {
+        middleH += CharHeight;
+    }
     Point start(viewArea.x, middleH);
     this->display.template PrintLine<CharWidth>(header, headerLength,
                                                 headerSkip, start);
@@ -271,7 +274,38 @@ TranscodeView<Octal>::printNumber(void) const {
 
 template <>
 void
-TranscodeView<Binary>::printNumber(void) const {}
+TranscodeView<Binary>::printNumber(void) const {
+    // 1001 1010 1000 0010
+    Glyph demoGlyphs[] = {
+        Glyph(Font6x8One),  // 1
+        Glyph(Font6x8Zero), // 0
+        Glyph(Font6x8Zero), // 0
+        Glyph(Font6x8One),  // 1
+        Glyph(FontEmpty),   //
+        Glyph(Font6x8One),  // 1
+        Glyph(Font6x8Zero), // 0
+        Glyph(Font6x8One),  // 1
+        Glyph(Font6x8Zero), // 0
+        Glyph(FontEmpty),   //
+        Glyph(Font6x8One),  // 1
+        Glyph(Font6x8Zero), // 0
+        Glyph(Font6x8Zero), // 0
+        Glyph(Font6x8Zero), // 0
+        Glyph(FontEmpty),   //
+        Glyph(Font6x8Zero), // 0
+        Glyph(Font6x8Zero), // 0
+        Glyph(Font6x8One),  // 1
+        Glyph(Font6x8Zero), // 0
+    };
+
+    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    for (int i = 0; i < 4; i++) {
+        Point start(viewArea.x +
+                        (headerSkip + headerLength + numberGap) * CharWidth,
+                    viewArea.y + i * 2 * CharHeight);
+        display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
+    }
+}
 
 template <>
 void

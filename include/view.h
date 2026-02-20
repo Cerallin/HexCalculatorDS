@@ -85,7 +85,7 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
 
     void ForceUpdate(void);
 
-    static constexpr int16_t offsetX = 2;
+    static constexpr int16_t offsetX = 4;
 
     static constexpr int16_t height = 2;
     static constexpr int16_t line = 2;
@@ -122,7 +122,7 @@ class ValueView : public MainView<ValueView, AlignRight> {
 
     void ForceUpdate(void);
 
-    static constexpr int16_t offsetX = 2;
+    static constexpr int16_t offsetX = 4;
 
     static constexpr int16_t height = 3;
     static constexpr int16_t line = 2 + FormulaView::height;
