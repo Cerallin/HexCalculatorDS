@@ -2,10 +2,10 @@
 
 using namespace HexCalc;
 
-Config HexCalc::config;
+ConfigModel HexCalc::config;
 
 EventResult
-Config::HandleEvent(const Event &e) {
+ConfigModel::HandleEvent(const Event &e) {
     EventResult res = Skipped;
 
     if (e.type == UpdateBaseEvent) {

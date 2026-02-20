@@ -4,10 +4,8 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include "common.h"
-
-#include "config.h"
 #include "formula.h"
+#include "common.h"
 
 using namespace HexCalc;
 

@@ -9,7 +9,7 @@
 using namespace HexCalc;
 
 ViewHost::ViewHost(ViewModel &viewModel)
-    : mainDisplay(), subDisplay(),
+    : mainDisplay(), subDisplay(), configView(mainDisplay),
       formulaView(mainDisplay, viewModel.Formula()),
       valueView(mainDisplay, viewModel.Value()),
       hexView(mainDisplay, viewModel.Value()),
@@ -23,6 +23,7 @@ void
 ViewHost::RegisterViews(ViewModel &viewModel) {
     auto &bus = viewModel.Bus();
 
+    bus.Subscribe(configView);
     bus.Subscribe(formulaView);
     bus.Subscribe(valueView);
     bus.Subscribe(hexView);
@@ -35,6 +36,7 @@ ViewHost::RegisterViews(ViewModel &viewModel) {
 void
 ViewHost::Update(void) {
     // TODO render dirty views instead of drawing placeholder glyphs
+    configView.Update();
     formulaView.Update();
     valueView.Update();
     hexView.Update();

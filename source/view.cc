@@ -21,8 +21,41 @@ InputView::HandleEvent(const Event &e) {
 }
 
 void
-HexCalc::InputView::ForceUpdate(void) {
+InputView::ForceUpdate(void) {
     debugf("InputView refreshed\n");
+}
+
+EventResult
+ConfigView::HandleEvent(const Event &e) {
+    if (e.type == EventType::ClearEvent) {
+        BasicView::markDirty();
+        debugf("ConfigView cleared\n");
+        return Consumed;
+    } else if ((e.type != EventType::UpdateBaseEvent) &&
+               (e.type != EventType::UpdateSignEvent) &&
+               (e.type != EventType::UpdateWidthEvent)) {
+        return Skipped;
+    }
+
+    BasicView::markDirty();
+    // TODO render config to glyphs
+    debugf("ConfigView invalidated\n");
+
+    return Consumed;
+}
+
+void
+ConfigView::ForceUpdate(void) {
+    debugf("ConfigView refreshed\n");
+    Area8x8 area(viewArea);
+    // UINT64
+    Glyph demoGlyphs[] = {
+        Glyph(FontColoredU), Glyph(FontColoredI),   Glyph(FontColoredN),
+        Glyph(FontColoredT), Glyph(FontColoredSix), Glyph(FontColoredFour),
+    };
+    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    Point start(viewArea.x, viewArea.y);
+    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
 }
 
 EventResult
@@ -31,7 +64,7 @@ FormulaView::HandleEvent(const Event &e) {
         return Skipped;
     }
 
-    BasicView<FormulaView, MainDisplay>::markDirty();
+    BasicView::markDirty();
     // TODO render formulaTree to glyphs
     debugf("FormulaView invalidated\n");
     return Consumed;
@@ -93,7 +126,7 @@ ValueView::HandleEvent(const Event &e) {
         return Skipped;
     }
 
-    BasicView<ValueView, MainDisplay>::markDirty();
+    BasicView::markDirty();
     auto value = model.Value();
     debugf("ValueView updated: %08llx\n",
            static_cast<unsigned long long>(value));

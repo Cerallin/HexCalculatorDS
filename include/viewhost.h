@@ -31,6 +31,7 @@ class ViewHost : private NonCopyable {
     MainDisplay mainDisplay;
     SubDisplay subDisplay;
 
+    ConfigView configView;
     FormulaView formulaView;
     ValueView valueView;
     TranscodeView<Hexadecimal> hexView;
