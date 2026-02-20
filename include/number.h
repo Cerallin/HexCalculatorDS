@@ -88,6 +88,11 @@ class Number {
         return value;
     }
 
+    static constexpr size_t MaxBinDigits = 64;
+    static constexpr size_t MaxOctDigits = 22;
+    static constexpr size_t MaxDecDigits = 22;
+    static constexpr size_t MaxHexDigits = 22;
+
     /**
      * @brief Get max digits for the number based on its width and sign.
      *
@@ -101,12 +106,22 @@ class Number {
                           base == Hexadecimal,
                       "Invalid base");
         // consider 64 for binary and 22 for other bases
-        return (base == Binary) ? 64 : 22;
+        return (base == Binary)
+                   ? MaxBinDigits
+                   : std::max(MaxOctDigits,
+                              std::max(MaxDecDigits, MaxHexDigits));
     }
 
     template <NumberBase base>
     auto
     Transcode() const {
+        if (value == 0) {
+            DigitArray<MaxDigits<base>()> digits;
+            digits[0] = Digit0;
+            digits.size = 1;
+            return digits;
+        }
+
         size_t count = 0;
         constexpr auto maxDigits = MaxDigits<base>();
         DigitArray<maxDigits> digits;

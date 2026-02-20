@@ -11,6 +11,12 @@
 
 TEST_GROUP(Number){};
 
+TEST(Number, TestZero) {
+    HexCalc::Number num(0);
+    auto res = num.Transcode<HexCalc::Hexadecimal>();
+    CHECK_EQUAL(1, res.size);
+}
+
 TEST(Number, TestQwordHexadecimal) {
     constexpr uint64_t testValue = 0x0d000721;
     HexCalc::Number num(testValue);
@@ -18,7 +24,7 @@ TEST(Number, TestQwordHexadecimal) {
     CHECK_EQUAL(7, res.size);
 
     for (size_t i = 0; i < res.size; ++i) {
-        CHECK_EQUAL(static_cast<HexCalc::Digit>(testValue >> (4 * i)) & 0xF,
+        CHECK_EQUAL(static_cast<HexCalc::Digit>((testValue >> (4 * i)) & 0xF),
                     res[i]);
     }
 }
