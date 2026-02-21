@@ -65,7 +65,7 @@ ViewModel::handleKeyInputs(void) {
     } else if (keyInput.PressedB()) {
         commands.InputOperatorBackspace();
     } else if (keyInput.PressedX()) {
-        commands.InputOperatorClear();
+        commands.Clear();
     } else if (keyInput.PressedY()) {
         // TODO switch width
     } else if (keyInput.PressedStart()) {

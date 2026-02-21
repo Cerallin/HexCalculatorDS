@@ -73,7 +73,6 @@ class Commands {
     void InputOperatorModulo(void);
     void InputOperatorLShift(void);
     void InputOperatorRShift(void);
-    void InputOperatorClear(void);
     void InputOperatorBackspace(void);
     void InputOperatorNegate(void);
     void InputOperatorBitwiseNot(void);
@@ -83,7 +82,11 @@ class Commands {
 
     void SwitchBaseUpper(void);
     void SwitchBaseLower(void);
-    void SwitchWidth(void);
+    void SwitchWidthUpper(void);
+    void SwitchWidthLower(void);
+    void ToggleSign(void);
+
+    void Clear(void);
 
   private:
     EventBus &bus;

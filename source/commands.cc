@@ -236,15 +236,6 @@ Commands::InputOperatorRShift(void) {
 }
 
 void
-Commands::InputOperatorClear(void) {
-    debugf("Key Clear pressed\n");
-    bus.Post(Event{
-        0,
-        EventType::ClearEvent,
-    });
-}
-
-void
 Commands::InputOperatorBackspace(void) {
     debugf("Key Backspace pressed\n");
     bus.Post(Event{
@@ -255,7 +246,7 @@ Commands::InputOperatorBackspace(void) {
 
 void
 Commands::InputOperatorNegate(void) {
-    debugf("Key Negate pressed\n");
+    debugf("Key +/- pressed\n");
     bus.Post(Event{
         InputOpNegate,
         EventType::InputEvent,
@@ -264,7 +255,7 @@ Commands::InputOperatorNegate(void) {
 
 void
 Commands::InputOperatorBitwiseNot(void) {
-    debugf("Key Bitwise NOT pressed\n");
+    debugf("Key ~ pressed\n");
     bus.Post(Event{
         InputOpBitwiseNot,
         EventType::InputEvent,
@@ -348,4 +339,86 @@ Commands::SwitchBaseLower(void) {
         // should never reach here
         break;
     }
+}
+
+void
+Commands::SwitchWidthUpper(void) {
+    debugf("Switch width upper triggered\n");
+    auto numberWidth = config.Width();
+    switch (numberWidth) {
+    case NumberWidth::Byte:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::Word),
+                       EventType::UpdateWidthEvent});
+        break;
+    case NumberWidth::Word:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::DWord),
+                       EventType::UpdateWidthEvent});
+        break;
+    case NumberWidth::DWord:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::QWord),
+                       EventType::UpdateWidthEvent});
+        break;
+    case NumberWidth::QWord:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::Byte),
+                       EventType::UpdateWidthEvent});
+        break;
+    default:
+        // should never reach here
+        break;
+    }
+}
+
+void
+Commands::SwitchWidthLower(void) {
+    debugf("Switch width lower triggered\n");
+    auto numberWidth = config.Width();
+    switch (numberWidth) {
+    case NumberWidth::Byte:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::QWord),
+                       EventType::UpdateWidthEvent});
+        break;
+    case NumberWidth::Word:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::Byte),
+                       EventType::UpdateWidthEvent});
+        break;
+    case NumberWidth::DWord:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::Word),
+                       EventType::UpdateWidthEvent});
+        break;
+    case NumberWidth::QWord:
+        bus.Post(Event{static_cast<EventDataType>(NumberWidth::DWord),
+                       EventType::UpdateWidthEvent});
+        break;
+    default:
+        // should never reach here
+        break;
+    }
+}
+
+void
+Commands::ToggleSign(void) {
+    debugf("Toggle sign triggered\n");
+    auto numberSign = config.Sign();
+    switch (numberSign) {
+    case NumberSign::Unsigned:
+        bus.Post(Event{static_cast<EventDataType>(NumberSign::Signed),
+                       EventType::UpdateSignEvent});
+        break;
+    case NumberSign::Signed:
+        bus.Post(Event{static_cast<EventDataType>(NumberSign::Unsigned),
+                       EventType::UpdateSignEvent});
+        break;
+    default:
+        // should never reach here
+        break;
+    }
+}
+
+void
+Commands::Clear(void) {
+    debugf("Clear triggered\n");
+    bus.Post(Event{
+        0,
+        EventType::ClearEvent,
+    });
 }
