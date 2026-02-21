@@ -30,6 +30,31 @@ enum NumberSign : uint8_t {
     Unsigned,
 };
 
+using NumberDataType = uint64_t;
+static constexpr NumberDataType NumberZero = NumberDataType(0);
+
+/**
+ * @brief Get the width mask for a given number width.
+ *
+ * @param w The number width.
+ * @return constexpr NumberDataType The width mask.
+ */
+constexpr NumberDataType
+WidthMask(NumberWidth w) {
+    switch (w) {
+    case Byte:
+        return 0xFFull;
+    case Word:
+        return 0xFFFFull;
+    case DWord:
+        return 0xFFFFFFFFull;
+    case QWord:
+        return 0xFFFFFFFFFFFFFFFFull;
+    default:
+        return 0xFFFFFFFFFFFFFFFFull;
+    }
+}
+
 enum Digit : int8_t {
     DigitEOS = -1,
     Digit0 = 0,
@@ -68,9 +93,6 @@ struct DigitArray {
     size_t size;
     bool isNegative;
 };
-
-using NumberDataType = uint64_t;
-static constexpr NumberDataType NumberZero = NumberDataType(0);
 
 /**
  * @brief A number with a specified width and sign.

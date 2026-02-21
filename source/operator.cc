@@ -11,28 +11,6 @@
 using namespace HexCalc;
 
 /**
- * @brief Get the width mask for a given number width.
- *
- * @param w The number width.
- * @return constexpr uint64_t The width mask.
- */
-constexpr uint64_t
-_widthMask(NumberWidth w) {
-    switch (w) {
-    case Byte:
-        return 0xFFull;
-    case Word:
-        return 0xFFFFull;
-    case DWord:
-        return 0xFFFFFFFFull;
-    case QWord:
-        return 0xFFFFFFFFFFFFFFFFull;
-    default:
-        return 0xFFFFFFFFFFFFFFFFull;
-    }
-}
-
-/**
  * @brief Sign-extend a value to the specified width.
  *
  * @tparam T
@@ -43,7 +21,7 @@ _widthMask(NumberWidth w) {
 template <typename T>
 static constexpr T
 _signExtend(uint64_t v, NumberWidth w) {
-    uint64_t mask = _widthMask(w);
+    uint64_t mask = WidthMask(w);
     v &= mask;
 
     if constexpr (std::is_signed_v<T>) {
@@ -99,7 +77,7 @@ _operateCalc(OperatorType op, NumberDataType a, NumberDataType b) {
     auto sign = config.Sign();
     auto width = config.Width();
 
-    uint64_t mask = _widthMask(width);
+    uint64_t mask = WidthMask(width);
 
     a &= mask;
     b &= mask;
