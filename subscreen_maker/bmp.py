@@ -27,12 +27,21 @@ class Palette:
             b = (i * 109) % 256
             self.add_color(r, g, b)
 
-    def generate_demo(self, color_array, count):
+    def generate_demo(self, colorset_common, colorset_disabled, colorset_selected, count):
         # index 0 reserved for transparent
         self.colors = [(0, 0, 0)]
         for _ in range(count):
-            for color in color_array:
+            for color in colorset_common:
                 self.add_color(*color)
+
+        remain = len(colorset_disabled) + len(colorset_selected)
+        for _ in range(256 - len(self.colors) - remain):
+            self.add_color(0, 0, 0)
+
+        for color in colorset_disabled:
+            self.add_color(*color)
+        for color in colorset_selected:
+            self.add_color(*color)
 
     def get(self):
         return self.colors

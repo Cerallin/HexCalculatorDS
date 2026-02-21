@@ -11,6 +11,8 @@ import numpy as np
 from bmp import Palette, IndexedImage, Bmp8Writer
 from contour import contour_shape_key
 
+DEBUG = False
+
 # ============================================================
 # Utils
 # ============================================================
@@ -244,15 +246,30 @@ class HexCalculatorExporter:
         palette = Palette()
 
         # palette for demo view
-        palette.generate_demo([
-            hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # contour
-            hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[0]),   # shadow
-            hex_to_rgb(ContourAnalyzer.TEXT_COLORS[0]),     # text
-            hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # bg
-            hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # sign (default to hide)
-        ], len(records))
-
-        palette.generate_rainbow()
+        palette.generate_demo(
+            common := [
+                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # contour
+                hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[0]),   # shadow
+                hex_to_rgb(ContourAnalyzer.TEXT_COLORS[0]),     # text
+                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # bg
+                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # sign (default to hide)
+            ],
+            disabled := [
+                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[1]),   # contour
+                hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[1]),   # shadow
+                hex_to_rgb(ContourAnalyzer.TEXT_COLORS[1]),     # text
+                hex_to_rgb(ContourAnalyzer.BG_COLORS[1]),       # bg
+                hex_to_rgb(ContourAnalyzer.BG_COLORS[1]),       # sign (hidden)
+            ],
+            selected := [
+                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # contour
+                hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[0]),   # shadow
+                hex_to_rgb(ContourAnalyzer.TEXT_COLORS[0]),     # text
+                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # bg
+                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # sign
+            ],
+            len(records),
+        )
 
         img = IndexedImage(width, height)
 
@@ -276,14 +293,14 @@ class HexCalculatorExporter:
     def export(self, output_file):
         self.preprocess()
         records = self.analyze()
-        # # FIXME debug
-        # for idx, rec in enumerate(records):
-        #     x, y, w, h = rec.position()
-        #     print(f"Record {idx:2}: pos=({x:3},{y:3}),\tsize=({w:2}x{h:2}),\t"
-        #           f"{len(rec.shadow_points):2} shadow,\t"
-        #           f"{len(rec.text_points):2} text,\t"
-        #           f"{len(rec.bg_points):3} bg,\t"
-        #           f"{len(rec.sign_points):2} sign")
+        if DEBUG:
+            for idx, rec in enumerate(records):
+                x, y, w, h = rec.position()
+                print(f"Record {idx:2}: pos=({x:3},{y:3}),\tsize=({w:2}x{h:2}),\t"
+                    f"{len(rec.shadow_points):2} shadow,\t"
+                    f"{len(rec.text_points):2} text,\t"
+                    f"{len(rec.bg_points):3} bg,\t"
+                    f"{len(rec.sign_points):2} sign")
 
         h, w, _ = self.image.shape
         image, palette = self.build_image(records, w, h)
