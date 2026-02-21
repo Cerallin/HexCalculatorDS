@@ -11,50 +11,6 @@
 
 namespace HexCalc {
 
-struct UpdateBaseEventData {
-    NumberBase newBase;
-
-    UpdateBaseEventData(int data) {
-        if (data == Hexadecimal) {
-            newBase = Hexadecimal;
-        } else if (data == Decimal) {
-            newBase = Decimal;
-        } else if (data == Octal) {
-            newBase = Octal;
-        } else if (data == Binary) {
-            newBase = Binary;
-        }
-    }
-};
-
-struct UpdateWidthEventData {
-    NumberWidth newWidth;
-
-    UpdateWidthEventData(int data) {
-        if (data == QWord) {
-            newWidth = QWord;
-        } else if (data == DWord) {
-            newWidth = DWord;
-        } else if (data == Word) {
-            newWidth = Word;
-        } else if (data == Byte) {
-            newWidth = Byte;
-        }
-    }
-};
-
-struct UpdateSignEventData {
-    NumberSign newSign;
-
-    UpdateSignEventData(int data) {
-        if (data == Signed) {
-            newSign = Signed;
-        } else if (data == Unsigned) {
-            newSign = Unsigned;
-        }
-    }
-};
-
 class ConfigModel {
   public:
     ConfigModel(void)
