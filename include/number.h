@@ -84,7 +84,7 @@ class Number {
     constexpr explicit Number(uint64_t v, NumberSign sign = Unsigned)
         : value(v), sign(sign) {}
 
-    static constexpr size_t MaxBinDigits = 64;
+    static constexpr size_t MaxBinDigits = 16;
     static constexpr size_t MaxOctDigits = 22;
     static constexpr size_t MaxDecDigits = 22;
     static constexpr size_t MaxHexDigits = 22;

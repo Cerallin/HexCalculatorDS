@@ -78,6 +78,21 @@ class GlyphArray {
     size_t size;
 };
 
+class HeaderGlyphArray6x8 : public GlyphArray<3> {
+  public:
+    constexpr HeaderGlyphArray6x8(const Glyph &h1, const Glyph &h2,
+                                  const Glyph &h3)
+        : GlyphArray<3>() {
+        this->glyphs[0] = h1;
+        this->glyphs[1] = h2;
+        this->glyphs[2] = h3;
+        this->size = 3;
+    }
+
+    static constexpr int CharWidth = 6;
+    static constexpr int CharHeight = 8;
+};
+
 template <size_t N>
 class GlyphArray6x8 : public GlyphArray<N> {
   public:
@@ -181,7 +196,17 @@ class GlyphFormatArray6x8
   public:
     constexpr GlyphFormatArray6x8(const GlyphArray6x8<N> &glyphArray)
         : GlyphArray<GlyphFormatSize(N, GroupSize, hasSign)>() {
-        size_t starter = (hasSign && glyphArray.Negative()) ? 1 : 0;
+        // Insert digits with separators and sign if needed
+        if (!hasSign) {
+            auto zerosCount =
+                (GroupSize - (glyphArray.Size() % GroupSize)) % GroupSize;
+            for (int i = 0; i < zerosCount; i++) {
+                this->Insert(Glyph(Font6x8Zero));
+            }
+        }
+        auto negative = glyphArray.Negative();
+        size_t starter = (hasSign && negative) ? 1 : 0;
+        // Skip sign if present
         for (size_t i = starter; i < glyphArray.Size(); i++) {
             this->Insert(glyphArray[i]);
             bool isLast = (i == glyphArray.Size() - 1);
@@ -217,7 +242,20 @@ using DecGlyphArray6x8 =
 using OctGlyphArray6x8 =
     GlyphFormatArray6x8<FontEmpty, 3, false, Number::MaxOctDigits>;
 
-class BinGlyphMatrix6x8 {};
+/**
+ * @brief Glyph array for binary numbers, with group size of 4 and separator
+ * '_'.
+ *
+ */
+class BinGlyphArray6x8
+    : public GlyphFormatArray6x8<FontEmpty, 4, false, Number::MaxBinDigits> {
+  public:
+    constexpr BinGlyphArray6x8(
+        const GlyphArray6x8<Number::MaxBinDigits> &glyphArray)
+        : GlyphFormatArray6x8<FontEmpty, 4, false, Number::MaxBinDigits>(
+              GlyphFormatArray6x8<FontEmpty, 16, false, Number::MaxBinDigits>(
+                  glyphArray)) {}
+};
 
 template <typename Class, typename DisplayType>
 class BasicView {
@@ -426,6 +464,7 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
                                      : (base == Binary)    ? 7
                                                            : 0);
     static constexpr int16_t lineWidth = 30;
+    static constexpr int16_t lineHeight = 2;
 
     /**
      * @brief 6x8 font.
@@ -452,19 +491,24 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     static constexpr int numberGap = 2;
 
   private:
-    template <NumberBase>
-    struct HeaderTraits {
-        static constexpr FontType font0 = FontEmpty;
-        static constexpr FontType font1 = FontEmpty;
-        static constexpr FontType font2 = FontEmpty;
-    };
+    static constexpr HeaderGlyphArray6x8
+    MakeHeader(void) {
+        if constexpr (base == Hexadecimal) {
+            return HeaderGlyphArray6x8(Glyph(Font6x8HH), Glyph(Font6x8EH),
+                                       Glyph(Font6x8XH));
+        } else if constexpr (base == Decimal) {
+            return HeaderGlyphArray6x8(Glyph(Font6x8DH), Glyph(Font6x8EH),
+                                       Glyph(Font6x8CH));
+        } else if constexpr (base == Octal) {
+            return HeaderGlyphArray6x8(Glyph(Font6x8OH), Glyph(Font6x8CH),
+                                       Glyph(Font6x8TH));
+        } else {
+            return HeaderGlyphArray6x8(Glyph(Font6x8BH), Glyph(Font6x8IH),
+                                       Glyph(Font6x8NH));
+        }
+    }
 
-    static constexpr Glyph header[] = {
-        Glyph(HeaderTraits<base>::font0),
-        Glyph(HeaderTraits<base>::font1),
-        Glyph(HeaderTraits<base>::font2),
-    };
-    static constexpr int headerLength = sizeof(header) / sizeof(Glyph);
+    static constexpr HeaderGlyphArray6x8 header = MakeHeader();
 
     static constexpr int barOffsetX = 2;
 
@@ -495,38 +539,6 @@ using HexView = TranscodeView<Hexadecimal>;
 using DecView = TranscodeView<Decimal>;
 using OctView = TranscodeView<Octal>;
 using BinView = TranscodeView<Binary>;
-
-template <>
-template <>
-struct TranscodeView<Hexadecimal>::HeaderTraits<Hexadecimal> {
-    static constexpr FontType font0 = Font6x8HH;
-    static constexpr FontType font1 = Font6x8EH;
-    static constexpr FontType font2 = Font6x8XH;
-};
-
-template <>
-template <>
-struct TranscodeView<Decimal>::HeaderTraits<Decimal> {
-    static constexpr FontType font0 = Font6x8DH;
-    static constexpr FontType font1 = Font6x8EH;
-    static constexpr FontType font2 = Font6x8CH;
-};
-
-template <>
-template <>
-struct TranscodeView<Octal>::HeaderTraits<Octal> {
-    static constexpr FontType font0 = Font6x8OH;
-    static constexpr FontType font1 = Font6x8CH;
-    static constexpr FontType font2 = Font6x8TH;
-};
-
-template <>
-template <>
-struct TranscodeView<Binary>::HeaderTraits<Binary> {
-    static constexpr FontType font0 = Font6x8BH;
-    static constexpr FontType font1 = Font6x8IH;
-    static constexpr FontType font2 = Font6x8NH;
-};
 
 template <typename Class>
 class SubView : public BasicView<Class, SubDisplay> {

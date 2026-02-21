@@ -43,13 +43,16 @@ ConfigView::ForceUpdate(void) {
     debugf("ConfigView refreshed\n");
     Area8x8 area(viewArea);
     // UINT64
-    Glyph demoGlyphs[] = {
-        Glyph(FontColoredU), Glyph(FontColoredI),   Glyph(FontColoredN),
-        Glyph(FontColoredT), Glyph(FontColoredSix), Glyph(FontColoredFour),
-    };
-    constexpr size_t glyphCount = sizeof(demoGlyphs) / sizeof(Glyph);
+    GlyphArray<6> demoGlyphs;
+    demoGlyphs.Insert(Glyph(FontColoredU));
+    demoGlyphs.Insert(Glyph(FontColoredI));
+    demoGlyphs.Insert(Glyph(FontColoredN));
+    demoGlyphs.Insert(Glyph(FontColoredT));
+    demoGlyphs.Insert(Glyph(FontColoredSix));
+    demoGlyphs.Insert(Glyph(FontColoredFour));
+    GlyphArray8x8 glyphs(demoGlyphs);
     Point start(viewArea.x, viewArea.y);
-    display.PrintLine<CharWidth>(demoGlyphs, glyphCount, 0, start);
+    display.PrintLine(glyphs, 0, start);
 }
 
 EventResult
@@ -111,7 +114,7 @@ FormulaView::ForceUpdate(void) {
     GlyphArray6x8 glyphs(demoGlyphs);
 
     Point start(viewArea.x, viewArea.y);
-    display.PrintLine(glyphs, area.w - 38, start, glyphs.CharWidth);
+    display.PrintLine(glyphs, area.w - 38, start);
 }
 
 EventResult
@@ -155,11 +158,11 @@ ValueView::ForceUpdate(void) {
 
     if (MainView::viewAlign == AlignLeft) {
         GlyphArray8x8 glyphs(digits, true);
-        display.PrintLine(glyphs, 0, start, glyphs.CharWidth);
+        display.PrintLine(glyphs, 0, start);
     } else { // align right
         GlyphArray8x8 glyphs(digits);
         int skip = area.w - digits.size;
-        display.PrintLine(glyphs, skip, start, glyphs.CharWidth);
+        display.PrintLine(glyphs, skip, start);
     }
 }
 
@@ -175,6 +178,7 @@ TranscodeView<base>::handleBaseChanged(void) {
     debugf("TranscodeView(%d) base changed\n", static_cast<int>(base));
 
     // Clear indicator Area
+    // FIXME create a new view for the indicator bar
     constexpr size_t indicatorAreaY = 8 * MainDisplay::TileHeight;
     constexpr size_t indicatorAreaHeight = 15;
     for (size_t j = 0; j < indicatorAreaHeight; j++) {
@@ -215,8 +219,7 @@ HexCalc::TranscodeView<base>::printHeader(void) const {
         middleH += CharHeight;
     }
     Point start(viewArea.x, middleH);
-    this->display.template PrintLine<CharWidth>(header, headerLength,
-                                                headerSkip, start);
+    this->display.template PrintLine(header, headerSkip, start);
 }
 
 template <NumberBase base>
@@ -233,43 +236,38 @@ TranscodeView<base>::printNumber(void) const {
     GlyphArrayType glyphs(glyphArray);
 
     Point start(this->viewArea.x +
-                    (headerSkip + headerLength + numberGap) * CharWidth,
+                    (headerSkip + header.Size() + numberGap) * CharWidth,
                 this->viewArea.y);
-    this->display.PrintLine(glyphs, 0, start, glyphs.CharWidth);
+    this->display.PrintLine(glyphs, 0, start);
 }
 
 template <>
 void
 TranscodeView<Binary>::printNumber(void) const {
-    // 1001 1010 1000 0010
-    GlyphArray<20> demoGlyphs;
-    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
-    demoGlyphs.Insert(Glyph(FontEmpty));   //
-    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(FontEmpty));   //
-    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(FontEmpty));   //
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
-    demoGlyphs.Insert(Glyph(Font6x8One));  // 1
-    demoGlyphs.Insert(Glyph(Font6x8Zero)); // 0
+    // TODO Adjust the height of TranscodeView dynamically to accommodate
+    // different widths of number display
+    auto width = config.Width();
+    auto sign = config.Sign();
+    switch (width) {
+    case QWord:
+        for (int i = 0; i < 4; i++) {
+            auto nByte =
+                static_cast<uint16_t>((vm.GetNumber() >> (i * 16)) & 0xFFFF);
+            debugf("TranscodeView(Binary) byte %d: %04x\n", i, nByte);
+            Number number(nByte, sign);
+            auto digits = number.Transcode<Binary, Number::MaxBinDigits>();
+            GlyphArray6x8 glyphArray(digits, false);
+            BinGlyphArray6x8 glyphs(glyphArray);
+            Point start(this->viewArea.x +
+                            (headerSkip + header.Size() + numberGap) *
+                                CharWidth,
+                        this->viewArea.y + (3 - i) * lineHeight * CharHeight);
+            this->display.PrintLine(glyphs, 0, start);
+        }
+        break;
 
-    GlyphArray6x8 glyphs(demoGlyphs);
-
-    for (int i = 0; i < 4; i++) {
-        Point start(viewArea.x +
-                        (headerSkip + headerLength + numberGap) * CharWidth,
-                    viewArea.y + i * 2 * CharHeight);
-        display.PrintLine(glyphs, 0, start, glyphs.CharWidth);
+    default:
+        break;
     }
 }
 
