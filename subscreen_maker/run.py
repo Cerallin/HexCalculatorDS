@@ -290,6 +290,20 @@ class HexCalculatorExporter:
 
         return img, palette
 
+    def build_c_header(self, records, output_file):
+        with open(output_file, "w") as f:
+            f.write("#ifndef SUBSCREEN_AREA_H\n")
+            f.write("#define SUBSCREEN_AREA_H\n\n")
+            for idx, rec in enumerate(records):
+                x, y, w, h = rec.position()
+                f.write(f"#define AREA_{idx}_X {x}\n")
+                f.write(f"#define AREA_{idx}_Y {y}\n")
+                f.write(f"#define AREA_{idx}_W {w}\n")
+                f.write(f"#define AREA_{idx}_H {h}\n")
+                f.write("\n")
+            f.write("\n")
+            f.write("#endif // SUBSCREEN_AREA_H\n")
+
     def export(self, output_file):
         self.preprocess()
         records = self.analyze()
@@ -301,6 +315,8 @@ class HexCalculatorExporter:
                     f"{len(rec.text_points):2} text,\t"
                     f"{len(rec.bg_points):3} bg,\t"
                     f"{len(rec.sign_points):2} sign")
+
+        self.build_c_header(records, output_file.replace(".bmp", ".h"))
 
         h, w, _ = self.image.shape
         image, palette = self.build_image(records, w, h)

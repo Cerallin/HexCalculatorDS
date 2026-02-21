@@ -49,11 +49,11 @@ add_custom_command(
 find_program(PYTHON python3 REQUIRED)
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
     COMMAND ${PYTHON}
         ${CMAKE_CURRENT_SOURCE_DIR}/subscreen_maker/run.py
         ${CMAKE_CURRENT_SOURCE_DIR}/screenshots/HexCalculatorDS-sub.png
-        ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+        ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/screenshots/HexCalculatorDS-sub.png
     COMMENT "Generating font tilemap"
 )
@@ -61,7 +61,7 @@ add_custom_command(
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c
     COMMAND ${GRIT}
-        ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+        ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
         -ftc
         -gB8
         -gb
@@ -69,7 +69,7 @@ add_custom_command(
         -gTFF00FF
         -m
         -o subscreenImage
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
     COMMENT "Generating font tilemap"
 )
 
