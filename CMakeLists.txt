@@ -44,6 +44,34 @@ add_custom_command(
 )
 
 # ----------------------------------------
+# Subscreen Image
+# ----------------------------------------
+find_program(PYTHON python3 REQUIRED)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+    COMMAND ${PYTHON}
+        ${CMAKE_CURRENT_SOURCE_DIR}/subscreen_maker/run.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/screenshots/HexCalculatorDS-sub.png
+        ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/screenshots/HexCalculatorDS-sub.png
+    COMMENT "Generating font tilemap"
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c
+    COMMAND ${GRIT}
+        ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+        -ftc
+        -gB4
+        -gTFF00FF
+        -m
+        -o subscreenImage
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
+    COMMENT "Generating font tilemap"
+)
+
+# ----------------------------------------
 # Source files
 # ----------------------------------------
 
@@ -55,6 +83,7 @@ file(GLOB_RECURSE SOURCES
 add_executable(${PROJECT_NAME}.elf 
     ${SOURCES}
     ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
+    ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c
 )
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE

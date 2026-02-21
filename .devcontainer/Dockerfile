@@ -18,6 +18,7 @@ RUN apt-get install -y --no-install-recommends cmake automake autoconf autoconf-
 RUN apt-get install -y --no-install-recommends libfreeimage3 libfreeimage-dev
 RUN apt-get install -y --no-install-recommends imagemagick
 RUN apt-get install -y --no-install-recommends clang-format
+RUN apt-get install -y --no-install-recommends python3-opencv python3-numpy
 
 # locale
 RUN apt-get install -y --no-install-recommends locales
