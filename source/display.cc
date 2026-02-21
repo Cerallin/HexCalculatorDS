@@ -67,6 +67,22 @@ MainDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
     layer.Put(x / TileWidth, y / TileHeight, tile, hFlip, vFlip);
 }
 
+void
+MainDisplay::ClearLine(Point &start, int charWidth) {
+    auto x = start.x;
+    auto y = start.y;
+
+    assert(x % OffsetPerBG == 0);
+    assert(y % TileHeight == 0);
+
+    auto total = SCREEN_WIDTH / charWidth;
+    auto skip = start.x / charWidth;
+    auto clearNum = total - skip;
+    for (int i = 0; i < clearNum; i++) {
+        PrintGlyph(x + i * charWidth, y, FontEmpty);
+    }
+}
+
 SubDisplay::SubDisplay(void) {
     // button style & animation will be handled by modifing palette
     videoSetModeSub(VideoMode);

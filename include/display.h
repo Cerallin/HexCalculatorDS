@@ -53,16 +53,20 @@ class MainDisplay : public Display {
      */
     template <typename GlyphIterable>
     void
-    PrintLine(const GlyphIterable &glyphRange, int skip, Point &start) const {
+    PrintLine(const GlyphIterable &glyphRange, Point &start) const {
+        constexpr auto charWidth = GlyphIterable::CharWidth;
         auto x = start.x;
         auto y = start.y;
+        // print glyphs
         size_t index = 0;
         for (const auto &glyph : glyphRange) {
-            auto glyphX = start.x + (skip + index) * GlyphIterable::CharWidth;
+            auto glyphX = start.x + (index * charWidth);
             this->PrintGlyph(glyphX, y, glyph);
             index++;
         }
     }
+
+    void ClearLine(Point &start, int charWidth);
 
     static constexpr int Bpp = 4;
     static constexpr int TileWidth = 8;

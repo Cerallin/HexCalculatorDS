@@ -62,6 +62,26 @@ ValueModel::HandleEvent(const Event &e) {
         changed = true;
     } else if (e.type == EvaluateEvent) {
         // TODO evaluate the formula and update the value
+    } else if (e.type == UpdateBaseEvent) {
+        constexpr auto maxDigits = Number::MaxDecDigits;
+        if ((config.Base() == Binary) && (config.Width() > maxDigits)) {
+            constexpr auto width = (QWord < maxDigits)   ? QWord
+                                   : (DWord < maxDigits) ? DWord
+                                   : (Word < maxDigits)  ? Word
+                                                         : Byte;
+            bus.Post(Event{width, UpdateWidthEvent});
+        } else {
+            changed = true;
+        }
+    } else if (e.type == UpdateWidthEvent) {
+        auto oldValue = value;
+        value &= WidthMask(config.Width());
+        if (value != oldValue) {
+            notifyChanged();
+        }
+        changed = true;
+    } else {
+        // do nothing
     }
 
     if (changed) {

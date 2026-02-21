@@ -9,16 +9,13 @@ ConfigModel::HandleEvent(const Event &e) {
     EventResult res = Skipped;
 
     if (e.type == UpdateBaseEvent) {
-        auto newBase = UpdateBaseEventData(e.data).newBase;
-        base = newBase;
+        base = static_cast<NumberBase>(e.data);
         res = Consumed;
     } else if (e.type == UpdateWidthEvent) {
-        auto newWidth = UpdateWidthEventData(e.data).newWidth;
-        width = newWidth;
+        width = static_cast<NumberWidth>(e.data);
         res = Consumed;
     } else if (e.type == UpdateSignEvent) {
-        auto newSign = UpdateSignEventData(e.data).newSign;
-        sign = newSign;
+        sign = static_cast<NumberSign>(e.data);
         res = Consumed;
     }
 

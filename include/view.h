@@ -132,6 +132,7 @@ class GlyphArray8x8 : public GlyphArray<N> {
         : GlyphArray<N>(glyphArray), isNegative(false) {}
     constexpr GlyphArray8x8(DigitArray<N> digits, bool reverse = false)
         : GlyphArray<N>(), isNegative(digits.isNegative) {
+        // FIXME negative sign is only for digits, not for glyphs
         if (reverse) {
             for (size_t i = 0; i < digits.size; i++) {
                 if (!this->Insert(Glyph(
