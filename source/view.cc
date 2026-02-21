@@ -41,18 +41,47 @@ ConfigView::HandleEvent(const Event &e) {
 void
 ConfigView::ForceUpdate(void) {
     debugf("ConfigView refreshed\n");
-    Area8x8 area(viewArea);
-    // UINT64
-    GlyphArray<6> demoGlyphs;
-    demoGlyphs.Insert(Glyph(FontColoredU));
-    demoGlyphs.Insert(Glyph(FontColoredI));
-    demoGlyphs.Insert(Glyph(FontColoredN));
-    demoGlyphs.Insert(Glyph(FontColoredT));
-    demoGlyphs.Insert(Glyph(FontColoredSix));
-    demoGlyphs.Insert(Glyph(FontColoredFour));
-    GlyphArray8x8 glyphs(demoGlyphs);
+
+    auto glyphArray = getGlyphs();
+    GlyphArray8x8 glyphs(glyphArray);
+
     Point start(viewArea.x, viewArea.y);
     display.PrintLine(glyphs, 0, start);
+}
+
+GlyphArray<ConfigView::maxGlyphs>
+ConfigView::getGlyphs() {
+    GlyphArray<ConfigView::maxGlyphs> glyphs;
+    auto width = config.Width();
+    auto sign = config.Sign();
+
+    if (sign == Unsigned) {
+        glyphs.Insert(Glyph(FontColoredU));
+    }
+    glyphs.Insert(Glyph(FontColoredI));
+    glyphs.Insert(Glyph(FontColoredN));
+    glyphs.Insert(Glyph(FontColoredT));
+    switch (width) {
+    case QWord:
+        glyphs.Insert(Glyph(FontColoredSix));
+        glyphs.Insert(Glyph(FontColoredFour));
+        break;
+    case DWord:
+        glyphs.Insert(Glyph(FontColoredThree));
+        glyphs.Insert(Glyph(FontColoredTwo));
+        break;
+    case Word:
+        glyphs.Insert(Glyph(FontColoredOne));
+        glyphs.Insert(Glyph(FontColoredSix));
+        break;
+    case Byte:
+        glyphs.Insert(Glyph(FontColoredEight));
+        break;
+    default:
+        break;
+    }
+
+    return glyphs;
 }
 
 EventResult

@@ -344,6 +344,9 @@ class ConfigView : public MainView<ConfigView, AlignLeft> {
     static constexpr size_t CharHeight = 8;
 
   private:
+    static constexpr size_t maxGlyphs = 6;
+
+    GlyphArray<maxGlyphs> getGlyphs();
 };
 
 class FormulaView : public MainView<FormulaView, AlignRight> {
