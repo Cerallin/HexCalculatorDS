@@ -80,8 +80,3 @@ ViewModel::HandleInputs(void) {
         handleTouchScreen();
     }
 }
-
-EventBus &
-ViewModel::Bus(void) {
-    return eventBus;
-}

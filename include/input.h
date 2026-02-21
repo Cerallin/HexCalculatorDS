@@ -55,7 +55,7 @@ struct Area {
         h = height;
     }
 
-    Area(int16_t px, int16_t py, uint8_t width, uint8_t height)
+    constexpr Area(int16_t px, int16_t py, uint8_t width, uint8_t height)
         : x(px), y(py), w(width), h(height) {}
 };
 
@@ -211,8 +211,9 @@ class KeyInputHandler {
     uint32_t previousKeys;
 };
 
-enum ButtonType {
-    ButtonAnd,
+enum ButtonType : uint8_t {
+    ButtonInvalid = 0xFF,
+    ButtonAnd = 0,
     ButtonOr,
     ButtonModulo,
     ButtonA,
@@ -248,8 +249,12 @@ enum ButtonType {
 
 class TouchButton {
   public:
-    TouchButton(Commands &commands, const Area &area, ButtonType type)
-        : commands(commands), area(area), type(type) {}
+    constexpr TouchButton(void)
+        : area(0, 0, 0, 0), type(ButtonInvalid), disabled(true),
+          selected(false) {}
+
+    constexpr TouchButton(Area area, ButtonType type)
+        : area(area), type(type), disabled(false), selected(false) {}
 
     /**
      * @brief Handle the touch input and execute corresponding commands if the
@@ -258,12 +263,9 @@ class TouchButton {
      * @return true if the button handled the input, false otherwise
      */
     bool
-    ResponsibleFor(const TouchInput &input) const {
-        if (!input.Active()) {
-            return false;
-        }
-        auto x = input.point.x;
-        auto y = input.point.y;
+    ResponsibleFor(const Point &input) const {
+        auto x = input.x;
+        auto y = input.y;
         return (x >= area.x) && (x < area.x + area.w) && (y >= area.y) &&
                (y < area.y + area.h);
     }
@@ -316,12 +318,14 @@ class TouchButton {
         }
     }
 
+    ButtonType
+    Type() const {
+        return type;
+    }
+
+    static void ExecuteCommand(Commands &commands, ButtonType type);
+
   private:
-    /**
-     * @brief Commands instance to execute commands based on touch inputs.
-     *
-     */
-    Commands &commands;
     /**
      * @brief The area that this touch handler is responsible for.
      *
@@ -341,14 +345,13 @@ class TouchButton {
      * @brief Whether the button is currently selected.
      */
     bool selected;
-
-    static void executeCommand(Commands &commands, ButtonType type);
 };
 
 template <size_t N>
 class TouchScreenHandler {
   public:
-    TouchScreenHandler(Commands &commands) : commands(commands), size(0) {}
+    TouchScreenHandler(Commands &commands)
+        : commands(commands), buttons(), size(0) {}
 
     bool
     RegisterButton(const Area &area, ButtonType type) {
@@ -356,17 +359,17 @@ class TouchScreenHandler {
             return false;
         }
 
-        buttons[size++] = TouchButton(commands, area, type);
+        buttons[size++] = TouchButton(area, type);
 
         return true;
     }
 
     bool
-    Handle(const TouchInput &input) {
+    Handle(const Point &input) {
         for (size_t i = 0; i < N; i++) {
             auto &button = buttons[i];
             if (button.Active() && button.ResponsibleFor(input)) {
-                button.executeCommand(commands, button.type);
+                button.ExecuteCommand(commands, button.Type());
                 button.MarkSelected();
                 return true;
             }

@@ -13,7 +13,7 @@ ViewHost::ViewHost(ViewModel &viewModel)
       formulaView(mainDisplay, viewModel), valueView(mainDisplay, viewModel),
       hexView(mainDisplay, viewModel), decView(mainDisplay, viewModel),
       octView(mainDisplay, viewModel), binView(mainDisplay, viewModel),
-      inputView(subDisplay) {
+      inputView(subDisplay, viewModel) {
     RegisterViews(viewModel);
 }
 

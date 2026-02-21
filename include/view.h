@@ -355,7 +355,7 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
-    FormulaView(MainDisplay &display, const ViewModel &vm)
+    FormulaView(MainDisplay &display, ViewModel &vm)
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
@@ -384,7 +384,7 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr size_t CharHeight = 8;
 
   private:
-    const ViewModel &vm;
+    ViewModel &vm;
 };
 
 class ValueView : public MainView<ValueView, AlignRight> {
@@ -392,7 +392,7 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
-    ValueView(MainDisplay &display, const ViewModel &vm)
+    ValueView(MainDisplay &display, ViewModel &vm)
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
@@ -421,7 +421,7 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr size_t CharHeight = 8;
 
   private:
-    const ViewModel &vm;
+    ViewModel &vm;
 };
 
 template <NumberBase base>
@@ -430,7 +430,7 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
-    TranscodeView(MainDisplay &display, const ViewModel &vm)
+    TranscodeView(MainDisplay &display, ViewModel &vm)
         : MainView<TranscodeView<base>, AlignLeft>(
               //
               Area(0, line * TileHeight, lineWidth * TileWidth,
@@ -516,7 +516,7 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
 
     static constexpr int barOffsetX = 2;
 
-    const ViewModel &vm;
+    ViewModel &vm;
     bool selected;
 
     /**
@@ -552,11 +552,15 @@ class SubView : public BasicView<Class, SubDisplay> {
 
 class InputView : public SubView<InputView> {
   public:
-    InputView(SubDisplay &display);
+    InputView(SubDisplay &display, ViewModel &vm);
 
     EventResult HandleEvent(const Event &e);
 
     void ForceUpdate(void);
+
+  private:
+    ViewModel &vm;
+    TouchScreenHandler<32> handler;
 };
 
 }; // namespace HexCalc

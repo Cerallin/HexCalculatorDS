@@ -46,7 +46,7 @@ KeyInputHandler::Handle(const KeyInput &input) {
 }
 
 void
-TouchButton::executeCommand(Commands &commands, ButtonType type) {
+TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     switch (type) {
     case ButtonAnd:
         commands.InputOperatorAnd();

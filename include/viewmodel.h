@@ -34,7 +34,16 @@ class ViewModel : private NonCopyable {
      *
      */
     void HandleInputs(void);
-    EventBus &Bus(void);
+
+    EventBus &
+    Bus(void) {
+        return eventBus;
+    }
+
+    Commands &
+    Cmds(void) {
+        return commands;
+    }
 
     auto
     GetNumber(void) const {
