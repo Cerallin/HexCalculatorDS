@@ -75,8 +75,8 @@ class Commands {
     void InputOperatorRShift(void);
     void InputOperatorBackspace(void);
     void InputOperatorNegate(void);
-    void InputOperatorBitwiseNot(void);
-    void InputOperatorEqual(void);
+    void InputOperatorNot(void);
+    void Evaluate(void);
     void InputOperatorLBrac(void);
     void InputOperatorRBrac(void);
 

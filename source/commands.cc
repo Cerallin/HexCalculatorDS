@@ -254,7 +254,7 @@ Commands::InputOperatorNegate(void) {
 }
 
 void
-Commands::InputOperatorBitwiseNot(void) {
+Commands::InputOperatorNot(void) {
     debugf("Key ~ pressed\n");
     bus.Post(Event{
         InputOpBitwiseNot,
@@ -263,7 +263,7 @@ Commands::InputOperatorBitwiseNot(void) {
 }
 
 void
-Commands::InputOperatorEqual(void) {
+Commands::Evaluate(void) {
     debugf("Key = pressed\n");
     bus.Post(Event{
         0,
