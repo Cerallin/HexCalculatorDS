@@ -211,4 +211,173 @@ class KeyInputHandler {
     uint32_t previousKeys;
 };
 
+enum ButtonType {
+    ButtonAnd,
+    ButtonOr,
+    ButtonModulo,
+    ButtonA,
+    ButtonLShift,
+    ButtonRShift,
+    ButtonCE,
+    ButtonBackspace,
+    ButtonB,
+    ButtonLBrac,
+    ButtonRBrac,
+    ButtonDivide,
+    ButtonMultiply,
+    ButtonC,
+    Button7,
+    Button8,
+    Button9,
+    ButtonMinus,
+    ButtonD,
+    Button4,
+    Button5,
+    Button6,
+    ButtonPlus,
+    ButtonE,
+    Button1,
+    Button2,
+    Button3,
+    ButtonF,
+    ButtonNegate,
+    Button0,
+    ButtonBitwiseNot,
+    ButtonEvaluate,
+};
+
+class TouchButton {
+  public:
+    TouchButton(Commands &commands, const Area &area, ButtonType type)
+        : commands(commands), area(area), type(type) {}
+
+    /**
+     * @brief Handle the touch input and execute corresponding commands if the
+     * button is responsible for the input.
+     * @param input The current touch input state
+     * @return true if the button handled the input, false otherwise
+     */
+    bool
+    ResponsibleFor(const TouchInput &input) const {
+        if (!input.Active()) {
+            return false;
+        }
+        auto x = input.point.x;
+        auto y = input.point.y;
+        return (x >= area.x) && (x < area.x + area.w) && (y >= area.y) &&
+               (y < area.y + area.h);
+    }
+
+    /**
+     * @brief Disable the button, making it unresponsive to touch inputs.
+     *
+     */
+    void
+    Disable() {
+        disabled = true;
+        selected = false;
+    }
+
+    /**
+     * @brief Enable the button, allowing it to respond to touch inputs.
+     *
+     */
+    void
+    Enable() {
+        disabled = false;
+    }
+
+    /**
+     * @brief Check if the button is currently disabled. A button is considered
+     * disabled if it is not responsive to touch inputs.
+     *
+     * @return true if the button is disabled, false otherwise
+     */
+    bool
+    Active() const {
+        return !disabled;
+    }
+
+    /**
+     * @brief Check if the button is currently selected. A button is considered
+     * selected if it is currently being touched and is active (not disabled).
+     *
+     * @return true if the button is selected, false otherwise
+     */
+    bool
+    Selected() const {
+        return selected && Active();
+    }
+
+    void
+    MarkSelected() {
+        if (Active()) {
+            selected = true;
+        }
+    }
+
+  private:
+    /**
+     * @brief Commands instance to execute commands based on touch inputs.
+     *
+     */
+    Commands &commands;
+    /**
+     * @brief The area that this touch handler is responsible for.
+     *
+     */
+    Area area;
+    /**
+     * @brief The type of the button, which determines which command to execute
+     * when the button is touched.
+     */
+    ButtonType type;
+    /**
+     * @brief Whether the button is currently disabled. If true, the button will
+     * not respond to touch inputs.
+     */
+    bool disabled;
+    /**
+     * @brief Whether the button is currently selected.
+     */
+    bool selected;
+
+    static void executeCommand(Commands &commands, ButtonType type);
+};
+
+template <size_t N>
+class TouchScreenHandler {
+  public:
+    TouchScreenHandler(Commands &commands) : commands(commands), size(0) {}
+
+    bool
+    RegisterButton(const Area &area, ButtonType type) {
+        if (size >= N) {
+            return false;
+        }
+
+        buttons[size++] = TouchButton(commands, area, type);
+
+        return true;
+    }
+
+    bool
+    Handle(const TouchInput &input) {
+        for (size_t i = 0; i < N; i++) {
+            auto &button = buttons[i];
+            if (button.Active() && button.ResponsibleFor(input)) {
+                button.executeCommand(commands, button.type);
+                button.MarkSelected();
+                return true;
+            }
+        }
+        return false;
+    }
+
+  private:
+    Commands &commands;
+    TouchButton buttons[N];
+    size_t size;
+};
+
 }; // namespace HexCalc

@@ -34,7 +34,7 @@ KeyInputHandler::Handle(const KeyInput &input) {
     } else if (input.PressedY()) {
         // TODO switch width
     } else if (input.PressedStart()) {
-        commands.InputOperatorEqual();
+        commands.Evaluate();
         res = true;
     } else if (input.PressedL()) {
         // TODO
@@ -43,4 +43,108 @@ KeyInputHandler::Handle(const KeyInput &input) {
     }
 
     return res;
+}
+
+void
+TouchButton::executeCommand(Commands &commands, ButtonType type) {
+    switch (type) {
+    case ButtonAnd:
+        commands.InputOperatorAnd();
+        break;
+    case ButtonOr:
+        commands.InputOperatorOr();
+        break;
+    case ButtonModulo:
+        commands.InputOperatorModulo();
+        break;
+    case ButtonA:
+        commands.InputNumberA();
+        break;
+    case ButtonLShift:
+        commands.InputOperatorLShift();
+        break;
+    case ButtonRShift:
+        commands.InputOperatorRShift();
+        break;
+    case ButtonCE:
+        commands.Clear();
+        break;
+    case ButtonBackspace:
+        commands.InputOperatorBackspace();
+        break;
+    case ButtonB:
+        commands.InputNumberB();
+        break;
+    case ButtonLBrac:
+        commands.InputOperatorLBrac();
+        break;
+    case ButtonRBrac:
+        commands.InputOperatorRBrac();
+        break;
+    case ButtonDivide:
+        commands.InputOperatorDivide();
+        break;
+    case ButtonMultiply:
+        commands.InputOperatorMultiply();
+        break;
+    case ButtonC:
+        commands.InputNumberC();
+        break;
+    case Button7:
+        commands.InputNumber7();
+        break;
+    case Button8:
+        commands.InputNumber8();
+        break;
+    case Button9:
+        commands.InputNumber9();
+        break;
+    case ButtonMinus:
+        commands.InputOperatorMinus();
+        break;
+    case ButtonD:
+        commands.InputNumberD();
+        break;
+    case Button4:
+        commands.InputNumber4();
+        break;
+    case Button5:
+        commands.InputNumber5();
+        break;
+    case Button6:
+        commands.InputNumber6();
+        break;
+    case ButtonPlus:
+        commands.InputOperatorPlus();
+        break;
+    case ButtonE:
+        commands.InputNumberE();
+        break;
+    case Button1:
+        commands.InputNumber1();
+        break;
+    case Button2:
+        commands.InputNumber2();
+        break;
+    case Button3:
+        commands.InputNumber3();
+        break;
+    case ButtonF:
+        commands.InputNumberF();
+        break;
+    case ButtonNegate:
+        commands.InputOperatorNegate();
+        break;
+    case Button0:
+        commands.InputNumber0();
+        break;
+    case ButtonBitwiseNot:
+        commands.InputOperatorNot();
+        break;
+    case ButtonEvaluate:
+        commands.Evaluate();
+        break;
+    default:
+        break;
+    }
 }
