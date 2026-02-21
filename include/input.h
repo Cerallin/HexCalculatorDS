@@ -6,10 +6,8 @@
  */
 #pragma once
 
+#include "commands.h"
 #include "common.h"
-
-#include <algorithm>
-#include <limits>
 
 namespace HexCalc {
 
@@ -186,5 +184,31 @@ ReadTouchInput(void) {
     TouchInput input{Point(touchPos), pressed};
     return input;
 }
+
+class KeyInputHandler {
+  public:
+    KeyInputHandler(Commands &commands) : commands(commands), previousKeys(0) {}
+
+    /**
+     * @brief Handle the key input and execute corresponding commands. It also
+     * updates the previous key states to detect key presses and releases.
+     *
+     * @param input The current key input state
+     * @return true if the input is handled, false otherwise
+     */
+    bool Handle(const KeyInput &input);
+
+  private:
+    /**
+     * @brief Commands instance to execute commands based on key inputs.
+     *
+     */
+    Commands &commands;
+    /**
+     * @brief Previously input states
+     *
+     */
+    uint32_t previousKeys;
+};
 
 }; // namespace HexCalc

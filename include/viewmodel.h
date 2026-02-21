@@ -8,6 +8,7 @@
 
 #include "commands.h"
 #include "event.h"
+#include "input.h"
 #include "model.h"
 
 namespace HexCalc {
@@ -61,11 +62,10 @@ class ViewModel : private NonCopyable {
     ValueModel valueModel;
 
     /**
-     * @brief Previously input states
+     * @brief Key input handler to identify key inputs and generate events
      *
      */
-    uint32_t previousKeys;
-    // TODO previousTouch;
+    KeyInputHandler keyInputHandler;
 
     /**
      * @brief Identify key inputs and generate events

@@ -16,7 +16,7 @@ ViewModel::ViewModel(void)
       // commands
       commands(eventBus),
       // models
-      formulaModel(eventBus), valueModel(eventBus) {
+      formulaModel(eventBus), valueModel(eventBus), keyInputHandler(commands) {
     eventBus.Subscribe(config);
     eventBus.Subscribe(formulaModel);
     eventBus.Subscribe(valueModel);
@@ -48,37 +48,11 @@ ViewModel::DispatchEvents(void) {
 bool
 ViewModel::handleKeyInputs(void) {
     auto keyInput = ReadKeyInput();
-    if (!keyInput.Active()) {
-        return false;
+    if (keyInput.Active()) {
+        return keyInputHandler.Handle(keyInput);
     }
 
-    if (keyInput.PressedUp()) {
-        commands.SwitchBaseUpper();
-    } else if (keyInput.PressedDown()) {
-        commands.SwitchBaseLower();
-    } else if (keyInput.PressedLeft()) {
-        // do nothing for now
-    } else if (keyInput.PressedRight()) {
-        // do nothing for now
-    } else if (keyInput.PressedA()) {
-        // TODO input previous selected button
-    } else if (keyInput.PressedB()) {
-        commands.InputOperatorBackspace();
-    } else if (keyInput.PressedX()) {
-        commands.Clear();
-    } else if (keyInput.PressedY()) {
-        // TODO switch width
-    } else if (keyInput.PressedStart()) {
-        commands.InputOperatorEqual();
-    } else if (keyInput.PressedL()) {
-        // TODO
-    } else if (keyInput.PressedR()) {
-        // TODO
-    }
-
-    previousKeys = keyInput.keys;
-
-    return true;
+    return false;
 }
 
 bool
@@ -87,8 +61,15 @@ ViewModel::handleTouchScreen(void) {
     if (!touchInput.Active()) {
         return false;
     }
-    // TODO: handle touch input and post TouchScreenEvent
-    return false;
+
+    // Get the touch point and post a TouchScreenEvent with the point data
+    Point touchPoint = touchInput.point;
+    eventBus.Post(Event{
+        touchPoint.ToInt(),
+        EventType::TouchScreenEvent,
+    });
+
+    return true;
 }
 
 void
