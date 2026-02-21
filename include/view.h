@@ -552,7 +552,7 @@ class SubView : public BasicView<Class, SubDisplay> {
 
 class InputView : public SubView<InputView> {
   public:
-    InputView(SubDisplay &display) : SubView(display) {}
+    InputView(SubDisplay &display);
 
     EventResult HandleEvent(const Event &e);
 

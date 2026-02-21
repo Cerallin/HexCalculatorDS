@@ -43,5 +43,6 @@ ViewHost::Update(void) {
     binView.Update();
     inputView.Update();
 
+    // Must be called once per frame --said by libnds
     bgUpdate();
 }

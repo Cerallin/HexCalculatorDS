@@ -9,6 +9,8 @@
 
 using namespace HexCalc;
 
+HexCalc::InputView::InputView(SubDisplay &display) : SubView(display) {}
+
 EventResult
 InputView::HandleEvent(const Event &e) {
     if (e.type != EventType::TouchScreenEvent) {

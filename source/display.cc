@@ -6,7 +6,10 @@
  */
 #include "display.h"
 #include "common.h"
+
+// assets
 #include "mainFont.h"
+#include "subscreenImage.h"
 
 using namespace HexCalc;
 
@@ -90,5 +93,11 @@ SubDisplay::SubDisplay(void) {
     // use layer 3
     auto bg = bgInitSub(3, SubType, SubSize, 0, 0);
     layer = Layer<SubDisplay>(bg);
-    // TODO load image
+    // copy image palette
+    dmaCopy(subscreenImagePal, BG_PALETTE_SUB, subscreenImagePalLen);
+    constexpr auto bgColor = RGB15(31, 31, 30);
+    setBackdropColorSub(bgColor);
+
+    // decompress image bitmap (LZ77) into VRAM
+    decompress(subscreenImageBitmap, bgGetGfxPtr(bg), LZ77Vram);
 }

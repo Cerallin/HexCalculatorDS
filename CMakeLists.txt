@@ -63,7 +63,9 @@ add_custom_command(
     COMMAND ${GRIT}
         ${CMAKE_CURRENT_BINARY_DIR}/subscreen-rainbow.bmp
         -ftc
-        -gB4
+        -gB8
+        -gb
+        -gzl
         -gTFF00FF
         -m
         -o subscreenImage

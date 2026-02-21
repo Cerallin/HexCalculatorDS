@@ -114,7 +114,7 @@ class SubDisplay : public Display {
      */
     static constexpr auto VideoMode = MODE_3_2D;
     static constexpr auto SubType = BgType_Bmp8;
-    static constexpr auto SubSize = BgSize_T_256x256;
+    static constexpr auto SubSize = BgSize_B8_256x256;
 
   private:
     Layer<SubDisplay> layer;
