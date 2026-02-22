@@ -20,15 +20,22 @@ An integer calculator for Nintendo DS.
 
 ### v1.0.0
 
-- [ ] input by touching sub screen
-- [ ] update current number
+- [x] input by touching sub screen
+- [x] update current number
 - [x] implement operators
 - [x] add quotes to the formula tree
+- [x] switch base: `hex`/`dec`/`oct`/`bin`
 - [ ] switch depth: `QWORD`/`DWORD`/`WORD`/`BYTE`
 - [ ] switch sign: `signed`/`unsigned`
-- [ ] switch base: `hex`/`dec`/`oct`/`bin`
+- [ ] Evaluate the formula
+- [ ] Disable number buttons with base
 
 ### v1.1.0
+
+- [ ] Count unclosed left brackets
+- [ ] Activate last pressed button (show focus sign)
+
+### v1.2.0
 
 - [ ] Add background to configView (the `UINT32` on topleft)
 - [ ] Modify the font shadows
