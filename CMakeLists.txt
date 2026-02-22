@@ -52,9 +52,9 @@ add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
     COMMAND ${PYTHON}
         ${CMAKE_CURRENT_SOURCE_DIR}/subscreen_maker/run.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/screenshots/HexCalculatorDS-sub.png
+        ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-sub.png
         ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/screenshots/HexCalculatorDS-sub.png
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-sub.png
     COMMENT "Generating font tilemap"
 )
 
@@ -152,7 +152,7 @@ set(NDS_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.nds)
 set(GAME_TITLE "Hex Calculator")
 set(GAME_SUBTITLE1 "c 2026")
 set(GAME_SUBTITLE2 "Cerallin")
-set(GAME_ICON ${CMAKE_SOURCE_DIR}/icon.bmp)
+set(GAME_ICON ${CMAKE_SOURCE_DIR}/design/HexCalculatorDS-icon.bmp)
 
 add_custom_command(
     OUTPUT ${NDS_FILE}
