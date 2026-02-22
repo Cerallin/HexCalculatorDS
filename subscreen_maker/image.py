@@ -6,7 +6,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 """
 import struct
 import numpy as np
-
+import cv2
 
 class Palette:
     def __init__(self):
@@ -62,6 +62,22 @@ class IndexedImage:
 
     def get_array(self):
         return self.data
+
+class ImagePreprocessor:
+    @staticmethod
+    def read_image(filename):
+        return cv2.imread(filename)
+
+    @staticmethod
+    def crop(image, top, left, bottom, right):
+        h, w, _ = image.shape
+        return image[top:h-bottom, left:w-right]
+
+    @staticmethod
+    def fill_rect(image, pos, shape, bgr):
+        x, y = pos
+        w, h = shape
+        image[y:y+h, x:x+w] = bgr
 
 
 class Bmp8Writer:

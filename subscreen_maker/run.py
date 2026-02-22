@@ -6,141 +6,11 @@ SPDX-License-Identifier: GPL-2.0-or-later
 """
 
 import sys
-import cv2
-import numpy as np
-from bmp import Palette, IndexedImage, Bmp8Writer
-from contour import contour_shape_key
+from image import Palette, IndexedImage, Bmp8Writer, ImagePreprocessor
+from contour import ContourAnalyzer, ContourRecord
+from contour import hex_to_bgr, hex_to_rgb
 
 DEBUG = False
-
-# ============================================================
-# Utils
-# ============================================================
-
-
-def hex_to_bgr(hex_color: str):
-    hex_color = hex_color.strip().lstrip("#")
-    r = int(hex_color[0:2], 16)
-    g = int(hex_color[2:4], 16)
-    b = int(hex_color[4:6], 16)
-    return (b, g, r)
-
-
-def hex_to_rgb(hex_color: str):
-    hex_color = hex_color.strip().lstrip("#")
-    r = int(hex_color[0:2], 16)
-    g = int(hex_color[2:4], 16)
-    b = int(hex_color[4:6], 16)
-    return (r, g, b)
-
-
-class ImagePreprocessor:
-
-    @staticmethod
-    def crop(image, top, left, bottom, right):
-        h, w, _ = image.shape
-        return image[top:h-bottom, left:w-right]
-
-    @staticmethod
-    def fill_rect(image, pos, shape, bgr):
-        x, y = pos
-        w, h = shape
-        image[y:y+h, x:x+w] = bgr
-
-
-class ContourAnalyzer:
-
-    BORDER_COLORS = ["82163d", "676666"]
-    SHADOW_COLORS = ["ddbfca", "cecccc"]
-    TEXT_COLORS = ["000000", "676666"]
-    BG_COLORS = ["f8f8f3", "f0eeee"]
-
-    @staticmethod
-    def build_mask(image, hex_colors):
-        mask = np.zeros(image.shape[:2], dtype=np.uint8)
-        for c in hex_colors:
-            bgr = np.array(hex_to_bgr(c), dtype=np.uint8)
-            match = np.all(image == bgr, axis=2)
-            mask[match] = 255
-        return mask
-
-    @staticmethod
-    def find_contours(mask):
-        kernel = np.ones((3, 3), dtype=np.uint8)
-        closed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        contours, _ = cv2.findContours(
-            closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        return contours
-
-    @staticmethod
-    def mask_points(mask):
-        ys, xs = np.where(mask)
-        return list(zip(xs.tolist(), ys.tolist()))
-
-    @staticmethod
-    def collect_outer_ring(image, contour, hex_colors, dist=1):
-        h, w, _ = image.shape
-
-        contour_mask = np.zeros((h, w), np.uint8)
-        cv2.drawContours(contour_mask, [contour], -1, 255, 1)
-
-        kernel = np.ones((3, 3), np.uint8)
-        dilated = cv2.dilate(contour_mask, kernel, iterations=dist)
-
-        filled = np.zeros((h, w), np.uint8)
-        cv2.drawContours(filled, [contour], -1, 255, -1)
-
-        ring = cv2.subtract(dilated, filled)
-
-        color_mask = ContourAnalyzer.build_mask(image, hex_colors)
-        near = (ring > 0) & (color_mask > 0)
-
-        return ContourAnalyzer.mask_points(near)
-
-    @staticmethod
-    def collect_inner_colors(image, contour):
-        h, w, _ = image.shape
-
-        filled = np.zeros((h, w), np.uint8)
-        boundary = np.zeros((h, w), np.uint8)
-
-        cv2.drawContours(filled, [contour], -1, 255, -1)
-        cv2.drawContours(boundary, [contour], -1, 255, 1)
-
-        inner = cv2.subtract(filled, boundary)
-
-        ys, xs = np.where(inner == 255)
-
-        colors = {}
-        for y, x in zip(ys, xs):
-            b, g, r = image[y, x]
-            key = f"{r:02x}{g:02x}{b:02x}"
-            colors.setdefault(key, []).append((x, y))
-
-        return colors
-
-
-class ContourRecord:
-    def __init__(self, contour):
-        self.contour = contour
-        self.shape_key = contour_shape_key(contour)
-
-        self.contour_points = [(x, y) for [[x, y]] in contour]
-        self.text_points = []
-        self.shadow_points = []
-        self.bg_points = []
-        self.sign_points = []
-
-    def draw(self, img: IndexedImage, palette_indices: dict):
-        img.fill_points(self.shadow_points, palette_indices["shadow"])
-        img.fill_points(self.contour_points, palette_indices["contour"])
-        img.fill_points(self.text_points, palette_indices["text"])
-        img.fill_points(self.bg_points, palette_indices["bg"])
-        img.fill_points(self.sign_points, palette_indices["sign"])
-
-    def position(self):
-        x, y, w, h = cv2.boundingRect(self.contour)
-        return x, y, w, h
 
 
 class HexCalculatorExporter:
@@ -333,7 +203,7 @@ if __name__ == "__main__":
     input_image = sys.argv[1]
     output_file = sys.argv[2]
 
-    img = cv2.imread(input_image)
+    img = ImagePreprocessor.read_image(input_image)
     if img is None:
         print(f"Failed to load image {input_image}")
         sys.exit(1)
