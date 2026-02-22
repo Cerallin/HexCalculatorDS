@@ -49,7 +49,7 @@ EventResult
 ValueModel::HandleEvent(const Event &e) {
     bool changed = false;
     if (e.type == InputEvent) {
-        auto eventData = static_cast<InputEventData>(e.data);
+        auto eventData = InputEventData(e.data);
 
         if (eventData.isOp) {
             // do nothing

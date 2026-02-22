@@ -23,13 +23,14 @@ struct InputEventData {
     } data;
     bool isOp;
 
-    InputEventData(EventDataType value) {
-        data.digit = static_cast<Digit>(value & 0xFF);
-        isOp = ((value & 0x100) != 0);
-    }
+    constexpr InputEventData(EventDataType value, bool isOp)
+        : data{static_cast<Digit>(value & 0xFF)}, isOp(isOp) {}
+
+    constexpr InputEventData(EventDataType value)
+        : data{.digit = static_cast<Digit>(value & 0xFF)}, isOp(false) {}
 
     int
-    ToInt() {
+    ToInt() const {
         return ((isOp ? 0x100 : 0) | (data.digit & 0xFF));
     }
 };
