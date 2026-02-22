@@ -12,9 +12,11 @@ An integer calculator for Nintendo DS.
 
 *Will change to real screen shots when all done.*
 
-![](screenshots/HexCalculatorDS-main.png)
+![](design/HexCalculatorDS-icon.bmp)
 
-![](screenshots/HexCalculatorDS-sub.png)
+![](design/HexCalculatorDS-main.png)
+
+![](design/HexCalculatorDS-sub.png)
 
 ## Milestones
 
