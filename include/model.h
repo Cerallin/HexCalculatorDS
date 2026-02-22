@@ -27,7 +27,8 @@ struct InputEventData {
         : data{static_cast<Digit>(value & 0xFF)}, isOp(isOp) {}
 
     constexpr InputEventData(EventDataType value)
-        : data{.digit = static_cast<Digit>(value & 0xFF)}, isOp(false) {}
+        : data{.digit = static_cast<Digit>(value & 0xFF)},
+          isOp((value & 0x100) != 0) {}
 
     int
     ToInt() const {

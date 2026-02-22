@@ -52,10 +52,24 @@ ValueModel::HandleEvent(const Event &e) {
         auto eventData = InputEventData(e.data);
 
         if (eventData.isOp) {
-            // do nothing
+            // TODO implement after formula tree is done
         } else {
-            value = value * config.Base() + eventData.data.digit;
-            changed = true;
+            // check overflow
+            auto base = config.Base();
+            auto width = config.Width();
+            auto sign = config.Sign();
+
+            auto maxValue = NumberMax(width, sign);
+            bool willOverflow = (value > maxValue / base) ||
+                                (value == maxValue / base &&
+                                 eventData.data.digit > maxValue % base);
+
+            if (willOverflow) {
+                // do nothing
+            } else {
+                value = value * base + eventData.data.digit;
+                changed = true;
+            }
         }
     } else if (e.type == ClearEvent) {
         value = NumberZero;

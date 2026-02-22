@@ -55,6 +55,22 @@ WidthMask(NumberWidth w) {
     }
 }
 
+constexpr NumberDataType
+NumberMax(NumberWidth w, NumberSign s) {
+    switch (w) {
+    case Byte:
+        return (s == Signed) ? 0x7F : 0xFF;
+    case Word:
+        return (s == Signed) ? 0x7FFF : 0xFFFF;
+    case DWord:
+        return (s == Signed) ? 0x7FFFFFFF : 0xFFFFFFFF;
+    case QWord:
+        return (s == Signed) ? 0x7FFFFFFFFFFFFFFF : 0xFFFFFFFFFFFFFFFF;
+    default:
+        return 0xFFFFFFFFFFFFFFFFull;
+    }
+}
+
 enum Digit : int8_t {
     DigitEOS = -1,
     Digit0 = 0,
