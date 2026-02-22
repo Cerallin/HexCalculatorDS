@@ -34,10 +34,12 @@ class Palette:
             for color in colorset_common:
                 self.add_color(*color)
 
-        remain = len(colorset_disabled) + len(colorset_selected)
+        remain = len(colorset_common) + len(colorset_disabled) + len(colorset_selected)
         for _ in range(256 - len(self.colors) - remain):
             self.add_color(0, 0, 0)
 
+        for color in colorset_common:
+            self.add_color(*color)
         for color in colorset_disabled:
             self.add_color(*color)
         for color in colorset_selected:
