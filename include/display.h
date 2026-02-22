@@ -108,6 +108,10 @@ class SubDisplay : public Display {
   public:
     SubDisplay(void);
 
+    void DisableButton(int index);
+    void EnableButton(int index);
+    void SelectButton(int index);
+
     /**
      * @brief
      *
@@ -116,8 +120,14 @@ class SubDisplay : public Display {
     static constexpr auto SubType = BgType_Bmp8;
     static constexpr auto SubSize = BgSize_B8_256x256;
 
+    static constexpr int ColorCount = 5;
+    static constexpr int MaxColorCount = 256;
+
   private:
     Layer<SubDisplay> layer;
+    uint16_t *enabledPalette;
+    uint16_t *disabledPalette;
+    uint16_t *selectedPalette;
 };
 
 }; // namespace HexCalc

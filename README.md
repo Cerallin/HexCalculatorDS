@@ -29,8 +29,8 @@ An integer calculator for Nintendo DS.
 - [x] switch base: `hex`/`dec`/`oct`/`bin`
 - [ ] switch depth: `QWORD`/`DWORD`/`WORD`/`BYTE`
 - [ ] switch sign: `signed`/`unsigned`
-- [ ] Evaluate the formula
-- [ ] Disable number buttons with base
+- [ ] evaluate the formula
+- [x] disable number buttons with base
 
 ### v1.1.0
 

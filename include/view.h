@@ -560,7 +560,12 @@ class InputView : public SubView<InputView> {
 
   private:
     ViewModel &vm;
+    // FIXME magic numbers
     TouchScreenHandler<32> handler;
+    TouchButton *numberButtons[16];
+    TouchButton *rightBracketButton;
+
+    void handleBaseChange(void);
 };
 
 }; // namespace HexCalc

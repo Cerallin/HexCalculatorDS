@@ -98,6 +98,32 @@ SubDisplay::SubDisplay(void) {
     constexpr auto bgColor = RGB15(31, 31, 30);
     setBackdropColorSub(bgColor);
 
+    // set up palettes for button states
+    enabledPalette = &BG_PALETTE_SUB[MaxColorCount - (3 * ColorCount)];
+    disabledPalette = &BG_PALETTE_SUB[MaxColorCount - (2 * ColorCount)];
+    selectedPalette = &BG_PALETTE_SUB[MaxColorCount - ColorCount];
+
     // decompress image bitmap (LZ77) into VRAM
     decompress(subscreenImageBitmap, bgGetGfxPtr(bg), LZ77Vram);
+}
+
+void
+SubDisplay::DisableButton(int index) {
+    // 1 for the backdrop color
+    uint16_t *dest = &BG_PALETTE_SUB[1 + (index * ColorCount)];
+    dmaCopy(disabledPalette, dest, ColorCount * sizeof(uint16_t));
+}
+
+void
+SubDisplay::EnableButton(int index) {
+    // 1 for the backdrop color
+    uint16_t *dest = &BG_PALETTE_SUB[1 + (index * ColorCount)];
+    dmaCopy(enabledPalette, dest, ColorCount * sizeof(uint16_t));
+}
+
+void
+SubDisplay::SelectButton(int index) {
+    // 1 for the backdrop color
+    uint16_t *dest = &BG_PALETTE_SUB[1 + (index * ColorCount)];
+    dmaCopy(selectedPalette, dest, ColorCount * sizeof(uint16_t));
 }

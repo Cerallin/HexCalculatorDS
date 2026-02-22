@@ -353,15 +353,18 @@ class TouchScreenHandler {
     TouchScreenHandler(Commands &commands)
         : commands(commands), buttons(), size(0) {}
 
-    bool
+    TouchButton *
     RegisterButton(const Area &area, ButtonType type) {
-        if (size >= N) {
-            return false;
-        }
-
+        assert(size < N);
         buttons[size++] = TouchButton(area, type);
 
-        return true;
+        return &buttons[size - 1];
+    }
+
+    TouchButton &
+    GetButton(size_t index) {
+        assert(index < size);
+        return buttons[index];
     }
 
     bool
@@ -375,6 +378,11 @@ class TouchScreenHandler {
             }
         }
         return false;
+    }
+
+    size_t
+    Size() const {
+        return size;
     }
 
   private:

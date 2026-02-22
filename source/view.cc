@@ -13,92 +13,152 @@ using namespace HexCalc;
 InputView::InputView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), handler(vm.Cmds()) {
     // Ordered by button position, left to right then top to bottom
-    handler.RegisterButton(Area(AREA_0_X, AREA_0_Y, AREA_0_W, AREA_0_H),
-                           ButtonType::ButtonAnd);
-    handler.RegisterButton(Area(AREA_1_X, AREA_1_Y, AREA_1_W, AREA_1_H),
-                           ButtonType::ButtonA);
-    handler.RegisterButton(Area(AREA_2_X, AREA_2_Y, AREA_2_W, AREA_2_H),
-                           ButtonType::ButtonB);
-    handler.RegisterButton(Area(AREA_3_X, AREA_3_Y, AREA_3_W, AREA_3_H),
-                           ButtonType::ButtonC);
-    handler.RegisterButton(Area(AREA_4_X, AREA_4_Y, AREA_4_W, AREA_4_H),
-                           ButtonType::ButtonD);
-    handler.RegisterButton(Area(AREA_5_X, AREA_5_Y, AREA_5_W, AREA_5_H),
-                           ButtonType::ButtonE);
-    handler.RegisterButton(Area(AREA_6_X, AREA_6_Y, AREA_6_W, AREA_6_H),
-                           ButtonType::ButtonF);
-    handler.RegisterButton(Area(AREA_7_X, AREA_7_Y, AREA_7_W, AREA_7_H),
-                           ButtonType::ButtonOr);
-    handler.RegisterButton(Area(AREA_8_X, AREA_8_Y, AREA_8_W, AREA_8_H),
-                           ButtonType::ButtonLShift);
-    handler.RegisterButton(Area(AREA_9_X, AREA_9_Y, AREA_9_W, AREA_9_H),
-                           ButtonType::ButtonLBrac);
-    handler.RegisterButton(Area(AREA_10_X, AREA_10_Y, AREA_10_W, AREA_10_H),
-                           ButtonType::Button7);
-    handler.RegisterButton(Area(AREA_11_X, AREA_11_Y, AREA_11_W, AREA_11_H),
-                           ButtonType::Button4);
-    handler.RegisterButton(Area(AREA_12_X, AREA_12_Y, AREA_12_W, AREA_12_H),
-                           ButtonType::Button1);
-    handler.RegisterButton(Area(AREA_13_X, AREA_13_Y, AREA_13_W, AREA_13_H),
-                           ButtonType::ButtonNegate);
-    handler.RegisterButton(Area(AREA_14_X, AREA_14_Y, AREA_14_W, AREA_14_H),
-                           ButtonType::ButtonModulo);
-    handler.RegisterButton(Area(AREA_15_X, AREA_15_Y, AREA_15_W, AREA_15_H),
-                           ButtonType::ButtonRShift);
-    handler.RegisterButton(Area(AREA_16_X, AREA_16_Y, AREA_16_W, AREA_16_H),
-                           ButtonType::ButtonRBrac);
-    handler.RegisterButton(Area(AREA_17_X, AREA_17_Y, AREA_17_W, AREA_17_H),
-                           ButtonType::Button8);
-    handler.RegisterButton(Area(AREA_18_X, AREA_18_Y, AREA_18_W, AREA_18_H),
-                           ButtonType::Button5);
-    handler.RegisterButton(Area(AREA_19_X, AREA_19_Y, AREA_19_W, AREA_19_H),
-                           ButtonType::Button2);
-    handler.RegisterButton(Area(AREA_20_X, AREA_20_Y, AREA_20_W, AREA_20_H),
-                           ButtonType::Button0);
-    handler.RegisterButton(Area(AREA_21_X, AREA_21_Y, AREA_21_W, AREA_21_H),
-                           ButtonType::ButtonClear);
-    handler.RegisterButton(Area(AREA_22_X, AREA_22_Y, AREA_22_W, AREA_22_H),
-                           ButtonType::ButtonDivide);
-    handler.RegisterButton(Area(AREA_23_X, AREA_23_Y, AREA_23_W, AREA_23_H),
-                           ButtonType::Button9);
-    handler.RegisterButton(Area(AREA_24_X, AREA_24_Y, AREA_24_W, AREA_24_H),
-                           ButtonType::Button6);
-    handler.RegisterButton(Area(AREA_25_X, AREA_25_Y, AREA_25_W, AREA_25_H),
-                           ButtonType::Button3);
-    handler.RegisterButton(Area(AREA_26_X, AREA_26_Y, AREA_26_W, AREA_26_H),
-                           ButtonType::ButtonBitwiseNot);
-    handler.RegisterButton(Area(AREA_27_X, AREA_27_Y, AREA_27_W, AREA_27_H),
-                           ButtonType::ButtonBackspace);
-    handler.RegisterButton(Area(AREA_28_X, AREA_28_Y, AREA_28_W, AREA_28_H),
-                           ButtonType::ButtonMultiply);
-    handler.RegisterButton(Area(AREA_29_X, AREA_29_Y, AREA_29_W, AREA_29_H),
-                           ButtonType::ButtonMinus);
-    handler.RegisterButton(Area(AREA_30_X, AREA_30_Y, AREA_30_W, AREA_30_H),
-                           ButtonType::ButtonPlus);
+    auto buttonAnd = handler.RegisterButton(
+        Area(AREA_0_X, AREA_0_Y, AREA_0_W, AREA_0_H), ButtonType::ButtonAnd);
+    auto buttonA = handler.RegisterButton(
+        Area(AREA_1_X, AREA_1_Y, AREA_1_W, AREA_1_H), ButtonType::ButtonA);
+    auto buttonB = handler.RegisterButton(
+        Area(AREA_2_X, AREA_2_Y, AREA_2_W, AREA_2_H), ButtonType::ButtonB);
+    auto buttonC = handler.RegisterButton(
+        Area(AREA_3_X, AREA_3_Y, AREA_3_W, AREA_3_H), ButtonType::ButtonC);
+    auto buttonD = handler.RegisterButton(
+        Area(AREA_4_X, AREA_4_Y, AREA_4_W, AREA_4_H), ButtonType::ButtonD);
+    auto buttonE = handler.RegisterButton(
+        Area(AREA_5_X, AREA_5_Y, AREA_5_W, AREA_5_H), ButtonType::ButtonE);
+    auto buttonF = handler.RegisterButton(
+        Area(AREA_6_X, AREA_6_Y, AREA_6_W, AREA_6_H), ButtonType::ButtonF);
+    auto buttonOr = handler.RegisterButton(
+        Area(AREA_7_X, AREA_7_Y, AREA_7_W, AREA_7_H), ButtonType::ButtonOr);
+    auto buttonLShift = handler.RegisterButton(
+        Area(AREA_8_X, AREA_8_Y, AREA_8_W, AREA_8_H), ButtonType::ButtonLShift);
+    auto buttonLBrac = handler.RegisterButton(
+        Area(AREA_9_X, AREA_9_Y, AREA_9_W, AREA_9_H), ButtonType::ButtonLBrac);
+    auto button7 = handler.RegisterButton(
+        Area(AREA_10_X, AREA_10_Y, AREA_10_W, AREA_10_H), ButtonType::Button7);
+    auto button4 = handler.RegisterButton(
+        Area(AREA_11_X, AREA_11_Y, AREA_11_W, AREA_11_H), ButtonType::Button4);
+    auto button1 = handler.RegisterButton(
+        Area(AREA_12_X, AREA_12_Y, AREA_12_W, AREA_12_H), ButtonType::Button1);
+    auto buttonNegate =
+        handler.RegisterButton(Area(AREA_13_X, AREA_13_Y, AREA_13_W, AREA_13_H),
+                               ButtonType::ButtonNegate);
+    auto buttonModulo =
+        handler.RegisterButton(Area(AREA_14_X, AREA_14_Y, AREA_14_W, AREA_14_H),
+                               ButtonType::ButtonModulo);
+    auto buttonRShift =
+        handler.RegisterButton(Area(AREA_15_X, AREA_15_Y, AREA_15_W, AREA_15_H),
+                               ButtonType::ButtonRShift);
+    auto buttonRBrac =
+        handler.RegisterButton(Area(AREA_16_X, AREA_16_Y, AREA_16_W, AREA_16_H),
+                               ButtonType::ButtonRBrac);
+    auto button8 = handler.RegisterButton(
+        Area(AREA_17_X, AREA_17_Y, AREA_17_W, AREA_17_H), ButtonType::Button8);
+    auto button5 = handler.RegisterButton(
+        Area(AREA_18_X, AREA_18_Y, AREA_18_W, AREA_18_H), ButtonType::Button5);
+    auto button2 = handler.RegisterButton(
+        Area(AREA_19_X, AREA_19_Y, AREA_19_W, AREA_19_H), ButtonType::Button2);
+    auto button0 = handler.RegisterButton(
+        Area(AREA_20_X, AREA_20_Y, AREA_20_W, AREA_20_H), ButtonType::Button0);
+    auto buttonClear =
+        handler.RegisterButton(Area(AREA_21_X, AREA_21_Y, AREA_21_W, AREA_21_H),
+                               ButtonType::ButtonClear);
+    auto buttonDivide =
+        handler.RegisterButton(Area(AREA_22_X, AREA_22_Y, AREA_22_W, AREA_22_H),
+                               ButtonType::ButtonDivide);
+    auto button9 = handler.RegisterButton(
+        Area(AREA_23_X, AREA_23_Y, AREA_23_W, AREA_23_H), ButtonType::Button9);
+    auto button6 = handler.RegisterButton(
+        Area(AREA_24_X, AREA_24_Y, AREA_24_W, AREA_24_H), ButtonType::Button6);
+    auto button3 = handler.RegisterButton(
+        Area(AREA_25_X, AREA_25_Y, AREA_25_W, AREA_25_H), ButtonType::Button3);
+    auto buttonBitwiseNot =
+        handler.RegisterButton(Area(AREA_26_X, AREA_26_Y, AREA_26_W, AREA_26_H),
+                               ButtonType::ButtonBitwiseNot);
+    auto buttonBackspace =
+        handler.RegisterButton(Area(AREA_27_X, AREA_27_Y, AREA_27_W, AREA_27_H),
+                               ButtonType::ButtonBackspace);
+    auto buttonMultiply =
+        handler.RegisterButton(Area(AREA_28_X, AREA_28_Y, AREA_28_W, AREA_28_H),
+                               ButtonType::ButtonMultiply);
+    auto buttonMinus =
+        handler.RegisterButton(Area(AREA_29_X, AREA_29_Y, AREA_29_W, AREA_29_H),
+                               ButtonType::ButtonMinus);
+    auto buttonPlus =
+        handler.RegisterButton(Area(AREA_30_X, AREA_30_Y, AREA_30_W, AREA_30_H),
+                               ButtonType::ButtonPlus);
+
+    numberButtons[0x00] = button0;
+    numberButtons[0x01] = button1;
+    numberButtons[0x02] = button2;
+    numberButtons[0x03] = button3;
+    numberButtons[0x04] = button4;
+    numberButtons[0x05] = button5;
+    numberButtons[0x06] = button6;
+    numberButtons[0x07] = button7;
+    numberButtons[0x08] = button8;
+    numberButtons[0x09] = button9;
+    numberButtons[0x0A] = buttonA;
+    numberButtons[0x0B] = buttonB;
+    numberButtons[0x0C] = buttonC;
+    numberButtons[0x0D] = buttonD;
+    numberButtons[0x0E] = buttonE;
+    numberButtons[0x0F] = buttonF;
+
+    rightBracketButton = buttonRBrac;
+
+    handleBaseChange();
 }
 
 EventResult
 InputView::HandleEvent(const Event &e) {
-    if (e.type != EventType::TouchScreenEvent) {
-        return Skipped;
+    if (e.type == EventType::UpdateBaseEvent) {
+        handleBaseChange();
+
+        BasicView::markDirty();
+        debugf("InputView invalidated by UpdateBaseEvent\n");
+
+        return Consumed;
+    } else if (e.type == EventType::TouchScreenEvent) {
+        Point touchPoint(e.data);
+
+        debugf("Touch at (%d, %d)\n", touchPoint.x, touchPoint.y);
+
+        handler.Handle(touchPoint);
+
+        // FIXME wait for a while to avoid handling the same touch event
+        // multiple times
+        for (int i = 0; i < 8; i++) {
+            swiWaitForVBlank();
+        }
+        return Consumed;
     }
 
-    Point touchPoint(e.data);
-
-    debugf("Touch at (%d, %d)\n", touchPoint.x, touchPoint.y);
-
-    handler.Handle(touchPoint);
-
-    for (int i = 0; i < 8; i++) {
-        swiWaitForVBlank();
-    }
-
-    return Consumed;
+    return Skipped;
 }
 
 void
 InputView::ForceUpdate(void) {
     debugf("InputView refreshed\n");
+    for (size_t i = 0; i < handler.Size(); i++) {
+        const auto &button = handler.GetButton(i);
+        if (button.Active()) {
+            display.EnableButton(i);
+        } else {
+            display.DisableButton(i);
+        }
+    }
+}
+
+void
+InputView::handleBaseChange(void) {
+    auto base = config.Base();
+    for (size_t i = 0; i < 16; i++) {
+        if (i < static_cast<int>(base)) {
+            numberButtons[i]->Enable();
+        } else {
+            numberButtons[i]->Disable();
+        }
+    }
 }
 
 EventResult
