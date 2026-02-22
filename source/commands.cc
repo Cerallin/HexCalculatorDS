@@ -210,7 +210,7 @@ Commands::InputOperatorOr(void) {
 
 void
 Commands::InputOperatorModulo(void) {
-    debugf("Key % pressed\n");
+    debugf("Key %% pressed\n");
     bus.Post(Event{
         InputOpModulo,
         EventType::InputEvent,

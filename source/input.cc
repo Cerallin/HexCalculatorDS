@@ -66,7 +66,7 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     case ButtonRShift:
         commands.InputOperatorRShift();
         break;
-    case ButtonCE:
+    case ButtonClear:
         commands.Clear();
         break;
     case ButtonBackspace:
