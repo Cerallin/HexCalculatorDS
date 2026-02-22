@@ -130,6 +130,10 @@ InputView::HandleEvent(const Event &e) {
         for (int i = 0; i < 8; i++) {
             swiWaitForVBlank();
         }
+
+        // To update selected button state after handling touch input
+        BasicView::markDirty();
+
         return Consumed;
     }
 
@@ -141,7 +145,10 @@ InputView::ForceUpdate(void) {
     debugf("InputView refreshed\n");
     for (size_t i = 0; i < handler.Size(); i++) {
         const auto &button = handler.GetButton(i);
-        if (button.Active()) {
+        if (button.Selected()) {
+            debugf("Button %zu selected\n", i);
+            display.SelectButton(i);
+        } else if (button.Active()) {
             display.EnableButton(i);
         } else {
             display.DisableButton(i);

@@ -318,6 +318,11 @@ class TouchButton {
         }
     }
 
+    void
+    Unselect() {
+        selected = false;
+    }
+
     ButtonType
     Type() const {
         return type;
@@ -351,7 +356,7 @@ template <size_t N>
 class TouchScreenHandler {
   public:
     TouchScreenHandler(Commands &commands)
-        : commands(commands), buttons(), size(0) {}
+        : commands(commands), buttons(), previouslySelected(nullptr), size(0) {}
 
     TouchButton *
     RegisterButton(const Area &area, ButtonType type) {
@@ -370,10 +375,14 @@ class TouchScreenHandler {
     bool
     Handle(const Point &input) {
         for (size_t i = 0; i < N; i++) {
-            auto &button = buttons[i];
+            TouchButton &button = buttons[i];
             if (button.Active() && button.ResponsibleFor(input)) {
                 button.ExecuteCommand(commands, button.Type());
+                if (previouslySelected) {
+                    previouslySelected->Unselect();
+                }
                 button.MarkSelected();
+                previouslySelected = &button;
                 return true;
             }
         }
@@ -388,6 +397,7 @@ class TouchScreenHandler {
   private:
     Commands &commands;
     TouchButton buttons[N];
+    TouchButton *previouslySelected;
     size_t size;
 };
 
