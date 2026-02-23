@@ -11,26 +11,139 @@ using namespace HexCalc;
 
 static bool evaluateError = false;
 
-static inline bool
-IsExpression(FormulaTreeNode &node) {
-    auto data = node.Get();
+void
+FormulaTreeNode::Evaluate(void) {
+    if (evaluateError) {
+        return;
+    }
+
+    if (value.IsNumber()) {
+        // do nothing if is number
+    } else {
+        // is operator
+        auto op = value.GetOperator();
+
+        if (Operator::Unary(op)) {
+            // check left node if is unary operator
+            if (left == nullptr) {
+                evaluateError = true;
+                return;
+            }
+            // this only handles equal & bracket
+            value.SetNumber(left->Get().GetNumber());
+            Assign(value);
+        } else {
+            // check both left & right nodes if is binary operator
+            if ((left == nullptr) || (right == nullptr)) {
+                evaluateError = true;
+                return;
+            }
+
+            auto lvalue = left->Get().GetNumber();
+            auto rvalue = right->Get().GetNumber();
+
+            switch (op) {
+            case LeftShift:
+                value.SetNumber(Operator::LeftShift(lvalue, rvalue));
+                break;
+            case RightShift:
+                value.SetNumber(Operator::RightShift(lvalue, rvalue));
+                break;
+            case Modulo:
+                value.SetNumber(Operator::Modulo(lvalue, rvalue));
+                break;
+            case BitwiseAnd:
+                value.SetNumber(Operator::And(lvalue, rvalue));
+                break;
+            case BitwiseOr:
+                value.SetNumber(Operator::Or(lvalue, rvalue));
+                break;
+            case Multiply:
+                value.SetNumber(Operator::Multiply(lvalue, rvalue));
+                break;
+            case Divide:
+                value.SetNumber(Operator::Divide(lvalue, rvalue));
+                break;
+            case Plus:
+                value.SetNumber(Operator::Plus(lvalue, rvalue));
+                break;
+            case Minus:
+                value.SetNumber(Operator::Minus(lvalue, rvalue));
+                break;
+            default:
+                // TODO generate error event
+                break;
+            }
+
+            Assign(value);
+        }
+    }
+}
+
+bool
+FormulaTreeNode::Expression() {
     // return true if is number or paired brackets
-    if (data.IsNumber() || data.Paired()) {
+    if (value.IsNumber() || value.Paired()) {
         return true;
     }
 
-    auto left = node.Left();
-    auto right = node.Right();
+    auto left = Left();
+    auto right = Right();
     if (left == nullptr || right == nullptr) {
         return false;
     }
     // if is an operator,
     // return true if both left and right are valid expressions
-    if (IsExpression(*node.Left()) && IsExpression(*node.Left())) {
+    // TODO post-order traversal
+    if (left->Expression() && right->Expression()) {
         return true;
     }
 
     return false;
+}
+
+bool
+FormulaTreeNode::Completed() {
+    if (value.IsNumber()) {
+        return true;
+    }
+    if (value.IsOperator()) {
+        auto op = value.GetOperator();
+        if (Operator::Unary(op)) {
+            return ChildCount() >= 1;
+        } else {
+            return ChildCount() >= 2;
+        }
+    }
+    return false;
+}
+
+FormulaTreeNode *
+FormulaTreeNode::findUnpairedLBrac() {
+    for (auto node = this; node != nullptr; node = node->Parent()) {
+        auto &nodeRef = *node;
+
+        if (!nodeRef.Get().IsOperator() ||
+            nodeRef.Get().GetOperator() != OperatorType::LeftBracket) {
+            if (nodeRef.Completed()) {
+                continue;
+            } else {
+                return nullptr;
+            }
+        }
+        // Found the matching left bracket
+        if (!nodeRef.Get().Paired()) {
+            return node;
+        }
+    }
+
+    return nullptr;
+}
+
+FormulaTree::FormulaTree(void)
+    : nodes{}, root{FormulaData{OperatorType::Equal}}, currentNode(&nodes[0]),
+      size(0) {
+    Clear();
 }
 
 bool
@@ -41,7 +154,7 @@ FormulaTree::Input(const FormulaData &data) {
     }
 
     bool incomingNumber = data.IsNumber();
-    bool currentExpression = IsExpression(*currentNode);
+    bool currentExpression = currentNode->Expression();
 
     if (!incomingNumber && !currentExpression) {
         // 2 operators cannot be adjacent
@@ -53,9 +166,9 @@ FormulaTree::Input(const FormulaData &data) {
 
             auto op = currentNode->Get().GetOperator();
             if (Operator::Unary(op)) {
-                FormulaTreeNode::ConnectLeft(*currentNode, node);
+                currentNode->ConnectLeft(node);
             } else {
-                FormulaTreeNode::ConnectRight(*currentNode, node);
+                currentNode->ConnectRight(node);
             }
             currentNode = &node;
             return true;
@@ -78,9 +191,9 @@ FormulaTree::Input(const FormulaData &data) {
 
         auto op = currentNode->Get().GetOperator();
         if (Operator::Unary(op)) {
-            FormulaTreeNode::ConnectLeft(*currentNode, node);
+            currentNode->ConnectLeft(node);
         } else {
-            FormulaTreeNode::ConnectRight(*currentNode, node);
+            currentNode->ConnectRight(node);
         }
 
         // point current node to new number
@@ -92,7 +205,7 @@ FormulaTree::Input(const FormulaData &data) {
         // bracket handling
         auto op = data.GetOperator();
         if (op == OperatorType::RightBracket) {
-            auto *leftBracket = findUnpairedLBrac();
+            auto *leftBracket = currentNode->findUnpairedLBrac();
             if (leftBracket == nullptr) {
                 return false;
             }
@@ -116,30 +229,30 @@ FormulaTree::Input(const FormulaData &data) {
         if ((parentOp == Equal) || (parentOp == LeftBracket)) {
 
             if (parent.Left() == currentNode) {
-                FormulaTreeNode::ConnectLeft(parent, node);
+                parent.ConnectLeft(node);
             } else {
-                FormulaTreeNode::ConnectRight(parent, node);
+                parent.ConnectRight(node);
             }
-            FormulaTreeNode::ConnectLeft(node, *currentNode);
+            node.ConnectLeft(*currentNode);
         } else if (Operator::LowerThan(op, parent.Get().GetOperator())) {
             // new operator has lower precedence than parent operator
             auto grandParent = parent.Parent();
             // new operator becomes the parent of the parent node
             if (grandParent->Left() == &parent) {
-                FormulaTreeNode::ConnectLeft(*grandParent, node);
+                grandParent->ConnectLeft(node);
             } else {
-                FormulaTreeNode::ConnectRight(*grandParent, node);
+                grandParent->ConnectRight(node);
             }
-            FormulaTreeNode::ConnectLeft(node, parent);
+            node.ConnectLeft(parent);
         } else {
             // new operator has higher or equal precedence than parent
             // operator new operator becomes the child of current node
             if (parent.Left() == currentNode) {
-                FormulaTreeNode::ConnectLeft(parent, node);
+                parent.ConnectLeft(node);
             } else {
-                FormulaTreeNode::ConnectRight(parent, node);
+                parent.ConnectRight(node);
             }
-            FormulaTreeNode::ConnectLeft(node, *currentNode);
+            node.ConnectLeft(*currentNode);
         }
         // point current node to new operator
         currentNode = &node;
@@ -157,112 +270,26 @@ FormulaTree::Clear(void) {
     auto &node = newNode();
     node.Assign(FormulaData(NumberZero, true));
     // connect the new node to the dummy root node
-    FormulaTreeNode::ConnectLeft(root, node);
+    root.ConnectLeft(node);
     // point current node to the new node
     currentNode = &node;
-}
-
-static void
-evaluateNode(FormulaTreeNode &node) {
-    if (evaluateError) {
-        return;
-    }
-
-    auto data = node.Get();
-    if (data.IsNumber()) {
-        // do nothing if is number
-    } else {
-        // is operator
-        auto op = data.GetOperator();
-        auto *left = node.Left();
-        auto *right = node.Right();
-
-        if (Operator::Unary(op)) {
-            // check left node if is unary operator
-            if (left == nullptr) {
-                evaluateError = true;
-                return;
-            }
-            // this only handles equal & bracket
-            data.SetNumber(left->Get().GetNumber());
-            node.Assign(data);
-        } else {
-            // check both left & right nodes if is binary operator
-            if ((left == nullptr) || (right == nullptr)) {
-                evaluateError = true;
-                return;
-            }
-
-            auto lvalue = left->Get().GetNumber();
-            auto rvalue = right->Get().GetNumber();
-
-            switch (op) {
-            case LeftShift:
-                data.SetNumber(Operator::LeftShift(lvalue, rvalue));
-                break;
-            case RightShift:
-                data.SetNumber(Operator::RightShift(lvalue, rvalue));
-                break;
-            case Modulo:
-                data.SetNumber(Operator::Modulo(lvalue, rvalue));
-                break;
-            case BitwiseAnd:
-                data.SetNumber(Operator::And(lvalue, rvalue));
-                break;
-            case BitwiseOr:
-                data.SetNumber(Operator::Or(lvalue, rvalue));
-                break;
-            case Multiply:
-                data.SetNumber(Operator::Multiply(lvalue, rvalue));
-                break;
-            case Divide:
-                data.SetNumber(Operator::Divide(lvalue, rvalue));
-                break;
-            case Plus:
-                data.SetNumber(Operator::Plus(lvalue, rvalue));
-                break;
-            case Minus:
-                data.SetNumber(Operator::Minus(lvalue, rvalue));
-                break;
-            default:
-                // TODO generate error event
-                break;
-            }
-
-            node.Assign(data);
-        }
-    }
 }
 
 bool
 FormulaTree::Evaluate(void) {
     evaluateError = false;
 
-    PostOrderTraversal<FormulaTreeNode, 32>(&root, evaluateNode);
-
-    // auto result = root.Get().GetNumber();
+    constexpr size_t stackSize = MaxSize / 2; // maximum depth of the tree
+    root.PostOrderTraversal<stackSize>(
+        [](FormulaTreeNode &node) { node.Evaluate(); });
 
     return evaluateError != true;
 }
 
-FormulaTreeNode *
-FormulaTree::findUnpairedLBrac() {
-    for (auto node = currentNode; node != nullptr; node = node->Parent()) {
-        auto &nodeRef = *node;
+FormulaTreeNode &
+FormulaTree::newNode() {
+    auto node = &nodes[size++];
+    node->Reset();
 
-        if (!nodeRef.Get().IsOperator() ||
-            nodeRef.Get().GetOperator() != OperatorType::LeftBracket) {
-            if (nodeCompleted(nodeRef)) {
-                continue;
-            } else {
-                return nullptr;
-            }
-        }
-        // Found the matching left bracket
-        if (!nodeRef.Get().Paired()) {
-            return node;
-        }
-    }
-
-    return nullptr;
+    return *node;
 }

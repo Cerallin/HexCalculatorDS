@@ -79,17 +79,56 @@ class FormulaData {
     bool isShadow;
 };
 
+/**
+ * @brief A binary tree node that represents either a number or an operator in
+ * the formula tree. The tree structure encodes the precedence and associativity
+ * of the operators, as well as the grouping of expressions with brackets.
+ *
+ */
 class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
   public:
     FormulaTreeNode(void) : TreeNode() {}
     FormulaTreeNode(const FormulaData &data) : TreeNode(data) {}
+
+    /**
+     * @brief Evaluate the expression represented by this node. If the node is a
+     * number, do nothing. If the node is an operator, evaluate its children and
+     * apply the operator to get the result.
+     *
+     */
+    void Evaluate(void);
+
+    /**
+     * @brief Check if the node is a valid expression. A valid expression can be
+     * a number, a paired bracket, or an operator with valid expressions as its
+     * children.
+     *
+     * @return true if the node is a valid expression, false otherwise
+     */
+    bool Expression();
+
+    /**
+     * @brief Check if the node is completed, which means it has enough children
+     * to be evaluated. For number node, it is always completed. For operator
+     * node, it is completed if it has at least 1 child for unary operator, or
+     * at least 2 children for binary operator.
+     *
+     * @return true if the node is completed, false otherwise
+     */
+    bool Completed();
+
+    /**
+     * @brief Find the nearest unpaired left bracket node from the current node.
+     *
+     * @return FormulaTreeNode* pointer to the unpaired '(' node, or nullptr if
+     * not found
+     */
+    FormulaTreeNode *findUnpairedLBrac();
 };
 
 class FormulaTree : private NonCopyable {
   public:
-    explicit FormulaTree(void) : nodes{}, currentNode(&nodes[0]), size(0) {
-        Clear();
-    }
+    explicit FormulaTree(void);
 
     bool Input(const FormulaData &data);
 
@@ -114,7 +153,7 @@ class FormulaTree : private NonCopyable {
     /**
      * @brief root node, will be enclosed by another equal operator node.
      */
-    FormulaTreeNode root{FormulaData{OperatorType::Equal}};
+    FormulaTreeNode root;
     FormulaTreeNode *currentNode;
     size_t size;
 
@@ -124,46 +163,7 @@ class FormulaTree : private NonCopyable {
      *
      * @return FormulaTreeNode& reference to the new node
      */
-    FormulaTreeNode &
-    newNode() {
-        auto node = &nodes[size++];
-        node->Reset();
-
-        return *node;
-    }
-
-    /**
-     * @brief Find the nearest unpaired left bracket node from the current node.
-     *
-     * @return FormulaTreeNode* pointer to the unpaired '(' node, or
-     * nullptr if not found
-     */
-    FormulaTreeNode *findUnpairedLBrac();
-
-    /**
-     * @brief Check if the node is completed, which means it has enough children
-     * to be evaluated. For number node, it is always completed. For operator
-     * node, it is completed if it has at least 1 child for unary operator, or
-     * at least 2 children for binary operator.
-     *
-     * @param node
-     * @return true if the node is completed, false otherwise
-     */
-    bool
-    nodeCompleted(const FormulaTreeNode &node) {
-        if (node.Get().IsNumber()) {
-            return true;
-        }
-        if (node.Get().IsOperator()) {
-            auto op = node.Get().GetOperator();
-            if (Operator::Unary(op)) {
-                return node.ChildCount() >= 1;
-            } else {
-                return node.ChildCount() >= 2;
-            }
-        }
-        return false;
-    }
+    FormulaTreeNode &newNode();
 };
 
 }; // namespace HexCalc
