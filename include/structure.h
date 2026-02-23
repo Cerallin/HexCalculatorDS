@@ -94,6 +94,81 @@ class CircularQueue : public NonCopyable {
 };
 
 /**
+ * @brief A fixed-capacity stack container.
+ *
+ * This stack stores elements in a contiguous internal buffer with
+ * compile-time capacity. No dynamic memory allocation is performed.
+ *
+ * @tparam T The element type stored in the stack.
+ * @tparam N The maximum number of elements the stack can hold.
+ */
+template <typename T, size_t N>
+class Stack : public NonCopyable {
+  public:
+    /**
+     * @brief Constructs an empty stack.
+     */
+    Stack() : top(0) {}
+
+    /**
+     * @brief Pushes a value onto the stack.
+     *
+     * @param value The value to be pushed.
+     * @return true  If the value was successfully pushed.
+     * @return false If the stack is already full.
+     */
+    bool
+    Push(const T &value) {
+        if (top == N) {
+            return false; // stack is full
+        }
+        data[top++] = value;
+        return true;
+    }
+
+    /**
+     * @brief Pops the top value from the stack.
+     *
+     * @param value Output parameter that receives the popped value.
+     * @return true if a value was successfully popped, false if the stack is
+     * empty.
+     */
+    bool
+    Pop(T &value) {
+        if (top == 0) {
+            return false; // stack is empty
+        }
+        value = data[--top];
+        return true;
+    }
+
+    /**
+     * @brief Checks whether the stack is empty.
+     *
+     * @return true if the stack contains no elements, false otherwise.
+     */
+    bool
+    Empty() const {
+        return top == 0;
+    }
+
+    /**
+     * @brief Checks whether the stack is full.
+     *
+     * @return true  If the stack has reached its capacity.
+     * @return false Otherwise.
+     */
+    bool
+    Full() const {
+        return top == N;
+    }
+
+  private:
+    T data[N];  // Internal storage buffer.
+    size_t top; // Index of the next insertion position (also current size).
+};
+
+/**
  * @brief A simple binary tree node.
  *
  * @tparam DataType The type of the value stored in the tree node.
@@ -178,7 +253,7 @@ class TreeNode {
     PostOrderTraversal(Func visit) {
         Stack<Class *, N> stack;
 
-        Class *current = this;
+        Class *current = static_cast<Class *>(this);
         Class *lastVisited = nullptr;
 
         while (current != nullptr || !stack.Empty()) {
@@ -208,79 +283,4 @@ class TreeNode {
     Class *left;
     Class *right;
     Class *parent;
-};
-
-/**
- * @brief A fixed-capacity stack container.
- *
- * This stack stores elements in a contiguous internal buffer with
- * compile-time capacity. No dynamic memory allocation is performed.
- *
- * @tparam T The element type stored in the stack.
- * @tparam N The maximum number of elements the stack can hold.
- */
-template <typename T, size_t N>
-class Stack : public NonCopyable {
-  public:
-    /**
-     * @brief Constructs an empty stack.
-     */
-    Stack() : top(0) {}
-
-    /**
-     * @brief Pushes a value onto the stack.
-     *
-     * @param value The value to be pushed.
-     * @return true  If the value was successfully pushed.
-     * @return false If the stack is already full.
-     */
-    bool
-    Push(const T &value) {
-        if (top == N) {
-            return false; // stack is full
-        }
-        data[top++] = value;
-        return true;
-    }
-
-    /**
-     * @brief Pops the top value from the stack.
-     *
-     * @param value Output parameter that receives the popped value.
-     * @return true if a value was successfully popped, false if the stack is
-     * empty.
-     */
-    bool
-    Pop(T &value) {
-        if (top == 0) {
-            return false; // stack is empty
-        }
-        value = data[--top];
-        return true;
-    }
-
-    /**
-     * @brief Checks whether the stack is empty.
-     *
-     * @return true if the stack contains no elements, false otherwise.
-     */
-    bool
-    Empty() const {
-        return top == 0;
-    }
-
-    /**
-     * @brief Checks whether the stack is full.
-     *
-     * @return true  If the stack has reached its capacity.
-     * @return false Otherwise.
-     */
-    bool
-    Full() const {
-        return top == N;
-    }
-
-  private:
-    T data[N];  // Internal storage buffer.
-    size_t top; // Index of the next insertion position (also current size).
 };
