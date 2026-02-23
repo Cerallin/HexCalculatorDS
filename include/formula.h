@@ -104,9 +104,7 @@ class FormulaTree : private NonCopyable {
     // TODO Number of brackets also needs to be limited.
 
     /**
-     * @brief The array of nodes to avoid allocating memory on the heap, which
-     * is not recommended on Nintendo DS. So we can have at most MaxSize nodes
-     * in the formula tree, which should be enough for a simple calculator.
+     * @brief The array of pre-allocated tree nodes.
      */
     FormulaTreeNode nodes[MaxSize];
     /**
@@ -116,6 +114,12 @@ class FormulaTree : private NonCopyable {
     FormulaTreeNode *currentNode;
     size_t size;
 
+    /**
+     * @brief Create a new node from the pre-allocated array and initialize it
+     * with default value.
+     *
+     * @return FormulaTreeNode& reference to the new node
+     */
     FormulaTreeNode &
     newNode() {
         auto node = &nodes[size++];
@@ -124,10 +128,25 @@ class FormulaTree : private NonCopyable {
         return *node;
     }
 
-    FormulaTreeNode *findNearestUnPairedLeftBracket();
+    /**
+     * @brief Find the nearest unpaired left bracket node from the current node.
+     *
+     * @return FormulaTreeNode* pointer to the unpaired '(' node, or
+     * nullptr if not found
+     */
+    FormulaTreeNode *findUnpairedLBrac();
 
+    /**
+     * @brief Check if the node is completed, which means it has enough children
+     * to be evaluated. For number node, it is always completed. For operator
+     * node, it is completed if it has at least 1 child for unary operator, or
+     * at least 2 children for binary operator.
+     *
+     * @param node
+     * @return true if the node is completed, false otherwise
+     */
     bool
-    treeNodeIsCompleted(const FormulaTreeNode &node) {
+    nodeCompleted(const FormulaTreeNode &node) {
         if (node.Get().IsNumber()) {
             return true;
         }

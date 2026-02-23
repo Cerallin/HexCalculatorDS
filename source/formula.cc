@@ -92,7 +92,7 @@ FormulaTree::Input(const FormulaData &data) {
         // bracket handling
         auto op = data.GetOperator();
         if (op == OperatorType::RightBracket) {
-            auto *leftBracket = findNearestUnPairedLeftBracket();
+            auto *leftBracket = findUnpairedLBrac();
             if (leftBracket == nullptr) {
                 return false;
             }
@@ -246,13 +246,13 @@ FormulaTree::Evaluate(void) {
 }
 
 FormulaTreeNode *
-FormulaTree::findNearestUnPairedLeftBracket() {
+FormulaTree::findUnpairedLBrac() {
     for (auto node = currentNode; node != nullptr; node = node->Parent()) {
         auto &nodeRef = *node;
 
         if (!nodeRef.Get().IsOperator() ||
             nodeRef.Get().GetOperator() != OperatorType::LeftBracket) {
-            if (treeNodeIsCompleted(nodeRef)) {
+            if (nodeCompleted(nodeRef)) {
                 continue;
             } else {
                 return nullptr;
