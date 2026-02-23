@@ -9,14 +9,8 @@
 
 using namespace HexCalc;
 
-static bool evaluateError = false;
-
-void
+bool
 FormulaTreeNode::Evaluate(void) {
-    if (evaluateError) {
-        return;
-    }
-
     if (value.IsNumber()) {
         // do nothing if is number
     } else {
@@ -26,8 +20,7 @@ FormulaTreeNode::Evaluate(void) {
         if (Operator::Unary(op)) {
             // check left node if is unary operator
             if (left == nullptr) {
-                evaluateError = true;
-                return;
+                return true;
             }
             // this only handles equal & bracket
             value.SetNumber(left->Get().GetNumber());
@@ -35,8 +28,7 @@ FormulaTreeNode::Evaluate(void) {
         } else {
             // check both left & right nodes if is binary operator
             if ((left == nullptr) || (right == nullptr)) {
-                evaluateError = true;
-                return;
+                return true;
             }
 
             auto lvalue = left->Get().GetNumber();
@@ -62,6 +54,10 @@ FormulaTreeNode::Evaluate(void) {
                 value.SetNumber(Operator::Multiply(lvalue, rvalue));
                 break;
             case Divide:
+                if (rvalue == 0) {
+                    // Divide by zero
+                    return true;
+                }
                 value.SetNumber(Operator::Divide(lvalue, rvalue));
                 break;
             case Plus:
@@ -72,12 +68,14 @@ FormulaTreeNode::Evaluate(void) {
                 break;
             default:
                 // TODO generate error event
-                break;
+                return true;
             }
 
             Assign(value);
         }
     }
+
+    return false;
 }
 
 bool
@@ -277,13 +275,21 @@ FormulaTree::Clear(void) {
 
 bool
 FormulaTree::Evaluate(void) {
-    evaluateError = false;
+    bool evaluateError = false;
 
     constexpr size_t stackSize = MaxSize / 2; // maximum depth of the tree
-    root.PostOrderTraversal<stackSize>(
-        [](FormulaTreeNode &node) { node.Evaluate(); });
+    root.PostOrderTraversal<stackSize>([&evaluateError](FormulaTreeNode &node) {
+        if (evaluateError) {
+            return;
+        }
 
-    return evaluateError != true;
+        bool raiseError = node.Evaluate();
+        if (raiseError) {
+            evaluateError = true;
+        }
+    });
+
+    return (evaluateError != true);
 }
 
 FormulaTreeNode &

@@ -95,8 +95,11 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
      * number, do nothing. If the node is an operator, evaluate its children and
      * apply the operator to get the result.
      *
+     * @return true if there is an error during evaluation (e.g. missing
+     * operand, division by zero), false otherwise
+     *
      */
-    void Evaluate(void);
+    bool Evaluate(void);
 
     /**
      * @brief Check if the node is a valid expression. A valid expression can be
