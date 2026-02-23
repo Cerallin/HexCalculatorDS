@@ -85,7 +85,7 @@ FormulaTreeNode::Evaluate(void) {
 }
 
 bool
-FormulaTreeNode::Expression() {
+FormulaTreeNode::Expression() const {
     // return true if is number or paired brackets
     if (value.IsNumber() || value.Paired()) {
         return true;
@@ -107,7 +107,7 @@ FormulaTreeNode::Expression() {
 }
 
 bool
-FormulaTreeNode::Completed() {
+FormulaTreeNode::Completed() const {
     if (value.IsNumber()) {
         return true;
     }
@@ -344,6 +344,19 @@ FormulaTree::EvaluatePartial(void) {
     }
 
     return (evaluateError != true);
+}
+
+OperatorType
+FormulaTree::LastOperator() const {
+    for (const auto *node = currentNode; node != nullptr;
+         node = node->Parent()) {
+        auto data = node->Get();
+        if (data.IsOperator()) {
+            return data.GetOperator();
+        }
+    }
+
+    return OperatorType::None;
 }
 
 NumberDataType

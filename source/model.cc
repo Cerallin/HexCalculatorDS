@@ -87,32 +87,38 @@ FormulaModel::handleInput(const Event &e) {
 
     auto eventData = InputEventData(e.data);
 
-    if (eventData.isOp) {
-        // is operator
+    if (eventData.isOp) { // is operator
+        OperatorType op = eventData.data.op;
         // 1. insert current number into formula tree
         debugf("input number: %llu\n", currentNumber);
         formulaTree.Input(FormulaData(currentNumber));
         // 2. evaluate the formula tree
-        // FIXME do not evaluate if current operator has higher precedence than
-        // the previous one, otherwise it will cause wrong result for
-        // expressions like "1 + 2 * 3"
-        bool evaluated = formulaTree.EvaluatePartial();
-        debugf("Partial evaluation result: %s\n", evaluated ? "OK" : "Error");
-        inputState = PlaceHolder;
-        if (evaluated) {
-            currentNumber = formulaTree.Result();
-            valueChanged = true;
-        } else {
-            // do not update current number if evaluation failed
+        auto lastOp = formulaTree.LastOperator();
+        if (Operator::HigherThan(op, lastOp)) {
+            // do not evaluate if current operator has higher precedence than
+            // the previous one, otherwise it will cause wrong result for
+            // expressions like "1 + 2 * 3"
+        } else { // op <= lastOp
+            bool evaluated = formulaTree.EvaluatePartial();
+            debugf("Partial evaluation result: %s\n",
+                   evaluated ? "OK" : "Error");
+            if (evaluated) {
+                currentNumber = formulaTree.Result();
+                valueChanged = true;
+            } else {
+                // do not update current number if evaluation failed
+            }
         }
         // 3. insert operator into formula tree
         // must after evaluation, otherwise the new operator will affect the
         // evaluation
-        debugf("input op: %d\n", eventData.data.op);
-        formulaTree.Input(FormulaData(eventData.data.op));
+        debugf("input op: %d\n", op);
+        formulaTree.Input(FormulaData(op));
         formulaChanged = true;
-    } else {
-        // is number
+        // 4. Mark the current number as placeholder, so that the next digit
+        // input will start a new number instead of joining the current number.
+        inputState = PlaceHolder;
+    } else { // is number
         if (inputState == PlaceHolder) {
             // if the previous input is an operator, start a new number
             currentNumber = NumberZero;

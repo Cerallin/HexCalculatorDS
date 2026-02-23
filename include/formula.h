@@ -123,7 +123,7 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
      *
      * @return true if the node is a valid expression, false otherwise
      */
-    bool Expression();
+    bool Expression() const;
 
     /**
      * @brief Check if the node is completed, which means it has enough
@@ -133,7 +133,7 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
      *
      * @return true if the node is completed, false otherwise
      */
-    bool Completed();
+    bool Completed() const;
 
     /**
      * @brief Find the nearest unpaired left bracket node from the current
@@ -184,6 +184,8 @@ class FormulaTree : private NonCopyable {
      * by zero)
      */
     bool EvaluatePartial(void);
+
+    OperatorType LastOperator(void) const;
 
     NumberDataType Result(void) const;
 
