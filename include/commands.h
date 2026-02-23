@@ -10,40 +10,6 @@
 
 namespace HexCalc {
 
-enum CommandType : uint8_t {
-    Invalid = 0xFF,
-    InputNum0 = 0,
-    InputNum1,
-    InputNum2,
-    InputNum3,
-    InputNum4,
-    InputNum5,
-    InputNum6,
-    InputNum7,
-    InputNum8,
-    InputNum9,
-    InputNumA,
-    InputNumB,
-    InputNumC,
-    InputNumD,
-    InputNumE,
-    InputNumF,
-    InputOpPlus,
-    InputOpMinus,
-    InputOpMultiply,
-    InputOpDivide,
-    InputOpAnd,
-    InputOpOr,
-    InputOpModulo,
-    InputOpLShift,
-    InputOpRShift,
-    InputOpBackspace,
-    InputOpNegate,
-    InputOpBitwiseNot,
-    InputOpLBrac,
-    InputOpRBrac,
-};
-
 class Commands {
   public:
     Commands(EventBus &eventBus) : bus(eventBus) {}

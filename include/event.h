@@ -21,6 +21,7 @@ enum EventType {
     TouchScreenEvent, // when the user touches or releases the touchscreen
     // logical events
     InputEvent,           // when the user inputs a number or an operator
+    BackspaceEvent,       // when the user presses backspace
     ClearEvent,           // when the user clears the formula
     FormulaInputEvent,    // when a formula element should be input
     FormulaEvaluateEvent, // when the user evaluates the formula

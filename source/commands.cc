@@ -15,7 +15,7 @@ void
 Commands::InputNumber0(void) {
     debugf("Key 0 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum0, false).ToInt(),
+        InputEventData(Digit0).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -24,7 +24,7 @@ void
 Commands::InputNumber1(void) {
     debugf("Key 1 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum1, false).ToInt(),
+        InputEventData(Digit1).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -33,7 +33,7 @@ void
 Commands::InputNumber2(void) {
     debugf("Key 2 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum2, false).ToInt(),
+        InputEventData(Digit2).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -42,7 +42,7 @@ void
 Commands::InputNumber3(void) {
     debugf("Key 3 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum3, false).ToInt(),
+        InputEventData(Digit3).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -51,7 +51,7 @@ void
 Commands::InputNumber4(void) {
     debugf("Key 4 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum4, false).ToInt(),
+        InputEventData(Digit4).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -60,7 +60,7 @@ void
 Commands::InputNumber5(void) {
     debugf("Key 5 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum5, false).ToInt(),
+        InputEventData(Digit5).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -69,7 +69,7 @@ void
 Commands::InputNumber6(void) {
     debugf("Key 6 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum6, false).ToInt(),
+        InputEventData(Digit6).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -78,7 +78,7 @@ void
 Commands::InputNumber7(void) {
     debugf("Key 7 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum7, false).ToInt(),
+        InputEventData(Digit7).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -87,7 +87,7 @@ void
 Commands::InputNumber8(void) {
     debugf("Key 8 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum8, false).ToInt(),
+        InputEventData(Digit8).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -96,7 +96,7 @@ void
 Commands::InputNumber9(void) {
     debugf("Key 9 pressed\n");
     bus.Post(Event{
-        InputEventData(InputNum9, false).ToInt(),
+        InputEventData(Digit9).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -105,7 +105,7 @@ void
 Commands::InputNumberA(void) {
     debugf("Key A pressed\n");
     bus.Post(Event{
-        InputEventData(InputNumA, false).ToInt(),
+        InputEventData(DigitA).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -114,7 +114,7 @@ void
 Commands::InputNumberB(void) {
     debugf("Key B pressed\n");
     bus.Post(Event{
-        InputEventData(InputNumB, false).ToInt(),
+        InputEventData(DigitB).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -123,7 +123,7 @@ void
 Commands::InputNumberC(void) {
     debugf("Key C pressed\n");
     bus.Post(Event{
-        InputEventData(InputNumC, false).ToInt(),
+        InputEventData(DigitC).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -132,7 +132,7 @@ void
 Commands::InputNumberD(void) {
     debugf("Key D pressed\n");
     bus.Post(Event{
-        InputEventData(InputNumD, false).ToInt(),
+        InputEventData(DigitD).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -141,7 +141,7 @@ void
 Commands::InputNumberE(void) {
     debugf("Key E pressed\n");
     bus.Post(Event{
-        InputEventData(InputNumE, false).ToInt(),
+        InputEventData(DigitE).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -150,7 +150,7 @@ void
 Commands::InputNumberF(void) {
     debugf("Key F pressed\n");
     bus.Post(Event{
-        InputEventData(InputNumF, false).ToInt(),
+        InputEventData(DigitF).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -159,7 +159,7 @@ void
 Commands::InputOperatorPlus(void) {
     debugf("Key + pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpPlus, true).ToInt(),
+        InputEventData(OperatorType::Plus).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -168,7 +168,7 @@ void
 Commands::InputOperatorMinus(void) {
     debugf("Key - pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpMinus, true).ToInt(),
+        InputEventData(OperatorType::Minus).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -177,7 +177,7 @@ void
 Commands::InputOperatorMultiply(void) {
     debugf("Key * pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpMultiply, true).ToInt(),
+        InputEventData(OperatorType::Multiply).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -186,7 +186,7 @@ void
 Commands::InputOperatorDivide(void) {
     debugf("Key / pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpDivide, true).ToInt(),
+        InputEventData(OperatorType::Divide).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -195,7 +195,7 @@ void
 Commands::InputOperatorAnd(void) {
     debugf("Key & pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpAnd, true).ToInt(),
+        InputEventData(OperatorType::BitwiseAnd).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -204,7 +204,7 @@ void
 Commands::InputOperatorOr(void) {
     debugf("Key | pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpOr, true).ToInt(),
+        InputEventData(OperatorType::BitwiseOr).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -213,7 +213,7 @@ void
 Commands::InputOperatorModulo(void) {
     debugf("Key %% pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpModulo, true).ToInt(),
+        InputEventData(OperatorType::Modulo).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -222,7 +222,7 @@ void
 Commands::InputOperatorLShift(void) {
     debugf("Key << pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpLShift, true).ToInt(),
+        InputEventData(OperatorType::LeftShift).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -231,7 +231,7 @@ void
 Commands::InputOperatorRShift(void) {
     debugf("Key >> pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpRShift, true).ToInt(),
+        InputEventData(OperatorType::RightShift).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -240,8 +240,8 @@ void
 Commands::InputOperatorBackspace(void) {
     debugf("Key Backspace pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpBackspace, true).ToInt(),
-        EventType::InputEvent,
+        0,
+        EventType::BackspaceEvent,
     });
 }
 
@@ -249,7 +249,7 @@ void
 Commands::InputOperatorNegate(void) {
     debugf("Key +/- pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpNegate, true).ToInt(),
+        InputEventData(OperatorType::Negate).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -258,7 +258,7 @@ void
 Commands::InputOperatorNot(void) {
     debugf("Key ~ pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpBitwiseNot, true).ToInt(),
+        InputEventData(OperatorType::BitwiseNot).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -276,7 +276,7 @@ void
 Commands::InputOperatorLBrac(void) {
     debugf("Key ( pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpLBrac, true).ToInt(),
+        InputEventData(OperatorType::LeftBracket).ToInt(),
         EventType::InputEvent,
     });
 }
@@ -285,7 +285,7 @@ void
 Commands::InputOperatorRBrac(void) {
     debugf("Key ) pressed\n");
     bus.Post(Event{
-        InputEventData(InputOpRBrac, true).ToInt(),
+        InputEventData(OperatorType::RightBracket).ToInt(),
         EventType::InputEvent,
     });
 }
