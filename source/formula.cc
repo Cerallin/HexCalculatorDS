@@ -323,7 +323,7 @@ FormulaTree::EvaluatePartial(void) {
 
     auto *node = currentNode->findUnpairedLBrac();
     if (node == nullptr) {
-        return false;
+        node = &root;
     }
 
     node->PostOrderTraversal<stackSize>(
@@ -351,7 +351,10 @@ FormulaTree::Result(void) const {
     if (fullEvaluationFlag) {
         return root.Get().GetNumber();
     } else {
-        auto *partialRoot = currentNode->findUnpairedLBrac();
+        const auto *partialRoot = currentNode->findUnpairedLBrac();
+        if (partialRoot == nullptr) {
+            partialRoot = &root;
+        }
         return partialRoot->Get().GetNumber();
     }
 }

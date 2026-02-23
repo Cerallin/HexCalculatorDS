@@ -55,7 +55,10 @@ TEST(FormulaTree, TestInputSingleOperator) {
     CHECK(formula->Input(op));
 }
 
-TEST(FormulaTree, TestEvaluateEmpty) { CHECK(formula->Evaluate()); }
+TEST(FormulaTree, TestEvaluateEmpty) {
+    CHECK(formula->Evaluate());
+    CHECK_EQUAL(0, formula->Result());
+}
 
 TEST(FormulaTree, TestSimpleAdd) {
     // 1 + 2 = 3
@@ -288,6 +291,11 @@ TEST(FormulaTree, TestComplexFormula) {
 
     CHECK(formula->Evaluate());
     CHECK_EQUAL(24, formula->Result());
+}
+
+TEST(FormulaTree, TestEvaluatePartialEmpty) {
+    CHECK(formula->EvaluatePartial());
+    CHECK_EQUAL(0, formula->Result());
 }
 
 TEST(FormulaTree, TestEvaluatePartial) {
