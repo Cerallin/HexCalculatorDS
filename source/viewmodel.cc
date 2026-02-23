@@ -19,24 +19,6 @@ ViewModel::ViewModel(void)
       formulaModel(eventBus), keyInputHandler(commands) {
     eventBus.Subscribe(config);
     eventBus.Subscribe(formulaModel);
-
-    // FIXME just for testing, should be removed later
-    commands.InputNumber1();
-    commands.InputNumber2();
-    commands.InputNumber3();
-    commands.InputNumber4();
-    commands.InputNumber5();
-    commands.InputNumber6();
-    commands.InputNumber7();
-    commands.InputNumber8();
-    commands.InputNumber9();
-    commands.InputNumber0();
-    commands.InputNumber0();
-    commands.InputNumber0();
-    commands.InputNumber0();
-    commands.InputNumber7();
-    commands.InputNumber2();
-    commands.InputNumber1();
 }
 
 void

@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "model.h"
+#include "commands.h"
 #include "config.h"
 
 using namespace HexCalc;
@@ -26,7 +27,18 @@ FormulaModel::HandleEvent(const Event &e) {
         currentNumber = NumberZero;
         valueChanged = true;
     } else if (e.type == FormulaEvaluateEvent) {
-        // TODO
+        debugf("input number: %llu\n", currentNumber);
+        formulaTree.Input(FormulaData(currentNumber));
+        bool evaluated = formulaTree.Evaluate();
+        debugf("Evaluation result: %s\n", evaluated ? "OK" : "Error");
+        if (evaluated) {
+            currentNumber = formulaTree.Result();
+        } else {
+            currentNumber = NumberZero;
+        }
+        formulaTree.Clear();
+        inputState = PlaceHolder;
+        formulaChanged = true;
         valueChanged = true;
     } else if (e.type == UpdateBaseEvent) {
         handleBaseChange(e);
@@ -77,23 +89,35 @@ FormulaModel::handleInput(const Event &e) {
 
     if (eventData.isOp) {
         // is operator
-        // insert current number into formula tree
+        // 1. insert current number into formula tree
+        debugf("input number: %llu\n", currentNumber);
         formulaTree.Input(FormulaData(currentNumber));
-        // insert operator into formula tree
-        formulaTree.Input(FormulaData(eventData.data.op));
-        formulaChanged = true;
-        // update current number
+        // 2. evaluate the formula tree
+        // FIXME do not evaluate if current operator has higher precedence than
+        // the previous one, otherwise it will cause wrong result for
+        // expressions like "1 + 2 * 3"
         bool evaluated = formulaTree.EvaluatePartial();
+        debugf("Partial evaluation result: %s\n", evaluated ? "OK" : "Error");
+        inputState = PlaceHolder;
         if (evaluated) {
             currentNumber = formulaTree.Result();
-            inputState = PlaceHolder;
             valueChanged = true;
         } else {
             // do not update current number if evaluation failed
-            inputState = InputNumber;
         }
+        // 3. insert operator into formula tree
+        // must after evaluation, otherwise the new operator will affect the
+        // evaluation
+        debugf("input op: %d\n", eventData.data.op);
+        formulaTree.Input(FormulaData(eventData.data.op));
+        formulaChanged = true;
     } else {
         // is number
+        if (inputState == PlaceHolder) {
+            // if the previous input is an operator, start a new number
+            currentNumber = NumberZero;
+            inputState = InputNumber;
+        }
 
         // check overflow
         auto base = config.Base();
