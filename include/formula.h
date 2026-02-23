@@ -79,7 +79,11 @@ class FormulaData {
     bool isShadow;
 };
 
-using FormulaTreeNode = TreeNode<FormulaData>;
+class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
+  public:
+    FormulaTreeNode(void) : TreeNode() {}
+    FormulaTreeNode(const FormulaData &data) : TreeNode(data) {}
+};
 
 class FormulaTree : private NonCopyable {
   public:

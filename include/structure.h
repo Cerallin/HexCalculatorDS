@@ -96,35 +96,35 @@ class CircularQueue : public NonCopyable {
 /**
  * @brief A simple binary tree node.
  *
- * @tparam T The type of the value stored in the tree node.
+ * @tparam DataType The type of the value stored in the tree node.
  */
-template <typename T>
+template <typename Class, typename DataType>
 class TreeNode {
   public:
-    TreeNode(void) : value(T(0)), left(nullptr), right(nullptr) {}
-    TreeNode(const T &val) : value(val), left(nullptr), right(nullptr) {}
+    TreeNode(void) : value(DataType(0)), left(nullptr), right(nullptr) {}
+    TreeNode(const DataType &val) : value(val), left(nullptr), right(nullptr) {}
 
     void
-    Assign(const T &val) {
+    Assign(const DataType &val) {
         value = val;
     }
 
-    T
+    DataType
     Get() const {
         return value;
     }
 
-    TreeNode *
+    Class *
     Left() const {
         return left;
     }
 
-    TreeNode *
+    Class *
     Right() const {
         return right;
     }
 
-    TreeNode *
+    Class *
     Parent() const {
         return parent;
     }
@@ -144,30 +144,30 @@ class TreeNode {
     }
 
     static void
-    ConnectLeft(TreeNode &parent, TreeNode &child) {
+    ConnectLeft(Class &parent, Class &child) {
         parent.left = &child;
         child.parent = &parent;
     }
 
     static void
-    ConnectRight(TreeNode &parent, TreeNode &child) {
+    ConnectRight(Class &parent, Class &child) {
         parent.right = &child;
         child.parent = &parent;
     }
 
     void
     Reset() {
-        value = T(0);
+        value = DataType(0);
         left = nullptr;
         right = nullptr;
         parent = nullptr;
     }
 
-  private:
-    T value;
-    TreeNode *left;
-    TreeNode *right;
-    TreeNode *parent;
+  protected:
+    DataType value;
+    Class *left;
+    Class *right;
+    Class *parent;
 };
 
 /**
