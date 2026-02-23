@@ -90,41 +90,57 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
     FormulaTreeNode(void) : TreeNode() {}
     FormulaTreeNode(const FormulaData &data) : TreeNode(data) {}
 
-    /**
-     * @brief Evaluate the expression represented by this node. If the node is a
-     * number, do nothing. If the node is an operator, evaluate its children and
-     * apply the operator to get the result.
-     *
-     * @return true if there is an error during evaluation (e.g. missing
-     * operand, division by zero), false otherwise
-     *
-     */
-    bool Evaluate(void);
+    struct EvaluateFlag {
+        bool divideByZeroFlag : 1;
+        bool invalidExpressionFlag : 1;
+        bool unknownOperatorFlag : 1;
+
+        constexpr EvaluateFlag(void)
+            : divideByZeroFlag(false), invalidExpressionFlag(false),
+              unknownOperatorFlag(false) {}
+
+        constexpr bool
+        AllClear(void) const {
+            return !(divideByZeroFlag || invalidExpressionFlag ||
+                     unknownOperatorFlag);
+        }
+    };
 
     /**
-     * @brief Check if the node is a valid expression. A valid expression can be
-     * a number, a paired bracket, or an operator with valid expressions as its
-     * children.
+     * @brief Evaluate the expression represented by this node. If the node
+     * is a number, do nothing. If the node is an operator, evaluate its
+     * children and apply the operator to get the result.
+     *
+     * @return EvaluateFlag flags for different evaluation errors
+     *
+     */
+    EvaluateFlag Evaluate(void);
+
+    /**
+     * @brief Check if the node is a valid expression. A valid expression
+     * can be a number, a paired bracket, or an operator with valid
+     * expressions as its children.
      *
      * @return true if the node is a valid expression, false otherwise
      */
     bool Expression();
 
     /**
-     * @brief Check if the node is completed, which means it has enough children
-     * to be evaluated. For number node, it is always completed. For operator
-     * node, it is completed if it has at least 1 child for unary operator, or
-     * at least 2 children for binary operator.
+     * @brief Check if the node is completed, which means it has enough
+     * children to be evaluated. For number node, it is always completed.
+     * For operator node, it is completed if it has at least 1 child for
+     * unary operator, or at least 2 children for binary operator.
      *
      * @return true if the node is completed, false otherwise
      */
     bool Completed();
 
     /**
-     * @brief Find the nearest unpaired left bracket node from the current node.
+     * @brief Find the nearest unpaired left bracket node from the current
+     * node.
      *
-     * @return FormulaTreeNode* pointer to the unpaired '(' node, or nullptr if
-     * not found
+     * @return FormulaTreeNode* pointer to the unpaired '(' node, or nullptr
+     * if not found
      */
     FormulaTreeNode *findUnpairedLBrac();
 };
@@ -137,8 +153,9 @@ class FormulaTree : private NonCopyable {
      * @brief Input a new data into the formula tree.
      *
      * @param data The new data to be input, either a number or an operator
-     * @return true if the input is valid and successfully added to the tree,
-     * false if the input is invalid (e.g. two operators cannot be adjacent)
+     * @return true if the input is valid and successfully added to the
+     * tree, false if the input is invalid (e.g. two operators cannot be
+     * adjacent)
      */
     bool Input(const FormulaData &data);
 
@@ -151,27 +168,24 @@ class FormulaTree : private NonCopyable {
     /**
      * @brief Evaluate the formula tree and get the result.
      *
-     * @return true if the evaluation is successful, false if there is an error
-     * during evaluation (e.g. missing operand, division by zero)
+     * @return true if the evaluation is successful, false if there is an
+     * error during evaluation (e.g. missing operand, division by zero)
      */
     bool Evaluate(void);
 
     /**
      * @brief Evaluate the current expression without fully evaluating the
-     * entire tree. This is used for partial evaluation when the user is still
-     * inputting the formula, to provide immediate feedback on the current
-     * result.
+     * entire tree. This is used for partial evaluation when the user is
+     * still inputting the formula, to provide immediate feedback on the
+     * current result.
      *
-     * @return true if the partial evaluation is successful, false if there is
-     * an error during partial evaluation (e.g. missing operand, division by
-     * zero)
+     * @return true if the partial evaluation is successful, false if there
+     * is an error during partial evaluation (e.g. missing operand, division
+     * by zero)
      */
     bool EvaluatePartial(void);
 
-    NumberDataType
-    Result() const {
-        return root.Get().GetNumber();
-    }
+    NumberDataType Result(void) const;
 
     static constexpr size_t MaxSize = 64;
 
@@ -189,13 +203,19 @@ class FormulaTree : private NonCopyable {
     FormulaTreeNode *currentNode;
     size_t size;
 
+    bool evaluated = false;
+
+    bool fullEvaluationFlag = false;
+
     /**
-     * @brief Create a new node from the pre-allocated array and initialize it
-     * with default value.
+     * @brief Create a new node from the pre-allocated array and initialize
+     * it with default value.
      *
      * @return FormulaTreeNode& reference to the new node
      */
     FormulaTreeNode &newNode();
+
+    bool inputData(const FormulaData &data);
 };
 
 }; // namespace HexCalc

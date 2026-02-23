@@ -290,6 +290,34 @@ TEST(FormulaTree, TestComplexFormula) {
     CHECK_EQUAL(24, formula->Result());
 }
 
+TEST(FormulaTree, TestEvaluatePartial) {
+    // 1 + (2 -> 2
+    using HexCalc::OperatorType;
+
+    CHECK(formula->Input(HexCalc::FormulaData(1)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
+    CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
+    CHECK(formula->Input(HexCalc::FormulaData(2)));
+
+    CHECK(formula->EvaluatePartial());
+    CHECK_EQUAL(2, formula->Result());
+}
+
+TEST(FormulaTree, TestEvaluatePartial2) {
+    // 1 + (2 x 3 -> 6
+    using HexCalc::OperatorType;
+
+    CHECK(formula->Input(HexCalc::FormulaData(1)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
+    CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
+    CHECK(formula->Input(HexCalc::FormulaData(2)));
+    CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
+    CHECK(formula->Input(HexCalc::FormulaData(3)));
+
+    CHECK(formula->EvaluatePartial());
+    CHECK_EQUAL(6, formula->Result());
+}
+
 int
 main(int ac, char **av) {
     return CommandLineTestRunner::RunAllTests(ac, av);

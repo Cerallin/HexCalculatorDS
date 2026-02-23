@@ -9,8 +9,10 @@
 
 using namespace HexCalc;
 
-bool
+FormulaTreeNode::EvaluateFlag
 FormulaTreeNode::Evaluate(void) {
+    EvaluateFlag flag;
+
     if (value.IsNumber()) {
         // do nothing if is number
     } else {
@@ -20,7 +22,8 @@ FormulaTreeNode::Evaluate(void) {
         if (Operator::Unary(op)) {
             // check left node if is unary operator
             if (left == nullptr) {
-                return true;
+                flag.invalidExpressionFlag = true;
+                return flag;
             }
             // this only handles equal & bracket
             value.SetNumber(left->Get().GetNumber());
@@ -28,7 +31,8 @@ FormulaTreeNode::Evaluate(void) {
         } else {
             // check both left & right nodes if is binary operator
             if ((left == nullptr) || (right == nullptr)) {
-                return true;
+                flag.invalidExpressionFlag = true;
+                return flag;
             }
 
             auto lvalue = left->Get().GetNumber();
@@ -56,7 +60,8 @@ FormulaTreeNode::Evaluate(void) {
             case Divide:
                 if (rvalue == 0) {
                     // Divide by zero
-                    return true;
+                    flag.divideByZeroFlag = true;
+                    return flag;
                 }
                 value.SetNumber(Operator::Divide(lvalue, rvalue));
                 break;
@@ -68,14 +73,15 @@ FormulaTreeNode::Evaluate(void) {
                 break;
             default:
                 // TODO generate error event
-                return true;
+                flag.unknownOperatorFlag = true;
+                return flag;
             }
 
             Assign(value);
         }
     }
 
-    return false;
+    return flag;
 }
 
 bool
@@ -146,6 +152,16 @@ FormulaTree::FormulaTree(void)
 
 bool
 FormulaTree::Input(const FormulaData &data) {
+    bool res = inputData(data);
+    if (res) {
+        // reset evaluation flag when new data is input
+        evaluated = false;
+    }
+    return res;
+}
+
+bool
+FormulaTree::inputData(const FormulaData &data) {
     if (size >= MaxSize) {
         // tree is full
         return false;
@@ -285,11 +301,16 @@ FormulaTree::Evaluate(void) {
             return;
         }
 
-        bool raiseError = node.Evaluate();
-        if (raiseError) {
+        auto flags = node.Evaluate();
+        if (!flags.AllClear()) {
             evaluateError = true;
         }
     });
+
+    if (!evaluateError) {
+        evaluated = true;
+        fullEvaluationFlag = true;
+    }
 
     return (evaluateError != true);
 }
@@ -311,13 +332,28 @@ FormulaTree::EvaluatePartial(void) {
                 return;
             }
 
-            bool raiseError = node.Evaluate();
-            if (raiseError) {
+            auto flags = node.Evaluate();
+            if (!flags.AllClear()) {
                 evaluateError = true;
             }
         });
 
+    if (!evaluateError) {
+        evaluated = true;
+        fullEvaluationFlag = false;
+    }
+
     return (evaluateError != true);
+}
+
+NumberDataType
+FormulaTree::Result(void) const {
+    if (fullEvaluationFlag) {
+        return root.Get().GetNumber();
+    } else {
+        auto *partialRoot = currentNode->findUnpairedLBrac();
+        return partialRoot->Get().GetNumber();
+    }
 }
 
 FormulaTreeNode &
