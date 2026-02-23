@@ -161,11 +161,12 @@ class HexCalculatorExporter:
                 hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # sign
             ],
             len(records),
+            offset=16,  # remain for text layer (4bpp) colors
         )
 
         img = IndexedImage(width, height)
 
-        pal_idx = 1
+        pal_idx = 16  # remain for text layer (4bpp) colors
 
         for record in records:
             palette_map = {

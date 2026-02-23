@@ -127,20 +127,20 @@ SubDisplay::SubDisplay(void)
 void
 SubDisplay::DisableButton(int index) {
     // 1 for the backdrop color
-    uint16_t *dest = &BG_PALETTE_SUB[1 + (index * ColorCount)];
+    uint16_t *dest = &BG_PALETTE_SUB[16 + (index * ColorCount)];
     dmaCopy(disabledPalette, dest, ColorCount * sizeof(uint16_t));
 }
 
 void
 SubDisplay::EnableButton(int index) {
     // 1 for the backdrop color
-    uint16_t *dest = &BG_PALETTE_SUB[1 + (index * ColorCount)];
+    uint16_t *dest = &BG_PALETTE_SUB[16 + (index * ColorCount)];
     dmaCopy(enabledPalette, dest, ColorCount * sizeof(uint16_t));
 }
 
 void
 SubDisplay::SelectButton(int index) {
     // 1 for the backdrop color
-    uint16_t *dest = &BG_PALETTE_SUB[1 + (index * ColorCount)];
+    uint16_t *dest = &BG_PALETTE_SUB[16 + (index * ColorCount)];
     dmaCopy(selectedPalette, dest, ColorCount * sizeof(uint16_t));
 }

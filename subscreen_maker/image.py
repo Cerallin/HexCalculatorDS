@@ -8,6 +8,7 @@ import struct
 import numpy as np
 import cv2
 
+
 class Palette:
     def __init__(self):
         self.colors = []
@@ -27,14 +28,20 @@ class Palette:
             b = (i * 109) % 256
             self.add_color(r, g, b)
 
-    def generate_demo(self, colorset_common, colorset_disabled, colorset_selected, count):
+    def generate_demo(self, colorset_common, colorset_disabled, colorset_selected, count, offset=1):
         # index 0 reserved for transparent
-        self.colors = [(0, 0, 0)]
+        self.colors = []
+
+        # fill offset with dummy colors
+        for _ in range(offset):
+            self.add_color(0, 0, 0)
+
         for _ in range(count):
             for color in colorset_common:
                 self.add_color(*color)
 
-        remain = len(colorset_common) + len(colorset_disabled) + len(colorset_selected)
+        remain = len(colorset_common) + len(colorset_disabled) + \
+            len(colorset_selected)
         for _ in range(256 - len(self.colors) - remain):
             self.add_color(0, 0, 0)
 
@@ -66,6 +73,7 @@ class IndexedImage:
 
     def get_array(self):
         return self.data
+
 
 class ImagePreprocessor:
     @staticmethod

@@ -24,11 +24,12 @@ endif()
 set(DEVKITPRO $ENV{DEVKITPRO})
 set(LIBNDS ${DEVKITPRO}/libnds)
 
+find_program(GRIT grit REQUIRED)
+find_program(PYTHON python3 REQUIRED)
+
 # ----------------------------------------
 # Font tiles
 # ----------------------------------------
-
-find_program(GRIT grit REQUIRED)
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
@@ -46,7 +47,6 @@ add_custom_command(
 # ----------------------------------------
 # Subscreen Image
 # ----------------------------------------
-find_program(PYTHON python3 REQUIRED)
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
