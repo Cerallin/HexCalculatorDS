@@ -143,16 +143,16 @@ class TreeNode {
         return count;
     }
 
-    static void
-    ConnectLeft(Class &parent, Class &child) {
-        parent.left = &child;
-        child.parent = &parent;
+    void
+    ConnectLeft(Class &child) {
+        left = &child;
+        child.parent = static_cast<Class *>(this);
     }
 
-    static void
-    ConnectRight(Class &parent, Class &child) {
-        parent.right = &child;
-        child.parent = &parent;
+    void
+    ConnectRight(Class &child) {
+        right = &child;
+        child.parent = static_cast<Class *>(this);
     }
 
     void
@@ -161,6 +161,46 @@ class TreeNode {
         left = nullptr;
         right = nullptr;
         parent = nullptr;
+    }
+
+    /**
+     * @brief Performs a post-order traversal (left -> right -> root) of a
+     * binary tree.
+     *
+     * This implementation uses an explicit stack instead of recursion.
+     *
+     * @tparam T Node value type.
+     * @tparam N Maximum stack depth.
+     * @param visit Callback invoked for each visited node.
+     */
+    template <size_t N, typename Func>
+    void
+    PostOrderTraversal(Func visit) {
+        Stack<Class *, N> stack;
+
+        Class *current = this;
+        Class *lastVisited = nullptr;
+
+        while (current != nullptr || !stack.Empty()) {
+            if (current != nullptr) {
+                stack.Push(current);
+                current = current->Left();
+            } else {
+                Class *peek;
+                stack.Pop(peek); // temporary pop to inspect
+
+                auto *right = peek->Right();
+                if (right != nullptr && lastVisited != right) {
+                    // Right subtree not visited yet
+                    stack.Push(peek); // push back
+                    current = right;  // traverse right
+                } else {
+                    // Visit node
+                    visit(*peek);
+                    lastVisited = peek;
+                }
+            }
+        }
     }
 
   protected:
@@ -244,44 +284,3 @@ class Stack : public NonCopyable {
     T data[N];  // Internal storage buffer.
     size_t top; // Index of the next insertion position (also current size).
 };
-
-/**
- * @brief Performs a post-order traversal (left -> right -> root) of a
- * binary tree.
- *
- * This implementation uses an explicit stack instead of recursion.
- *
- * @tparam T Node value type.
- * @tparam N Maximum stack depth.
- * @param root Pointer to the root node.
- * @param visit Callback invoked for each visited node.
- */
-template <typename T, size_t N, typename Func>
-void
-PostOrderTraversal(T *root, Func visit) {
-    Stack<T *, N> stack;
-
-    T *current = root;
-    T *lastVisited = nullptr;
-
-    while (current != nullptr || !stack.Empty()) {
-        if (current != nullptr) {
-            stack.Push(current);
-            current = current->Left();
-        } else {
-            T *peek;
-            stack.Pop(peek); // temporary pop to inspect
-
-            auto *right = peek->Right();
-            if (right != nullptr && lastVisited != right) {
-                // Right subtree not visited yet
-                stack.Push(peek); // push back
-                current = right;  // traverse right
-            } else {
-                // Visit node
-                visit(*peek);
-                lastVisited = peek;
-            }
-        }
-    }
-}
