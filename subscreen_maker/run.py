@@ -28,7 +28,8 @@ class HexCalculatorExporter:
         # width & sign
         ImagePreprocessor.fill_rect(self.image, (159, 4), (94, 28), bg)
 
-        self.image = ImagePreprocessor.crop(self.image, 5, 6, 5, 5)
+        # make copyright contour closed
+        self.image = ImagePreprocessor.crop(self.image, 5, 6, 5, 4)
 
     def analyze(self):
 
@@ -82,8 +83,9 @@ class HexCalculatorExporter:
         records.sort(key=lambda r: (r.position()[:2]))
 
         # remove last 2: equal button and copyright
-        if len(records) >= 2:
-            records = records[:-2]
+        equal_record: ContourRecord = records[-2]
+        copyright_record: ContourRecord = records[-1]
+        records = records[:-2]
 
         # get unique contours
         unique_contours = []
@@ -109,9 +111,29 @@ class HexCalculatorExporter:
                 other.sign_points = [(ox + rx, oy + ry)
                                      for rx, ry in relative_sign_points]
 
+        # add back removed records
+        equal_record.contour_points += equal_record.sign_points
+        equal_record.sign_points = []
+
+        copyright_inner = ContourAnalyzer.collect_inner_colors(
+            self.image, copyright_record.contour)
+
+        for k, pts in copyright_inner.items():
+            if k == ContourAnalyzer.BG_COLORS[0]:
+                copyright_record.bg_points = pts
+            elif k == ContourAnalyzer.BORDER_COLORS[0]:
+                copyright_record.contour_points = pts
+            else:
+                pass
+
+        records.append(equal_record)
+        records.append(copyright_record)
+
+        self.image = ImagePreprocessor.crop(self.image, 0, 0, 0, 1)
+
         return records
 
-    def build_image(self, records, width, height):
+    def build_image(self, records: list[ContourRecord], width, height):
 
         palette = Palette()
 
@@ -122,7 +144,7 @@ class HexCalculatorExporter:
                 hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[0]),   # shadow
                 hex_to_rgb(ContourAnalyzer.TEXT_COLORS[0]),     # text
                 hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # bg
-                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # sign (default to hide)
+                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # sign (hidden)
             ],
             disabled := [
                 hex_to_rgb(ContourAnalyzer.BORDER_COLORS[1]),   # contour
@@ -181,10 +203,10 @@ class HexCalculatorExporter:
             for idx, rec in enumerate(records):
                 x, y, w, h = rec.position()
                 print(f"Record {idx:2}: pos=({x:3},{y:3}),\tsize=({w:2}x{h:2}),\t"
-                    f"{len(rec.shadow_points):2} shadow,\t"
-                    f"{len(rec.text_points):2} text,\t"
-                    f"{len(rec.bg_points):3} bg,\t"
-                    f"{len(rec.sign_points):2} sign")
+                      f"{len(rec.shadow_points):2} shadow,\t"
+                      f"{len(rec.text_points):2} text,\t"
+                      f"{len(rec.bg_points):3} bg,\t"
+                      f"{len(rec.sign_points):2} sign")
 
         self.build_c_header(records, output_file.replace(".bmp", ".h"))
 

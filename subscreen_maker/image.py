@@ -56,6 +56,8 @@ class IndexedImage:
         self.data = np.zeros((height, width), dtype=np.uint8)
 
     def set_pixel(self, x, y, palette_index):
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return
         self.data[y, x] = palette_index
 
     def fill_points(self, points, palette_index):
