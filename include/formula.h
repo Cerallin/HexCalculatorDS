@@ -133,11 +133,40 @@ class FormulaTree : private NonCopyable {
   public:
     explicit FormulaTree(void);
 
+    /**
+     * @brief Input a new data into the formula tree.
+     *
+     * @param data The new data to be input, either a number or an operator
+     * @return true if the input is valid and successfully added to the tree,
+     * false if the input is invalid (e.g. two operators cannot be adjacent)
+     */
     bool Input(const FormulaData &data);
 
+    /**
+     * @brief Clear the formula tree and reset it to the initial state.
+     *
+     */
     void Clear(void);
 
+    /**
+     * @brief Evaluate the formula tree and get the result.
+     *
+     * @return true if the evaluation is successful, false if there is an error
+     * during evaluation (e.g. missing operand, division by zero)
+     */
     bool Evaluate(void);
+
+    /**
+     * @brief Evaluate the current expression without fully evaluating the
+     * entire tree. This is used for partial evaluation when the user is still
+     * inputting the formula, to provide immediate feedback on the current
+     * result.
+     *
+     * @return true if the partial evaluation is successful, false if there is
+     * an error during partial evaluation (e.g. missing operand, division by
+     * zero)
+     */
+    bool EvaluatePartial(void);
 
     NumberDataType
     Result() const {

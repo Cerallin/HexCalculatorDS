@@ -275,9 +275,11 @@ FormulaTree::Clear(void) {
 
 bool
 FormulaTree::Evaluate(void) {
+    // maximum depth of the tree
+    constexpr size_t stackSize = MaxSize / 2;
+
     bool evaluateError = false;
 
-    constexpr size_t stackSize = MaxSize / 2; // maximum depth of the tree
     root.PostOrderTraversal<stackSize>([&evaluateError](FormulaTreeNode &node) {
         if (evaluateError) {
             return;
@@ -288,6 +290,32 @@ FormulaTree::Evaluate(void) {
             evaluateError = true;
         }
     });
+
+    return (evaluateError != true);
+}
+
+bool
+FormulaTree::EvaluatePartial(void) {
+    constexpr size_t stackSize = MaxSize / 2; // maximum depth of the tree
+
+    bool evaluateError = false;
+
+    auto *node = currentNode->findUnpairedLBrac();
+    if (node == nullptr) {
+        return false;
+    }
+
+    node->PostOrderTraversal<stackSize>(
+        [&evaluateError](FormulaTreeNode &node) {
+            if (evaluateError) {
+                return;
+            }
+
+            bool raiseError = node.Evaluate();
+            if (raiseError) {
+                evaluateError = true;
+            }
+        });
 
     return (evaluateError != true);
 }

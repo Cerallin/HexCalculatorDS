@@ -143,6 +143,17 @@ TEST(FormulaTree, TestSimpleModulo) {
     CHECK_EQUAL(1, formula->Result());
 }
 
+TEST(FormulaTree, TestIncompleteExpression) {
+    // 1 % ? = error
+    HexCalc::FormulaData n1(1);
+    HexCalc::FormulaData op(HexCalc::OperatorType::Modulo);
+
+    CHECK(formula->Input(n1));
+    CHECK(formula->Input(op));
+
+    CHECK_EQUAL(false, formula->Evaluate());
+}
+
 TEST(FormulaTree, TestOperatorPrecedence) {
     // 1 + 2 x 6 = 13
     using HexCalc::OperatorType;
@@ -185,6 +196,22 @@ TEST(FormulaTree, TestSimpleBrackets) {
 
     CHECK(formula->Evaluate());
     CHECK_EQUAL(18, formula->Result());
+}
+
+TEST(FormulaTree, TestIncompleteBrackets) {
+    // 1 + (2 x 6 = error
+    using HexCalc::OperatorType;
+
+    CHECK(formula->Input(HexCalc::FormulaData(1)));
+    CHECK(formula->Input(HexCalc::FormulaData(Plus)));
+    CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
+    CHECK(formula->Input(HexCalc::FormulaData(2)));
+    CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
+    CHECK(formula->Input(HexCalc::FormulaData(6)));
+
+    // Incomplete brackets will be treated as complete.
+    CHECK(formula->Evaluate());
+    CHECK_EQUAL(13, formula->Result());
 }
 
 TEST(FormulaTree, TestMoreBrackets) {
