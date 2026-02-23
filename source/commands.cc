@@ -268,7 +268,7 @@ Commands::Evaluate(void) {
     debugf("Key = pressed\n");
     bus.Post(Event{
         0,
-        EventType::EvaluateEvent,
+        EventType::FormulaEvaluateEvent,
     });
 }
 

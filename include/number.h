@@ -110,6 +110,21 @@ struct DigitArray {
     bool isNegative;
 };
 
+template <NumberBase base>
+static constexpr size_t
+MaxDigitsForType(void) {
+    static_assert(base == Binary || base == Octal || base == Decimal ||
+                      base == Hexadecimal,
+                  "Invalid base");
+    NumberDataType v = std::numeric_limits<NumberDataType>::max();
+    size_t count = 0;
+    do {
+        ++count;
+        v /= static_cast<NumberDataType>(base);
+    } while (v != 0);
+    return count;
+}
+
 /**
  * @brief A number with a specified width and sign.
  *
@@ -122,11 +137,11 @@ class Number {
     constexpr explicit Number(uint64_t v, NumberSign sign = Unsigned)
         : value(v), sign(sign) {}
 
-    static constexpr size_t MaxBinDigits = 16;
-    static constexpr size_t MaxOctDigits = 22;
-    static constexpr size_t MaxDecDigits = 22;
-    static constexpr size_t MaxHexDigits = 22;
-    static constexpr size_t MaxDisplayDigits = 22;
+    static constexpr size_t MaxBinDigits = MaxDigitsForType<Binary>() / 4;
+    static constexpr size_t MaxOctDigits = MaxDigitsForType<Octal>();
+    static constexpr size_t MaxDecDigits = MaxDigitsForType<Decimal>();
+    static constexpr size_t MaxHexDigits = MaxDigitsForType<Hexadecimal>();
+    static constexpr size_t MaxDisplayDigits = 28;
 
     /**
      * @brief Get max digits for the number based on its width and sign.
@@ -140,11 +155,8 @@ class Number {
         static_assert(base == Binary || base == Octal || base == Decimal ||
                           base == Hexadecimal,
                       "Invalid base");
-        // consider 64 for binary and 22 for other bases
-        return (base == Binary)
-                   ? MaxBinDigits
-                   : std::max(MaxOctDigits,
-                              std::max(MaxDecDigits, MaxHexDigits));
+        // consider 16 for binary and MaxDisplayDigits for other bases
+        return (base == Binary) ? MaxBinDigits : MaxDisplayDigits;
     }
 
     template <NumberBase base, size_t N = MaxDigits<base>()>

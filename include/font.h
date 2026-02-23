@@ -177,11 +177,11 @@ class Glyph {
     FontType upper;
     FontType lower;
 
-    bool upHFlip;
-    bool upVFlip;
-    bool downHFlip;
-    bool downVFlip;
-    bool underBaseline;
+    bool upHFlip : 1;
+    bool upVFlip : 1;
+    bool downHFlip : 1;
+    bool downVFlip : 1;
+    bool underBaseline : 1;
 };
 
 constexpr Glyph InvalidGlyph = Glyph();

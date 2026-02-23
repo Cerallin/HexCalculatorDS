@@ -41,7 +41,9 @@ static_assert(sizeof(InputEventData) <= sizeof(EventDataType),
 
 class FormulaModel {
   public:
-    explicit FormulaModel(EventBus &eventBus) : formulaTree(), bus(eventBus) {}
+    explicit FormulaModel(EventBus &eventBus)
+        : bus(eventBus), formulaTree(), inputState(InputNumber),
+          currentNumber(NumberZero) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -50,34 +52,28 @@ class FormulaModel {
         return formulaTree;
     }
 
-  private:
-    void notifyChanged(void);
-
-    FormulaTree formulaTree;
-    EventBus &bus;
-};
-
-/**
- * @brief Number on the screen
- *
- */
-class ValueModel {
-  public:
-    explicit ValueModel(EventBus &eventBus)
-        : value(NumberZero), bus(eventBus) {}
-
-    EventResult HandleEvent(const Event &e);
-
     NumberDataType
-    Value(void) const {
-        return value;
+    CurrentNumber(void) const {
+        return currentNumber;
     }
 
   private:
-    void notifyChanged(void);
-
-    NumberDataType value;
     EventBus &bus;
+    FormulaTree formulaTree;
+
+    enum InputState {
+        InputNumber,
+        PlaceHolder,
+    } inputState;
+
+    NumberDataType currentNumber;
+
+    void notifyFormulaUpdate(void);
+    void notifyValueChange(void);
+    void notifyWidthChange(NumberWidth width);
+
+    void handleInput(const Event &e);
+    void handleBaseChange(const Event &e);
 };
 
 }; // namespace HexCalc

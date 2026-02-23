@@ -176,8 +176,10 @@ class Stack : public NonCopyable {
 template <typename Class, typename DataType>
 class TreeNode {
   public:
-    TreeNode(void) : value(DataType(0)), left(nullptr), right(nullptr) {}
-    TreeNode(const DataType &val) : value(val), left(nullptr), right(nullptr) {}
+    TreeNode(void)
+        : value(DataType(0)), left(nullptr), right(nullptr), parent(nullptr) {}
+    TreeNode(const DataType &val)
+        : value(val), left(nullptr), right(nullptr), parent(nullptr) {}
 
     void
     Assign(const DataType &val) {
@@ -242,8 +244,6 @@ class TreeNode {
      * @brief Performs a post-order traversal (left -> right -> root) of a
      * binary tree.
      *
-     * This implementation uses an explicit stack instead of recursion.
-     *
      * @tparam T Node value type.
      * @tparam N Maximum stack depth.
      * @param visit Callback invoked for each visited node.
@@ -274,6 +274,39 @@ class TreeNode {
                     visit(*peek);
                     lastVisited = peek;
                 }
+            }
+        }
+    }
+
+    /**
+     * @brief Performs an in-order traversal (left -> root -> right) of a binary
+     * tree.
+     *
+     * @tparam N Maximum stack depth.
+     * @tparam Func Callable type of the visit callback, which should be
+     * invocable with a single argument of type `Class&` (the node being
+     * visited).
+     * @param visit Callback invoked for each visited node.
+     */
+    template <size_t N, typename Func>
+    void
+    InOrderTraversal(Func visit) {
+        Stack<Class *, N> stack;
+
+        Class *current = static_cast<Class *>(this);
+
+        while (current != nullptr || !stack.Empty()) {
+            if (current != nullptr) {
+                stack.Push(current);
+                current = current->Left();
+            } else {
+                Class *peek;
+                stack.Pop(peek); // temporary pop to inspect
+
+                // Visit node
+                visit(*peek);
+
+                current = peek->Right(); // traverse right
             }
         }
     }

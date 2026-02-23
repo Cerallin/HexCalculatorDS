@@ -87,6 +87,10 @@ InputView::InputView(SubDisplay &display, ViewModel &vm)
         handler.RegisterButton(Area(AREA_30_X, AREA_30_Y, AREA_30_W, AREA_30_H),
                                ButtonType::ButtonPlus);
 
+    auto buttonEvaluate =
+        handler.RegisterButton(Area(AREA_31_X, AREA_31_Y, AREA_31_W, AREA_31_H),
+                               ButtonType::ButtonEvaluate);
+
     numberButtons[0x00] = button0;
     numberButtons[0x01] = button1;
     numberButtons[0x02] = button2;
@@ -127,7 +131,7 @@ InputView::HandleEvent(const Event &e) {
 
         // FIXME wait for a while to avoid handling the same touch event
         // multiple times
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 4; i++) {
             swiWaitForVBlank();
         }
 
@@ -230,7 +234,7 @@ ConfigView::getGlyphs() {
 
 EventResult
 FormulaView::HandleEvent(const Event &e) {
-    if (e.type != EventType::FormulaChangedEvent) {
+    if (e.type != EventType::FormulaUpdatedEvent) {
         return Skipped;
     }
 
@@ -244,51 +248,65 @@ void
 FormulaView::ForceUpdate(void) {
     debugf("FormulaView refreshed\n");
     Area6x8 area(viewArea);
-    GlyphArray<40> demoGlyphs;
-    demoGlyphs.Insert(Glyph(Font6x8LBrac));    // (
-    demoGlyphs.Insert(Glyph(Font6x8One));      // 1
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8Multiply)); // x
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8Two));      // 2
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8Divide));   // /
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8C));        // C
-    demoGlyphs.Insert(Glyph(Font6x8E));        // E
-    demoGlyphs.Insert(Glyph(Font6x8RBrac));    // )
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8And));      // &
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8A));        // A
-    demoGlyphs.Insert(Glyph(Font6x8F));        // F
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8RShift));   // >>
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8C));        // C
-    demoGlyphs.Insert(Glyph(Font6x8C));        // C
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8LShift));   // <<
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8Two));      // 2
-    demoGlyphs.Insert(Glyph(Font6x8Five));     // 5
-    demoGlyphs.Insert(Glyph(Font6x8Six));      // 6
-    demoGlyphs.Insert(Glyph(Font6x8Zero));     // 0
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8Or));       // |
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8Zero));     // 0
-    demoGlyphs.Insert(Glyph(Font6x8Seven));    // 7
-    demoGlyphs.Insert(Glyph(Font6x8Two));      // 2
-    demoGlyphs.Insert(Glyph(Font6x8One));      // 1
-    demoGlyphs.Insert(Glyph(FontEmpty));       //
-    demoGlyphs.Insert(Glyph(Font6x8Equal));    // =
 
-    GlyphArray6x8 glyphs(demoGlyphs);
+    clear();
+    bake();
+
+    // TODO pagination
+    GlyphArray6x8 glyphs6x8(glyphs);
 
     auto skipGlyphs = area.w - glyphs.Size();
-    Point start(viewArea.x + skipGlyphs * glyphs.CharWidth, viewArea.y);
-    display.PrintLine(glyphs, start);
+    Point start(viewArea.x + skipGlyphs * glyphs6x8.CharWidth, viewArea.y);
+    display.PrintLine(glyphs6x8, start);
+}
+
+void
+FormulaView::clear(void) {
+    dmaFillWords(0, &glyphs, sizeof(glyphs));
+}
+
+void
+FormulaView::bake(void) {
+    // TODO bake formulaTree to glyphs
+
+    // glyphs.Insert(Glyph(Font6x8LBrac));    // (
+    // glyphs.Insert(Glyph(Font6x8One));      // 1
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8Multiply)); // x
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8Two));      // 2
+    // glyphs.Insert(Glyph(Font6x8Five));     // 5
+    // glyphs.Insert(Glyph(Font6x8Divide));   // /
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8C));        // C
+    // glyphs.Insert(Glyph(Font6x8E));        // E
+    // glyphs.Insert(Glyph(Font6x8RBrac));    // )
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8And));      // &
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8A));        // A
+    // glyphs.Insert(Glyph(Font6x8F));        // F
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8RShift));   // >>
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8C));        // C
+    // glyphs.Insert(Glyph(Font6x8C));        // C
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8LShift));   // <<
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8Two));      // 2
+    // glyphs.Insert(Glyph(Font6x8Five));     // 5
+    // glyphs.Insert(Glyph(Font6x8Six));      // 6
+    // glyphs.Insert(Glyph(Font6x8Zero));     // 0
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8Or));       // |
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8Zero));     // 0
+    // glyphs.Insert(Glyph(Font6x8Seven));    // 7
+    // glyphs.Insert(Glyph(Font6x8Two));      // 2
+    // glyphs.Insert(Glyph(Font6x8One));      // 1
+    // glyphs.Insert(Glyph(FontEmpty));       //
+    // glyphs.Insert(Glyph(Font6x8Equal));    // =
 }
 
 EventResult
@@ -413,7 +431,7 @@ template <NumberBase base>
 void
 TranscodeView<base>::printNumber(void) const {
     Number number(vm.GetNumber(), config.Sign());
-    auto digits = number.Transcode<base, Number::MaxDisplayDigits>();
+    auto digits = number.Transcode<base, MaxDigitsForType<base>()>();
     using GlyphArrayType = std::conditional_t<
         (base == Hexadecimal), HexGlyphArray6x8,
         std::conditional_t<(base == Decimal), DecGlyphArray6x8,

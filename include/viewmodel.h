@@ -47,7 +47,7 @@ class ViewModel : private NonCopyable {
 
     auto
     GetNumber(void) const {
-        return valueModel.Value();
+        return formulaModel.CurrentNumber();
     }
 
   private:
@@ -60,15 +60,10 @@ class ViewModel : private NonCopyable {
     Commands commands;
 
     /**
-     * @brief Formula tree
+     * @brief Formula tree and current input number
      *
      */
     FormulaModel formulaModel;
-    /**
-     * @brief Curent input number or calculated result
-     *
-     */
-    ValueModel valueModel;
 
     /**
      * @brief Key input handler to identify key inputs and generate events

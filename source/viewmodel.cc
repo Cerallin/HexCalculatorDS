@@ -16,10 +16,9 @@ ViewModel::ViewModel(void)
       // commands
       commands(eventBus),
       // models
-      formulaModel(eventBus), valueModel(eventBus), keyInputHandler(commands) {
+      formulaModel(eventBus), keyInputHandler(commands) {
     eventBus.Subscribe(config);
     eventBus.Subscribe(formulaModel);
-    eventBus.Subscribe(valueModel);
 
     // FIXME just for testing, should be removed later
     commands.InputNumber1();
