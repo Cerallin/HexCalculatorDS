@@ -5,7 +5,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "view.h"
-#include "config.h"
 #include "subscreenArea.h"
 
 using namespace HexCalc;
@@ -173,15 +172,15 @@ InputView::ForceUpdate(void) {
         }
     }
     // Update width and sign drawers
-    auto width = config.Width();
+    auto width = vm.GetNumberWidth();
     display.UpdateWidthDrawer(width);
-    auto sign = config.Sign();
+    auto sign = vm.GetNumberSign();
     display.UpdateSignDrawer(sign);
 }
 
 void
 InputView::handleBaseChange(void) {
-    auto base = config.Base();
+    auto base = vm.GetNumberBase();
     // Enable number buttons that are valid for the current base, and disable
     // them otherwise. For example, in hexadecimal mode, all number buttons are
     // enabled, while in decimal mode, only 0-9 buttons are enabled.
@@ -196,13 +195,13 @@ InputView::handleBaseChange(void) {
 
 void
 InputView::handleWidthChange(void) {
-    auto width = config.Width();
+    auto width = vm.GetNumberWidth();
     display.UpdateWidthDrawer(width);
 }
 
 void
 InputView::handleSignChange(void) {
-    auto sign = config.Sign();
+    auto sign = vm.GetNumberSign();
     display.UpdateSignDrawer(sign);
 }
 
@@ -234,8 +233,8 @@ ConfigView::ForceUpdate(void) {
 GlyphArray8x8<ConfigView::maxGlyphs>
 ConfigView::getGlyphs() {
     GlyphArray8x8<ConfigView::maxGlyphs> glyphs;
-    auto width = config.Width();
-    auto sign = config.Sign();
+    auto width = vm.GetNumberWidth();
+    auto sign = vm.GetNumberSign();
 
     if (sign == Unsigned) {
         glyphs.Insert(Glyph(FontColoredU));
@@ -365,9 +364,9 @@ void
 ValueView::ForceUpdate(void) {
     debugf("ValueView refreshed\n");
 
-    auto sign = config.Sign();
-    auto base = config.Base();
-    auto width = config.Width();
+    auto sign = vm.GetNumberSign();
+    auto base = vm.GetNumberBase();
+    auto width = vm.GetNumberWidth();
 
     constexpr auto maxDigits = Number::MaxDecDigits;
 
@@ -407,7 +406,7 @@ ValueView::ForceUpdate(void) {
 template <NumberBase base>
 EventResult
 TranscodeView<base>::handleBaseChanged(void) {
-    if (base != config.Base()) {
+    if (base != vm.GetNumberBase()) {
         return Skipped;
     }
 
@@ -464,7 +463,7 @@ HexCalc::TranscodeView<base>::printHeader(void) const {
 template <NumberBase base>
 void
 TranscodeView<base>::printNumber(void) const {
-    Number number(vm.GetNumber(), config.Sign());
+    Number number(vm.GetNumber(), vm.GetNumberSign());
     auto digits = number.Transcode<base, MaxDigitsForType<base>()>();
     using GlyphArrayType = std::conditional_t<
         (base == Hexadecimal), HexGlyphArray6x8,
@@ -486,8 +485,8 @@ void
 TranscodeView<Binary>::printNumber(void) const {
     // TODO Adjust the height of TranscodeView dynamically to accommodate
     // different widths of number display
-    auto width = config.Width();
-    auto sign = config.Sign();
+    auto width = vm.GetNumberWidth();
+    auto sign = vm.GetNumberSign();
     for (int i = 0; i < 4; i++) {
         auto nByte =
             static_cast<uint16_t>((vm.GetNumber() >> (i * 16)) & 0xFFFF);

@@ -61,3 +61,18 @@ ViewModel::HandleInputs(void) {
         handleTouchScreen();
     }
 }
+
+NumberWidth
+ViewModel::GetNumberWidth(void) const {
+    return config.Width();
+}
+
+NumberSign
+ViewModel::GetNumberSign(void) const {
+    return config.Sign();
+}
+
+NumberBase
+ViewModel::GetNumberBase(void) const {
+    return config.Base();
+}

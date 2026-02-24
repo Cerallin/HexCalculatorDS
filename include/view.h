@@ -74,11 +74,12 @@ class MainView : public BasicView<Class, MainDisplay> {
 
 class ConfigView : public MainView<ConfigView, AlignLeft> {
   public:
-    ConfigView(MainDisplay &display)
+    ConfigView(MainDisplay &display, ViewModel &vm)
         : MainView(Area(offsetX, line * MainDisplay::TileHeight,
                         lineWidth * MainDisplay::TileWidth,
                         height * MainDisplay::TileHeight),
-                   display) {}
+                   display),
+          vm(vm) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -104,6 +105,8 @@ class ConfigView : public MainView<ConfigView, AlignLeft> {
 
   private:
     static constexpr size_t maxGlyphs = 6;
+
+    ViewModel &vm;
 
     GlyphArray8x8<maxGlyphs> getGlyphs();
 };

@@ -9,7 +9,7 @@
 using namespace HexCalc;
 
 ViewHost::ViewHost(ViewModel &viewModel)
-    : mainDisplay(), subDisplay(), configView(mainDisplay),
+    : mainDisplay(), subDisplay(), configView(mainDisplay, viewModel),
       formulaView(mainDisplay, viewModel), valueView(mainDisplay, viewModel),
       hexView(mainDisplay, viewModel), decView(mainDisplay, viewModel),
       octView(mainDisplay, viewModel), binView(mainDisplay, viewModel),

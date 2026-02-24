@@ -50,6 +50,12 @@ class ViewModel : private NonCopyable {
         return formulaModel.CurrentNumber();
     }
 
+    NumberWidth GetNumberWidth(void) const;
+
+    NumberSign GetNumberSign(void) const;
+
+    NumberBase GetNumberBase(void) const;
+
   private:
     EventBus eventBus;
 
