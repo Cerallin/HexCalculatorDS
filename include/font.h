@@ -21,7 +21,6 @@ using FontType = uint8_t;
  */
 enum FontChar : FontType {
     FontEmpty = 0,
-    FontEOS = 0xFF,
     Font6x8Zero = 1,
     Font6x8One,
     Font6x8Two,
@@ -106,6 +105,8 @@ enum FontChar : FontType {
     FontColoredSix,
     FontColoredEight,
     FontColoredBarrier,
+
+    FontEnd = 0xFF,
 };
 
 /**
@@ -115,6 +116,16 @@ enum FontChar : FontType {
 constexpr size_t BarTileCount = 3;
 constexpr FontType BarTiles[BarTileCount] = {83, 84, 85};
 
+class GlyphOO;
+class GlyphOX;
+class GlyphOY;
+class GlyphXO;
+class GlyphXX;
+class GlyphXY;
+class GlyphYO;
+class GlyphYX;
+class GlyphYY;
+
 /**
  * @brief Glyph may have 1 or 2 tiles.
  *
@@ -122,13 +133,12 @@ constexpr FontType BarTiles[BarTileCount] = {83, 84, 85};
 class Glyph {
   public:
     constexpr Glyph(FontType upper, FontType lower, bool upHFlip = false,
-                    bool downHFlip = false, bool underBaseline = false)
-        : upper(upper), lower(lower), upHFlip(upHFlip), upVFlip(false),
-          downHFlip(downHFlip), downVFlip(false), underBaseline(underBaseline) {
-    }
-    constexpr Glyph(void)
-        : upper(FontEmpty), lower(FontEmpty), upHFlip(false), upVFlip(false),
-          downHFlip(false), downVFlip(false), underBaseline(false) {}
+                    bool downHFlip = false, bool upVFlip = false,
+                    bool downVFlip = false, bool underBaseline = false)
+        : upper(upper), lower(lower), upHFlip(upHFlip), upVFlip(upVFlip),
+          downHFlip(downHFlip), downVFlip(downVFlip),
+          underBaseline(underBaseline) {}
+    constexpr Glyph(void) : Glyph(FontEmpty, FontEmpty) {}
 
     /**
      * @brief Load a glyph from a font.
@@ -182,6 +192,56 @@ class Glyph {
     bool downHFlip : 1;
     bool downVFlip : 1;
     bool underBaseline : 1;
+};
+
+class GlyphOO : public Glyph {};
+
+class GlyphOX : public Glyph {
+  public:
+    constexpr GlyphOX(FontType upper, FontType lower)
+        : Glyph(upper, lower, false, true, false, false) {}
+};
+
+class GlyphOY : public Glyph {
+  public:
+    constexpr GlyphOY(FontType upper, FontType lower)
+        : Glyph(upper, lower, false, false, false, true) {}
+};
+
+class GlyphXO : public Glyph {
+  public:
+    constexpr GlyphXO(FontType upper, FontType lower)
+        : Glyph(upper, lower, true, false, false, false) {}
+};
+
+class GlyphXX : public Glyph {
+  public:
+    constexpr GlyphXX(FontType upper, FontType lower)
+        : Glyph(upper, lower, true, true, false, false) {}
+};
+
+class GlyphXY : public Glyph {
+  public:
+    constexpr GlyphXY(FontType upper, FontType lower)
+        : Glyph(upper, lower, true, false, false, true) {}
+};
+
+class GlyphYO : public Glyph {
+  public:
+    constexpr GlyphYO(FontType upper, FontType lower)
+        : Glyph(upper, lower, false, false, true, false) {}
+};
+
+class GlyphYX : public Glyph {
+  public:
+    constexpr GlyphYX(FontType upper, FontType lower)
+        : Glyph(upper, lower, false, true, true, false) {}
+};
+
+class GlyphYY : public Glyph {
+  public:
+    constexpr GlyphYY(FontType upper, FontType lower)
+        : Glyph(upper, lower, false, true, true, true) {}
 };
 
 constexpr Glyph InvalidGlyph = Glyph();
@@ -287,7 +347,7 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(0, 42);
         break;
     case Font8x8D:
-        *this = Glyph(40, 41, true, true);
+        *this = GlyphXX(40, 41);
         break;
     case Font8x8E:
         *this = Glyph(0, 43);
@@ -305,7 +365,7 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(48, 50);
         break;
     case Font8x8Comma:
-        *this = Glyph(51, 52, false, false, true);
+        *this = Glyph(51, 52, false, false, false, false, true);
         break;
     case Font8x8Four:
         *this = Glyph(53, 54);
@@ -314,10 +374,10 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(55, 56);
         break;
     case Font8x8Six:
-        *this = Glyph(48, 57, true);
+        *this = GlyphXO(48, 57);
         break;
     case Font8x8Seven:
-        *this = Glyph(55, 58, true);
+        *this = GlyphXO(55, 58);
         break;
     case Font8x8Eight:
         *this = Glyph(59, 60);
@@ -353,10 +413,10 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(76, 78);
         break;
     case FontColoredThree:
-        *this = Glyph(76, 79, true);
+        *this = GlyphXO(76, 79);
         break;
     case FontColoredTwo:
-        *this = Glyph(76, 80, true);
+        *this = GlyphXO(76, 80);
         break;
     case FontColoredFour:
         *this = Glyph(81, 82);

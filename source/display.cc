@@ -9,7 +9,10 @@
 
 // assets
 #include "mainFont.h"
+#include "subFont.h"
 #include "subscreenImage.h"
+
+#include <array>
 
 using namespace HexCalc;
 
@@ -50,8 +53,7 @@ MainDisplay::MainDisplay(void)
     SetBackdrop(31, 31, 30);
 
     // cope font tiles
-    dmaCopy(mainFontTiles, bgGetGfxPtr(this->layers[0].GetBg()),
-            mainFontTilesLen);
+    decompress(mainFontTiles, bgGetGfxPtr(this->layers[0].GetBg()), LZ77Vram);
 }
 
 void
@@ -90,11 +92,17 @@ MainDisplay::ClearLine(Point &start, int charWidth) {
 }
 
 SubDisplay::SubDisplay(void)
-    : bmpLayer(0, 0), tileLayers{
-                          TileLayer<SubDisplay>(0, 0),
-                          TileLayer<SubDisplay>(0, 0),
-                          TileLayer<SubDisplay>(0, 0),
-                      } {
+    : bmpLayer(0, 0),
+      tileLayers{
+          TileLayer<SubDisplay>(0, 0),     // unused
+          TileLayer<SubDisplay>(-152, 0),  // border layer
+          TileLayer<SubDisplay>(-164, -8), // text layer
+      },
+      widthManager(tileLayers[1], tileLayers[2], {0, 0},
+                   {0, 0}), // number width manager
+      signManager(tileLayers[1], tileLayers[2], {64, 0},
+                  {64, 0}) // number sign manager
+{
     // button style & animation will be handled by modifing palette
     videoSetModeSub(VideoMode);
     vramSetBankC(VRAM_C_SUB_BG_0x06200000);
@@ -113,6 +121,9 @@ SubDisplay::SubDisplay(void)
 
     // copy image palette
     dmaCopy(subscreenImagePal, BG_PALETTE_SUB, subscreenImagePalLen);
+    // copy font palette
+    dmaCopy(subFontPal, BG_PALETTE_SUB, BIT(Bpp) * sizeof(uint16_t));
+    // Set backdrop color
     SetBackdrop(31, 31, 30);
 
     // set up palettes for button states
@@ -120,8 +131,16 @@ SubDisplay::SubDisplay(void)
     disabledPalette = &BG_PALETTE_SUB[MaxColorCount - (2 * ColorCount)];
     selectedPalette = &BG_PALETTE_SUB[MaxColorCount - ColorCount];
 
+    // draw borders once since they won't change
+    widthManager.DrawBorders(0, 0);
+    signManager.DrawBorders(0, 0);
+
     // decompress image bitmap (LZ77) into VRAM
     decompress(subscreenImageBitmap, bgGetGfxPtr(bmpLayer.GetBg()), LZ77Vram);
+
+    // decompress font tiles (LZ77) into VRAM
+    decompress(subFontTiles, bgGetGfxPtr(this->tileLayers[0].GetBg()),
+               LZ77Vram);
 }
 
 void
@@ -143,4 +162,14 @@ SubDisplay::SelectButton(int index) {
     // 1 for the backdrop color
     uint16_t *dest = &BG_PALETTE_SUB[16 + (index * ColorCount)];
     dmaCopy(selectedPalette, dest, ColorCount * sizeof(uint16_t));
+}
+
+void
+SubDisplay::UpdateWidthDrawer(NumberWidth width) {
+    widthManager.DrawText(width, 0, 0);
+}
+
+void
+SubDisplay::UpdateSignDrawer(NumberSign sign) {
+    signManager.DrawText(sign, 0, 0);
 }

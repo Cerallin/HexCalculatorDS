@@ -37,11 +37,26 @@ add_custom_command(
         ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-main-tilemap.png
         -ftc
         -gB4
+        -gzl
         -gTFF00FF
         -m
         -o mainFont
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-main-tilemap.png
-    COMMENT "Generating font tilemap"
+    COMMENT "Generating main font tilemap"
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subFont.c
+    COMMAND ${GRIT}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-tilemap.png
+        -ftc
+        -gB4
+        -gzl
+        -gTFF00FF
+        -m
+        -o subFont
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-tilemap.png
+    COMMENT "Generating sub font tilemap"
 )
 
 # ----------------------------------------
@@ -85,6 +100,7 @@ file(GLOB_RECURSE SOURCES
 add_executable(${PROJECT_NAME}.elf 
     ${SOURCES}
     ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
+    ${CMAKE_CURRENT_BINARY_DIR}/subFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c
 )
 
