@@ -93,7 +93,7 @@ enum Digit : int8_t {
 
 template <size_t N>
 struct DigitArray {
-    constexpr DigitArray(void) : digits{}, size(0), isNegative(false) {}
+    constexpr DigitArray(void) : digits{}, size(0), negative(false) {}
 
     auto &
     operator[](size_t index) {
@@ -107,7 +107,7 @@ struct DigitArray {
 
     Digit digits[N];
     size_t size;
-    bool isNegative;
+    bool negative;
 };
 
 template <NumberBase base>
@@ -173,7 +173,7 @@ class Number {
         DigitArray<N> digits;
         if (sign == Signed) { // signed
             int64_t v = static_cast<int64_t>(value);
-            digits.isNegative = (v < 0);
+            digits.negative = (v < 0);
             if (v < 0) {
                 v = -v;
             }

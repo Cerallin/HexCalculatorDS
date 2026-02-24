@@ -54,7 +54,7 @@ TEST(Number, TestNegativeDecimal) {
     constexpr int64_t testValue = -1234567890;
     HexCalc::Number num(testValue, HexCalc::Signed);
     auto res = num.Transcode<HexCalc::Decimal>();
-    CHECK(res.isNegative);
+    CHECK(res.negative);
     CHECK_EQUAL(10, res.size);
 }
 
