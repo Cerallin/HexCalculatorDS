@@ -88,6 +88,7 @@ enum FontChar : FontType {
     Font8x8E,
     Font8x8F,
     Font8x8Comma,
+    Font8x8Minus,
     Font8x8Barrier,
 
     /**
@@ -387,6 +388,9 @@ constexpr Glyph::Glyph(FontType font)
         break;
     case Font8x8Zero:
         *this = Glyph(59, 62);
+        break;
+    case Font8x8Minus:
+        *this = Glyph(0, 102);
         break;
     case Font6x8Comma:
         *this = Glyph(0, 63);
