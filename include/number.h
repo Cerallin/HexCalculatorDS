@@ -172,7 +172,7 @@ class Number {
         size_t count = 0;
         DigitArray<N> digits;
         if (sign == Signed) { // signed
-            int64_t v = static_cast<size_t>(value);
+            int64_t v = static_cast<int64_t>(value);
             digits.isNegative = (v < 0);
             if (v < 0) {
                 v = -v;

@@ -73,7 +73,6 @@ _doOp(OperatorType op, T a, T b) {
  */
 static NumberDataType
 _operateCalc(OperatorType op, NumberDataType a, NumberDataType b) {
-
     auto sign = config.Sign();
     auto width = config.Width();
 
@@ -85,7 +84,6 @@ _operateCalc(OperatorType op, NumberDataType a, NumberDataType b) {
     uint64_t result = 0;
 
     if (sign == Signed) {
-
         switch (width) {
         case Byte: {
             int8_t aa = _signExtend<int8_t>(a, width);

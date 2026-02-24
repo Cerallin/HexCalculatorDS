@@ -74,6 +74,36 @@ TEST(FormulaTree, TestSimpleAdd) {
     CHECK_EQUAL(3, formula->Result());
 }
 
+TEST(FormulaTree, TestNegativeResult) {
+    configNumber(Decimal, QWord, Signed);
+    // 1 - 2 = -1
+    HexCalc::FormulaData n1(1);
+    HexCalc::FormulaData n2(2);
+    HexCalc::FormulaData op(HexCalc::OperatorType::Minus);
+
+    CHECK(formula->Input(n1));
+    CHECK(formula->Input(op));
+    CHECK(formula->Input(n2));
+
+    CHECK(formula->Evaluate());
+    CHECK_EQUAL(static_cast<uint64_t>(-1), formula->Result());
+}
+
+TEST(FormulaTree, TestNegativeResultWord) {
+    configNumber(Decimal, Word, Signed);
+    // 1 - 2 = -1
+    HexCalc::FormulaData n1(1);
+    HexCalc::FormulaData n2(2);
+    HexCalc::FormulaData op(HexCalc::OperatorType::Minus);
+
+    CHECK(formula->Input(n1));
+    CHECK(formula->Input(op));
+    CHECK(formula->Input(n2));
+
+    CHECK(formula->Evaluate());
+    CHECK_EQUAL(static_cast<uint16_t>(-1), formula->Result());
+}
+
 TEST(FormulaTree, TestSimpleMultiply) {
     // 2 x 5 = 10
     HexCalc::FormulaData n1(2);
