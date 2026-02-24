@@ -54,10 +54,18 @@ TEST(Number, TestByteBinary) {
 
 TEST(Number, TestNegativeDecimal) {
     constexpr int64_t testValue = -1234567890;
-    HexCalc::Number num(testValue, HexCalc::Signed);
+    HexCalc::Number num(testValue, HexCalc::QWord, HexCalc::Signed);
     auto res = num.Transcode<MaxDigits>(HexCalc::Decimal);
     CHECK(res.negative);
     CHECK_EQUAL(10, res.size);
+}
+
+TEST(Number, TestNegativeWord) {
+    constexpr int64_t testValue = -12345;
+    HexCalc::Number num(testValue, HexCalc::Word, HexCalc::Signed);
+    auto res = num.Transcode<MaxDigits>(HexCalc::Decimal);
+    CHECK(res.negative);
+    CHECK_EQUAL(5, res.size);
 }
 
 int
