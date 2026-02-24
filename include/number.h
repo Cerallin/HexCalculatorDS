@@ -141,25 +141,8 @@ class Number {
     static constexpr size_t MaxOctDigits = MaxDigitsForType<Octal>();
     static constexpr size_t MaxDecDigits = MaxDigitsForType<Decimal>();
     static constexpr size_t MaxHexDigits = MaxDigitsForType<Hexadecimal>();
-    static constexpr size_t MaxDisplayDigits = 28;
 
-    /**
-     * @brief Get max digits for the number based on its width and sign.
-     *
-     * @tparam base
-     * @return constexpr size_t
-     */
-    template <NumberBase base>
-    static constexpr size_t
-    MaxDigits(void) {
-        static_assert(base == Binary || base == Octal || base == Decimal ||
-                          base == Hexadecimal,
-                      "Invalid base");
-        // consider 16 for binary and MaxDisplayDigits for other bases
-        return (base == Binary) ? MaxBinDigits : MaxDisplayDigits;
-    }
-
-    template <NumberBase base, size_t N = MaxDigits<base>()>
+    template <NumberBase base, size_t N>
     auto
     Transcode() const {
         if (value == 0) {
