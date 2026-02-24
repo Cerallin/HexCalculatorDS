@@ -347,13 +347,10 @@ ValueView::HandleEvent(const Event &e) {
     if (e.type == EventType::ValueChangedEvent) {
         BasicView::markDirty();
         debugf("ValueView updated\n");
-        auto value = vm.GetNumber();
-
         return Consumed;
     } else if (e.type == EventType::UpdateBaseEvent) {
         BasicView::markDirty();
         debugf("ValueView base changed\n");
-
         return Consumed;
     } else {
         return Skipped;
@@ -368,39 +365,9 @@ ValueView::ForceUpdate(void) {
     auto base = vm.GetNumberBase();
     auto width = vm.GetNumberWidth();
 
-    constexpr auto maxDigits = Number::MaxDecDigits;
+    auto digits = vm.GetValueDigits<ViewModel::MaxDisplayDigits>();
 
-    DigitArray<maxDigits> digits;
-    Number number(vm.GetNumber(), sign);
-
-    if (base == Hexadecimal) {
-        digits = number.Transcode<Hexadecimal, maxDigits>();
-    } else if (base == Decimal) {
-        digits = number.Transcode<Decimal, maxDigits>();
-    } else if (base == Octal) {
-        digits = number.Transcode<Octal, maxDigits>();
-    } else if (base == Binary) {
-        digits = number.Transcode<Binary, maxDigits>();
-    } else {
-        debugf("ValueView number: %llu\n",
-               static_cast<unsigned long long>(
-                   number.Transcode<Decimal, maxDigits>()[0]));
-    }
-
-    Point startLeft(viewArea.x, viewArea.y);
-    if (MainView::viewAlign == AlignLeft) {
-        GlyphArray8x8<maxDigits> glyphs(digits, true);
-        display.ClearLine(startLeft, glyphs.CharWidth);
-        display.PrintLine(glyphs, startLeft);
-    } else { // align right
-        GlyphArray8x8<maxDigits> glyphs(digits);
-        Area8x8 area(viewArea);
-        auto skipGlyphs = area.w - glyphs.Size();
-        Point startRight(viewArea.x + (skipGlyphs * glyphs.CharWidth),
-                         viewArea.y);
-        display.ClearLine(startLeft, glyphs.CharWidth);
-        display.PrintLine(glyphs, startRight);
-    }
+    PrintGlyphs<GlyphArray8x8<ViewModel::MaxDisplayDigits>>(digits);
 }
 
 template <NumberBase base>
@@ -463,8 +430,7 @@ HexCalc::TranscodeView<base>::printHeader(void) const {
 template <NumberBase base>
 void
 TranscodeView<base>::printNumber(void) const {
-    Number number(vm.GetNumber(), vm.GetNumberSign());
-    auto digits = number.Transcode<base, MaxDigitsForType<base>()>();
+    auto digits = vm.GetValueDigits<MaxDigitsForType<base>()>();
     using GlyphArrayType = std::conditional_t<
         (base == Hexadecimal), HexGlyphArray6x8,
         std::conditional_t<(base == Decimal), DecGlyphArray6x8,
@@ -488,11 +454,7 @@ TranscodeView<Binary>::printNumber(void) const {
     auto width = vm.GetNumberWidth();
     auto sign = vm.GetNumberSign();
     for (int i = 0; i < 4; i++) {
-        auto nByte =
-            static_cast<uint16_t>((vm.GetNumber() >> (i * 16)) & 0xFFFF);
-        debugf("TranscodeView(Binary) byte %d: %04x\n", i, nByte);
-        Number number(nByte, sign);
-        auto digits = number.Transcode<Binary, Number::MaxBinDigits>();
+        auto digits = vm.GetValueDigitsPerByte<Number::MaxBinDigits>(i);
         GlyphArray6x8<Number::MaxBinDigits> glyphArray(digits, false);
         BinGlyphArray6x8 glyphs(glyphArray);
         Point start(this->viewArea.x +

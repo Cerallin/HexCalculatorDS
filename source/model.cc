@@ -155,13 +155,9 @@ FormulaModel::handleInput(const Event &e) {
 
 void
 FormulaModel::handleBaseChange(const Event &e) {
-    constexpr auto maxDisplayDigits = Number::MaxDisplayDigits;
-    if ((config.Base() == Binary) && (config.Width() > maxDisplayDigits)) {
-        constexpr auto width = (QWord < maxDisplayDigits)   ? QWord
-                               : (DWord < maxDisplayDigits) ? DWord
-                               : (Word < maxDisplayDigits)  ? Word
-                                                            : Byte;
-        notifyWidthChange(width);
+    constexpr auto maxWidthforBinary = DWord;
+    if ((config.Base() == Binary) && (config.Width() > maxWidthforBinary)) {
+        notifyWidthChange(maxWidthforBinary);
     } else {
         notifyValueChange();
     }

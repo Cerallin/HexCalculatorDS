@@ -16,7 +16,7 @@
 
 namespace HexCalc {
 
-template <typename Class, typename DisplayType>
+template <class Derived, typename DisplayType>
 class BasicView {
   public:
     // Initially, the view needs to be rendered at least once.
@@ -30,7 +30,7 @@ class BasicView {
     void
     Update(void) {
         if (dirty) {
-            static_cast<Class *>(this)->ForceUpdate();
+            static_cast<Derived *>(this)->ForceUpdate();
         }
         dirty = false;
     }
@@ -60,13 +60,32 @@ enum ViewAlign : uint8_t {
  * @brief Basic view on the main screen.
  *
  */
-template <typename Class, ViewAlign Align>
-class MainView : public BasicView<Class, MainDisplay> {
+template <class Derived, ViewAlign Align>
+class MainView : public BasicView<Derived, MainDisplay> {
   public:
     MainView(Area area, MainDisplay &display)
-        : BasicView<Class, MainDisplay>(display), viewArea(area) {}
+        : BasicView<Derived, MainDisplay>(display), viewArea(area) {}
 
     static constexpr auto viewAlign = Align;
+
+    template <class GlyphArrayType, size_t N>
+    void
+    PrintGlyphs(DigitArray<N> digits) const {
+        Point startLeft(viewArea.x, viewArea.y);
+        if constexpr (Derived::viewAlign == AlignLeft) {
+            GlyphArrayType glyphs(digits, true);
+            this->display.ClearLine(startLeft, glyphs.CharWidth);
+            this->display.PrintLine(glyphs, startLeft);
+        } else { // align right
+            GlyphArrayType glyphs(digits, false);
+            Area8x8 area(viewArea);
+            auto skipGlyphs = area.w - glyphs.Size();
+            Point startRight(viewArea.x + (skipGlyphs * glyphs.CharWidth),
+                             viewArea.y);
+            this->display.ClearLine(startLeft, glyphs.CharWidth);
+            this->display.PrintLine(glyphs, startRight);
+        }
+    }
 
   protected:
     Area viewArea;
@@ -324,10 +343,10 @@ using DecView = TranscodeView<Decimal>;
 using OctView = TranscodeView<Octal>;
 using BinView = TranscodeView<Binary>;
 
-template <typename Class>
-class SubView : public BasicView<Class, SubDisplay> {
+template <class Derived>
+class SubView : public BasicView<Derived, SubDisplay> {
   public:
-    SubView(SubDisplay &display) : BasicView<Class, SubDisplay>(display) {}
+    SubView(SubDisplay &display) : BasicView<Derived, SubDisplay>(display) {}
 };
 
 class InputView : public SubView<InputView> {
