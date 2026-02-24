@@ -15,7 +15,7 @@ namespace HexCalc {
 class MainDisplay;
 class SubDisplay;
 
-template <typename Class, typename DisplayType>
+template <class Derived, typename DisplayType>
 class BasicLayer {
   public:
     BasicLayer(const Point &offset) : BasicLayer(offset.x, offset.y) {}
@@ -24,8 +24,8 @@ class BasicLayer {
 
     void
     Init(int layer, int mapBase, int tileBase) {
-        constexpr auto bgType = Class::BgType;
-        constexpr auto bgSize = Class::BgSize;
+        constexpr auto bgType = Derived::BgType;
+        constexpr auto bgSize = Derived::BgSize;
 
         // save handles
         if constexpr (std::is_same_v<DisplayType, MainDisplay>) {

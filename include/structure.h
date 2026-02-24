@@ -173,7 +173,7 @@ class Stack : public NonCopyable {
  *
  * @tparam DataType The type of the value stored in the tree node.
  */
-template <typename Class, typename DataType>
+template <class Derived, typename DataType>
 class TreeNode {
   public:
     TreeNode(void)
@@ -191,17 +191,17 @@ class TreeNode {
         return value;
     }
 
-    Class *
+    Derived *
     Left() const {
         return left;
     }
 
-    Class *
+    Derived *
     Right() const {
         return right;
     }
 
-    Class *
+    Derived *
     Parent() const {
         return parent;
     }
@@ -221,15 +221,15 @@ class TreeNode {
     }
 
     void
-    ConnectLeft(Class &child) {
+    ConnectLeft(Derived &child) {
         left = &child;
-        child.parent = static_cast<Class *>(this);
+        child.parent = static_cast<Derived *>(this);
     }
 
     void
-    ConnectRight(Class &child) {
+    ConnectRight(Derived &child) {
         right = &child;
-        child.parent = static_cast<Class *>(this);
+        child.parent = static_cast<Derived *>(this);
     }
 
     void
@@ -251,17 +251,17 @@ class TreeNode {
     template <size_t N, typename Func>
     void
     PostOrderTraversal(Func visit) {
-        Stack<Class *, N> stack;
+        Stack<Derived *, N> stack;
 
-        Class *current = static_cast<Class *>(this);
-        Class *lastVisited = nullptr;
+        Derived *current = static_cast<Derived *>(this);
+        Derived *lastVisited = nullptr;
 
         while (current != nullptr || !stack.Empty()) {
             if (current != nullptr) {
                 stack.Push(current);
                 current = current->Left();
             } else {
-                Class *peek;
+                Derived *peek;
                 stack.Pop(peek); // temporary pop to inspect
 
                 auto *right = peek->Right();
@@ -284,23 +284,23 @@ class TreeNode {
      *
      * @tparam N Maximum stack depth.
      * @tparam Func Callable type of the visit callback, which should be
-     * invocable with a single argument of type `Class&` (the node being
+     * invocable with a single argument of type `Derived&` (the node being
      * visited).
      * @param visit Callback invoked for each visited node.
      */
     template <size_t N, typename Func>
     void
     InOrderTraversal(Func visit) {
-        Stack<Class *, N> stack;
+        Stack<Derived *, N> stack;
 
-        Class *current = static_cast<Class *>(this);
+        Derived *current = static_cast<Derived *>(this);
 
         while (current != nullptr || !stack.Empty()) {
             if (current != nullptr) {
                 stack.Push(current);
                 current = current->Left();
             } else {
-                Class *peek;
+                Derived *peek;
                 stack.Pop(peek); // temporary pop to inspect
 
                 // Visit node
@@ -313,7 +313,7 @@ class TreeNode {
 
   protected:
     DataType value;
-    Class *left;
-    Class *right;
-    Class *parent;
+    Derived *left;
+    Derived *right;
+    Derived *parent;
 };
