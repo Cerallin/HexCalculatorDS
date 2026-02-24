@@ -224,17 +224,16 @@ void
 ConfigView::ForceUpdate(void) {
     debugf("ConfigView refreshed\n");
 
-    auto glyphArray = getGlyphs();
-    GlyphArray8x8 glyphs(glyphArray);
+    GlyphArray8x8<ConfigView::maxGlyphs> glyphs = getGlyphs();
 
     Point start(viewArea.x, viewArea.y);
     display.ClearLine(start, glyphs.CharWidth);
     display.PrintLine(glyphs, start);
 }
 
-GlyphArray<ConfigView::maxGlyphs>
+GlyphArray8x8<ConfigView::maxGlyphs>
 ConfigView::getGlyphs() {
-    GlyphArray<ConfigView::maxGlyphs> glyphs;
+    GlyphArray8x8<ConfigView::maxGlyphs> glyphs;
     auto width = config.Width();
     auto sign = config.Sign();
 
@@ -288,7 +287,7 @@ FormulaView::ForceUpdate(void) {
     bake();
 
     // TODO pagination
-    GlyphArray6x8 glyphs6x8(glyphs);
+    GlyphArray6x8<FormulaView::maxGlyphs> glyphs6x8(glyphs);
 
     auto skipGlyphs = area.w - glyphs.Size();
     Point start(viewArea.x + skipGlyphs * glyphs6x8.CharWidth, viewArea.y);
@@ -391,11 +390,11 @@ ValueView::ForceUpdate(void) {
 
     Point startLeft(viewArea.x, viewArea.y);
     if (MainView::viewAlign == AlignLeft) {
-        GlyphArray8x8 glyphs(digits, true);
+        GlyphArray8x8<maxDigits> glyphs(digits, true);
         display.ClearLine(startLeft, glyphs.CharWidth);
         display.PrintLine(glyphs, startLeft);
     } else { // align right
-        GlyphArray8x8 glyphs(digits);
+        GlyphArray8x8<maxDigits> glyphs(digits);
         Area8x8 area(viewArea);
         auto skipGlyphs = area.w - glyphs.Size();
         Point startRight(viewArea.x + (skipGlyphs * glyphs.CharWidth),
@@ -472,7 +471,7 @@ TranscodeView<base>::printNumber(void) const {
         std::conditional_t<(base == Decimal), DecGlyphArray6x8,
                            std::conditional_t<(base == Octal), OctGlyphArray6x8,
                                               BinGlyphArray6x8>>>;
-    GlyphArray6x8 glyphArray(digits, false);
+    GlyphArray6x8<MaxDigitsForType<base>()> glyphArray(digits, false);
     GlyphArrayType glyphs(glyphArray);
 
     Point start(this->viewArea.x +
@@ -495,7 +494,7 @@ TranscodeView<Binary>::printNumber(void) const {
         debugf("TranscodeView(Binary) byte %d: %04x\n", i, nByte);
         Number number(nByte, sign);
         auto digits = number.Transcode<Binary, Number::MaxBinDigits>();
-        GlyphArray6x8 glyphArray(digits, false);
+        GlyphArray6x8<Number::MaxBinDigits> glyphArray(digits, false);
         BinGlyphArray6x8 glyphs(glyphArray);
         Point start(this->viewArea.x +
                         (headerSkip + header.Size() + numberGap) * CharWidth,
