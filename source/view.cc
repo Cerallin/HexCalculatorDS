@@ -122,6 +122,12 @@ InputView::HandleEvent(const Event &e) {
         debugf("InputView invalidated by UpdateBaseEvent\n");
 
         return Consumed;
+    } else if (e.type == EventType::UpdateSignEvent) {
+        BasicView::markDirty();
+        return Consumed;
+    } else if (e.type == EventType::UpdateWidthEvent) {
+        BasicView::markDirty();
+        return Consumed;
     } else if (e.type == EventType::TouchScreenEvent) {
         Point touchPoint(e.data);
 
@@ -147,6 +153,7 @@ InputView::HandleEvent(const Event &e) {
 void
 InputView::ForceUpdate(void) {
     debugf("InputView refreshed\n");
+    // Update button states
     for (size_t i = 0; i < handler.Size(); i++) {
         const auto &button = handler.GetButton(i);
         if (button.Selected()) {
@@ -158,11 +165,19 @@ InputView::ForceUpdate(void) {
             display.DisableButton(i);
         }
     }
+    // Update width and sign drawers
+    auto width = config.Width();
+    display.UpdateWidthDrawer(width);
+    auto sign = config.Sign();
+    display.UpdateSignDrawer(sign);
 }
 
 void
 InputView::handleBaseChange(void) {
     auto base = config.Base();
+    // Enable number buttons that are valid for the current base, and disable
+    // them otherwise. For example, in hexadecimal mode, all number buttons are
+    // enabled, while in decimal mode, only 0-9 buttons are enabled.
     for (size_t i = 0; i < 16; i++) {
         if (i < static_cast<int>(base)) {
             numberButtons[i]->Enable();
@@ -170,6 +185,18 @@ InputView::handleBaseChange(void) {
             numberButtons[i]->Disable();
         }
     }
+}
+
+void
+InputView::handleWidthChange(void) {
+    auto width = config.Width();
+    display.UpdateWidthDrawer(width);
+}
+
+void
+InputView::handleSignChange(void) {
+    auto sign = config.Sign();
+    display.UpdateSignDrawer(sign);
 }
 
 EventResult

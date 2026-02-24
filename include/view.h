@@ -585,6 +585,8 @@ class InputView : public SubView<InputView> {
     TouchButton *rightBracketButton;
 
     void handleBaseChange(void);
+    void handleWidthChange(void);
+    void handleSignChange(void);
 };
 
 }; // namespace HexCalc
