@@ -142,9 +142,9 @@ class Number {
     static constexpr size_t MaxDecDigits = MaxDigitsForType<Decimal>();
     static constexpr size_t MaxHexDigits = MaxDigitsForType<Hexadecimal>();
 
-    template <NumberBase base, size_t N>
+    template <size_t N>
     auto
-    Transcode() const {
+    Transcode(NumberBase base) const {
         if (value == 0) {
             DigitArray<N> digits;
             digits[0] = Digit0;
@@ -188,4 +188,5 @@ class Number {
     NumberDataType value{};
     NumberSign sign;
 };
+
 }; // namespace HexCalc
