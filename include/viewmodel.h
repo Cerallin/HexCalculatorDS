@@ -64,11 +64,6 @@ class ViewModel : private NonCopyable {
         max(MaxDigitsForType<Binary>(), MaxDigitsForType<Octal>(),
             MaxDigitsForType<Decimal>(), MaxDigitsForType<Hexadecimal>());
 
-    auto
-    GetNumber(void) const {
-        return formulaModel.CurrentNumber();
-    }
-
     NumberWidth GetNumberWidth(void) const;
 
     NumberSign GetNumberSign(void) const;
@@ -79,8 +74,9 @@ class ViewModel : private NonCopyable {
     DigitArray<N>
     GetValueDigits(NumberBase base) const {
         auto sign = GetNumberSign();
+        auto width = GetNumberWidth();
 
-        Number number(formulaModel.CurrentNumber(), sign);
+        Number number(formulaModel.CurrentNumber(), width, sign);
         auto digits = number.Transcode<N>(base);
 
         return digits;
@@ -90,13 +86,13 @@ class ViewModel : private NonCopyable {
     DigitArray<N>
     GetValueDigitsPerByte(int i, NumberBase base) const {
         assert(i >= 0 && i < 4); // valid byte index for 64-bit number
+
         auto sign = GetNumberSign();
+        auto width = GetNumberWidth();
 
         auto currentNumber = formulaModel.CurrentNumber();
-
         auto byteNumber = (currentNumber >> (i * 16)) & 0xFFFF;
-
-        Number number(byteNumber, sign);
+        Number number(byteNumber, width, sign);
         auto digits = number.Transcode<N>(base);
 
         return digits;

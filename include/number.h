@@ -134,8 +134,9 @@ MaxDigitsForType(void) {
 class Number {
   public:
     constexpr Number(void) : Number(0) {}
-    constexpr explicit Number(uint64_t v, NumberSign sign = Unsigned)
-        : value(v), sign(sign) {}
+    constexpr explicit Number(NumberDataType v, NumberWidth width = QWord,
+                              NumberSign sign = Unsigned)
+        : value(v), width(width), sign(sign) {}
 
     static constexpr size_t MaxBinDigits = MaxDigitsForType<Binary>() / 4;
     static constexpr size_t MaxOctDigits = MaxDigitsForType<Octal>();
@@ -154,12 +155,24 @@ class Number {
 
         size_t count = 0;
         DigitArray<N> digits;
-        if (sign == Signed) { // signed
-            int64_t v = static_cast<int64_t>(value);
-            digits.negative = (v < 0);
-            if (v < 0) {
-                v = -v;
+        if ((sign == Signed) && (base == Decimal)) { // signed
+            auto widthMask = WidthMask(width);
+            int64_t v = static_cast<int64_t>(value & widthMask);
+            // check the sign bit
+            bool negative;
+            if (width < 64) {
+                negative = ((v & BIT(width - 1)) != 0);
+                if (negative) {
+                    v = (v ^ widthMask) + 1;
+                    v &= widthMask;
+                }
+            } else {
+                negative = (v < 0);
+                if (negative) {
+                    v = -v;
+                }
             }
+            digits.negative = negative;
             for (size_t i = 0; i < N; ++i) {
                 if (v == 0) {
                     break;
@@ -170,7 +183,7 @@ class Number {
             }
             digits.size = count;
         } else { // unsigned
-            uint64_t v = value;
+            NumberDataType v = value;
             for (size_t i = 0; i < N; ++i) {
                 if (v == 0) {
                     break;
@@ -186,6 +199,7 @@ class Number {
 
   private:
     NumberDataType value{};
+    NumberWidth width;
     NumberSign sign;
 };
 
