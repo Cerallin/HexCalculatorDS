@@ -245,6 +245,8 @@ enum ButtonType : uint8_t {
     ButtonClear,
     ButtonBackspace,
     ButtonEvaluate,
+    ButtonChangeWidth,
+    ButtonToggleSign,
 };
 
 class TouchButton {

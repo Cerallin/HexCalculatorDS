@@ -580,7 +580,7 @@ class InputView : public SubView<InputView> {
   private:
     ViewModel &vm;
     // FIXME magic numbers
-    TouchScreenHandler<32> handler;
+    TouchScreenHandler<34> handler;
     TouchButton *numberButtons[16];
     TouchButton *rightBracketButton;
 

@@ -91,6 +91,12 @@ InputView::InputView(SubDisplay &display, ViewModel &vm)
         handler.RegisterButton(Area(AREA_31_X, AREA_31_Y, AREA_31_W, AREA_31_H),
                                ButtonType::ButtonEvaluate);
 
+    auto buttonWidthDrawer = handler.RegisterButton(
+        Area(160 - 6, 0, 218 - 160, 25), ButtonType::ButtonChangeWidth);
+
+    auto buttonSignDrawer = handler.RegisterButton(
+        Area(224 - 6, 0, 250 - 224, 25), ButtonType::ButtonToggleSign);
+
     numberButtons[0x00] = button0;
     numberButtons[0x01] = button1;
     numberButtons[0x02] = button2;
@@ -154,7 +160,8 @@ void
 InputView::ForceUpdate(void) {
     debugf("InputView refreshed\n");
     // Update button states
-    for (size_t i = 0; i < handler.Size(); i++) {
+    // minus 2 for width and sign drawers, which are handled separately
+    for (size_t i = 0; i < handler.Size() - 2; i++) {
         const auto &button = handler.GetButton(i);
         if (button.Selected()) {
             debugf("Button %zu selected\n", i);
@@ -221,6 +228,7 @@ ConfigView::ForceUpdate(void) {
     GlyphArray8x8 glyphs(glyphArray);
 
     Point start(viewArea.x, viewArea.y);
+    display.ClearLine(start, glyphs.CharWidth);
     display.PrintLine(glyphs, start);
 }
 

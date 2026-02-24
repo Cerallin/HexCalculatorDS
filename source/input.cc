@@ -144,6 +144,12 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     case ButtonEvaluate:
         commands.Evaluate();
         break;
+    case ButtonChangeWidth:
+        commands.SwitchWidthLower();
+        break;
+    case ButtonToggleSign:
+        commands.ToggleSign();
+        break;
     default:
         break;
     }
