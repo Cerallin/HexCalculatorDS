@@ -365,9 +365,21 @@ ValueView::ForceUpdate(void) {
     auto base = vm.GetNumberBase();
     auto width = vm.GetNumberWidth();
 
-    auto digits = vm.GetValueDigits<ViewModel::MaxDisplayDigits>();
+    auto digits = vm.GetValueDigits<ViewModel::MaxDisplayDigits>(base);
 
-    PrintGlyphs<GlyphArray8x8<ViewModel::MaxDisplayDigits>>(digits);
+    constexpr auto N = ViewModel::MaxDisplayDigits;
+
+    if (base == Hexadecimal) {
+        PrintGlyphs<HexGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
+    } else if (base == Decimal) {
+        PrintGlyphs<DecGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
+    } else if (base == Octal) {
+        PrintGlyphs<OctGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
+    } else if (base == Binary) {
+        PrintGlyphs<BinGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
+    } else {
+        // should never reach here
+    }
 }
 
 template <NumberBase base>
@@ -430,7 +442,7 @@ HexCalc::TranscodeView<base>::printHeader(void) const {
 template <NumberBase base>
 void
 TranscodeView<base>::printNumber(void) const {
-    auto digits = vm.GetValueDigits<MaxDigitsForType<base>()>();
+    auto digits = vm.GetValueDigits<MaxDigitsForType<base>()>(base);
     using GlyphArrayType = std::conditional_t<
         (base == Hexadecimal), HexGlyphArray6x8,
         std::conditional_t<(base == Decimal), DecGlyphArray6x8,
@@ -454,7 +466,7 @@ TranscodeView<Binary>::printNumber(void) const {
     auto width = vm.GetNumberWidth();
     auto sign = vm.GetNumberSign();
     for (int i = 0; i < 4; i++) {
-        auto digits = vm.GetValueDigitsPerByte<Number::MaxBinDigits>(i);
+        auto digits = vm.GetValueDigitsPerByte<Number::MaxBinDigits>(i, Binary);
         GlyphArray6x8<Number::MaxBinDigits> glyphArray(digits, false);
         BinGlyphArray6x8 glyphs(glyphArray);
         Point start(this->viewArea.x +

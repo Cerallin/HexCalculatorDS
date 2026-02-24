@@ -68,22 +68,26 @@ class MainView : public BasicView<Derived, MainDisplay> {
 
     static constexpr auto viewAlign = Align;
 
-    template <class GlyphArrayType, size_t N>
+    template <class FormatArrayType, class GlyphArrayType, size_t N>
     void
-    PrintGlyphs(DigitArray<N> digits) const {
-        Point startLeft(viewArea.x, viewArea.y);
+    PrintGlyphs(DigitArray<N> digits, bool underline = false) const {
+        Point start(viewArea.x, viewArea.y);
         if constexpr (Derived::viewAlign == AlignLeft) {
             GlyphArrayType glyphs(digits, true);
-            this->display.ClearLine(startLeft, glyphs.CharWidth);
-            this->display.PrintLine(glyphs, startLeft);
+            FormatArrayType formattedGlyphs(glyphs);
+            this->display.ClearLine(start, formattedGlyphs.CharWidth,
+                                    underline);
+            this->display.PrintLine(formattedGlyphs, start);
         } else { // align right
             GlyphArrayType glyphs(digits, false);
+            FormatArrayType formattedGlyphs(glyphs);
             Area8x8 area(viewArea);
-            auto skipGlyphs = area.w - glyphs.Size();
-            Point startRight(viewArea.x + (skipGlyphs * glyphs.CharWidth),
+            auto skipGlyphs = area.w - formattedGlyphs.Size();
+            Point glyphStart(viewArea.x +
+                                 (skipGlyphs * formattedGlyphs.CharWidth),
                              viewArea.y);
-            this->display.ClearLine(startLeft, glyphs.CharWidth);
-            this->display.PrintLine(glyphs, startRight);
+            this->display.ClearLine(start, glyphs.CharWidth, underline);
+            this->display.PrintLine(formattedGlyphs, glyphStart);
         }
     }
 

@@ -77,8 +77,7 @@ class ViewModel : private NonCopyable {
 
     template <size_t N>
     DigitArray<N>
-    GetValueDigits(void) const {
-        auto base = GetNumberBase();
+    GetValueDigits(NumberBase base) const {
         auto sign = GetNumberSign();
 
         Number number(formulaModel.CurrentNumber(), sign);
@@ -89,9 +88,8 @@ class ViewModel : private NonCopyable {
 
     template <size_t N>
     DigitArray<N>
-    GetValueDigitsPerByte(int i) const {
+    GetValueDigitsPerByte(int i, NumberBase base) const {
         assert(i >= 0 && i < 4); // valid byte index for 64-bit number
-        auto base = GetNumberBase();
         auto sign = GetNumberSign();
 
         auto currentNumber = formulaModel.CurrentNumber();

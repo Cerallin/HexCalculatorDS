@@ -172,15 +172,16 @@ GlyphFormatSize(size_t digitCount, int groupSize, bool signable = false) {
  * hexadecimal and octal)
  * @tparam N The maximum number of digits in the number
  */
-template <FontType Separator, int GroupSize, bool Signable, size_t N>
-class GlyphFormatArray6x8
-    : public GlyphArray6x8<GlyphFormatSize(N, GroupSize, Signable)> {
+template <FontType Separator, int GroupSize, bool Signable, int W, int H,
+          size_t N>
+class GlyphFormatArray
+    : public GlyphArray<W, H, GlyphFormatSize(N, GroupSize, Signable)> {
   private:
-    using Base = GlyphArray6x8<GlyphFormatSize(N, GroupSize, Signable)>;
+    using Base = GlyphArray<W, H, GlyphFormatSize(N, GroupSize, Signable)>;
 
     template <size_t I>
     constexpr void
-    InsertDigit(const GlyphArray6x8<N> &src, size_t digitCount) {
+    InsertDigit(const GlyphArray<W, H, N> &src, size_t digitCount) {
         if constexpr (I < N) {
 
             if (I < digitCount) {
@@ -208,18 +209,18 @@ class GlyphFormatArray6x8
 
     template <size_t... I>
     constexpr void
-    InsertDigitsImpl(const GlyphArray6x8<N> &src, size_t digitCount,
+    InsertDigitsImpl(const GlyphArray<W, H, N> &src, size_t digitCount,
                      std::index_sequence<I...>) {
         (InsertDigit<I>(src, digitCount), ...);
     }
 
     constexpr void
-    InsertDigits(const GlyphArray6x8<N> &src) {
+    InsertDigits(const GlyphArray<W, H, N> &src) {
         InsertDigitsImpl(src, src.Size(), std::make_index_sequence<N>{});
     }
 
   public:
-    constexpr GlyphFormatArray6x8(const GlyphArray6x8<N> &glyphArray) : Base() {
+    constexpr GlyphFormatArray(const GlyphArray<W, H, N> &glyphArray) : Base() {
         const size_t digitCount = glyphArray.Size();
 
         // ---------- padding ----------
@@ -248,6 +249,14 @@ class GlyphFormatArray6x8
     static constexpr int CharWidth = Base::CharWidth;
     static constexpr int CharHeight = Base::CharHeight;
 };
+
+template <FontType Separator, int GroupSize, bool Signable, size_t N>
+using GlyphFormatArray6x8 =
+    GlyphFormatArray<Separator, GroupSize, Signable, 6, 8, N>;
+
+template <FontType Separator, int GroupSize, bool Signable, size_t N>
+using GlyphFormatArray8x8 =
+    GlyphFormatArray<Separator, GroupSize, Signable, 8, 8, N>;
 
 /**
  * @brief Glyph array for hexadecimal numbers, with group size of 4 and
@@ -285,5 +294,17 @@ class BinGlyphArray6x8
               GlyphFormatArray6x8<FontEmpty, 16, false, Number::MaxBinDigits>(
                   glyphArray)) {}
 };
+
+template <size_t N>
+using HexGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 4, false, N>;
+
+template <size_t N>
+using DecGlyphArray8x8 = GlyphFormatArray8x8<Font8x8Comma, 3, true, N>;
+
+template <size_t N>
+using OctGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 3, false, N>;
+
+template <size_t N>
+using BinGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 4, false, N>;
 
 }; // namespace HexCalc

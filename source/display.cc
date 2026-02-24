@@ -76,7 +76,7 @@ MainDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
 }
 
 void
-MainDisplay::ClearLine(Point &start, int charWidth) {
+MainDisplay::ClearLine(Point &start, int charWidth, bool underline) const {
     auto x = start.x;
     auto y = start.y;
 
@@ -86,8 +86,12 @@ MainDisplay::ClearLine(Point &start, int charWidth) {
     auto total = SCREEN_WIDTH / charWidth;
     auto skip = start.x / charWidth;
     auto clearNum = total - skip;
-    for (int i = 0; i < clearNum; i++) {
-        PrintGlyph(x + i * charWidth, y, FontEmpty);
+    auto height = underline ? 3 : 2;
+    for (int i = 0; i < height; i++) {
+        auto _y = y + (i * TileHeight);
+        for (int j = 0; j < clearNum; j++) {
+            PutTile(x + (j * charWidth), _y, FontEmpty);
+        }
     }
 }
 
