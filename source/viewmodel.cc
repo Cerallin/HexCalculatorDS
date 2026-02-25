@@ -206,8 +206,9 @@ FormulaPaginator::formulaInsertDigits() {
     }
     auto base = vm.GetNumberBase();
     auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
-    for (size_t i = 0; i < digits.size; ++i) {
-        formulaQueue.Enqueue(DigitGlyph(digits[i]));
+    // reverse insert digits into the queue
+    for (size_t i = digits.size; i > 0; i--) {
+        formulaQueue.Enqueue(DigitGlyph(digits[i - 1]));
     }
     formulaState = InputDigit;
 }
