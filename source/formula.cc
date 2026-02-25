@@ -237,6 +237,8 @@ FormulaTree::inputData(const FormulaData &data) {
         node.Assign(data);
 
         // current node must have a parent operator
+        debugf("current parent is nullptr: %s\n",
+               (currentNode->Parent() == nullptr) ? "true" : "false");
         auto &parent = *currentNode->Parent();
         auto parentOp = parent.Get().GetOperator();
 
@@ -250,6 +252,8 @@ FormulaTree::inputData(const FormulaData &data) {
             node.ConnectLeft(*currentNode);
         } else if (Operator::LowerThan(op, parent.Get().GetOperator())) {
             // new operator has lower precedence than parent operator
+            debugf("grandParent is nullptr: %s\n",
+                   (currentNode->Parent() == nullptr) ? "true" : "false");
             auto grandParent = parent.Parent();
             // new operator becomes the parent of the parent node
             if (grandParent->Left() == &parent) {

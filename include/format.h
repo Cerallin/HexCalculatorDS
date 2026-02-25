@@ -37,6 +37,15 @@ class GlyphArray {
     static constexpr int CharHeight = H;
 
     constexpr GlyphArray(void) : glyphs{}, size(0), negative(false) {}
+    template <size_t M>
+    constexpr GlyphArray(const GlyphArray<W, H, M> &other, size_t offset,
+                         size_t limit)
+        : glyphs{}, size(0), negative(false) {
+        auto end = std::min(offset + limit, other.Size());
+        for (size_t i = offset; i < end; i++) {
+            this->Insert(other[i]);
+        }
+    }
     constexpr GlyphArray(DigitArray<N> digits, bool reverse = false)
         : glyphs{}, size(0), negative(digits.negative) {
         if (reverse) {
@@ -312,5 +321,16 @@ using OctGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 3, false, N>;
 
 template <size_t N>
 using BinGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 4, false, N>;
+
+constexpr size_t
+max(size_t a, size_t b, size_t c, size_t d) {
+    return std::max(std::max(a, b), std::max(c, d));
+}
+
+constexpr size_t MaxDisplayDigits =
+    max(GlyphFormatSize(Number::MaxBinDigits, 4, false),
+        GlyphFormatSize(Number::MaxOctDigits, 3, false),
+        GlyphFormatSize(Number::MaxDecDigits, 3, true),
+        GlyphFormatSize(Number::MaxHexDigits, 4, false));
 
 }; // namespace HexCalc

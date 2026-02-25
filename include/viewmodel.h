@@ -14,26 +14,6 @@
 
 namespace HexCalc {
 
-constexpr size_t
-max(size_t a, size_t b) {
-    return (a > b) ? a : b;
-}
-
-constexpr size_t
-max(size_t a, size_t b, size_t c, size_t d) {
-    return max(max(a, b), max(c, d));
-}
-
-constexpr size_t MaxDisplayDigits =
-    max(Number::MaxBinDigits, Number::MaxOctDigits, Number::MaxDecDigits,
-        Number::MaxHexDigits);
-
-constexpr size_t MaxTranscodeDigits =
-    max(MaxDigitsForType<Binary>(), MaxDigitsForType<Octal>(),
-        MaxDigitsForType<Decimal>(), MaxDigitsForType<Hexadecimal>());
-
-constexpr size_t MaxFormulaGlyphs = 128;
-
 class ViewModel;
 
 class ValueManager {
@@ -86,11 +66,37 @@ class FormulaPaginator {
 
     EventResult HandleEvent(const Event &e);
 
-    using FormulaGlyphArray = GlyphArray6x8<MaxFormulaGlyphs>;
+    static constexpr size_t MaxFormulaGlyphs = 128;
+    /**
+     * @brief Padding for scrolling indicators when the formula exceeds the
+     * display capacity.
+     *
+     */
+    static constexpr int padding = 2;
+    /**
+     * @brief The maximum number of glyphs that can be displayed on the screen
+     * at once, with padding for scrolling indicators.
+     *
+     */
+    static constexpr size_t MaxPageGlyphs =
+        (SCREEN_WIDTH / GlyphArray6x8<0>::CharWidth) - 2 * padding;
 
-    const FormulaGlyphArray &
-    GetFormulaGlyphs() const {
-        return formulaGlyphs;
+    /**
+     * @brief Get the Formula Glyphs object for the current page of the formula
+     *
+     * @param page The page number starting from 1, from right to left
+     * @return const GlyphArray6x8<MaxPageGlyphs> The glyphs for the specified
+     * page of the formula
+     */
+    const GlyphArray6x8<MaxPageGlyphs>
+    GetFormulaGlyphs(int page = 1) const {
+        auto size = formulaGlyphs.Size();
+        size_t offset =
+            std::max(0, static_cast<ssize_t>(size) -
+                            static_cast<ssize_t>(page * MaxPageGlyphs));
+        GlyphArray6x8<MaxPageGlyphs> pageGlyphs(formulaGlyphs, offset,
+                                                MaxPageGlyphs);
+        return pageGlyphs;
     }
 
     size_t
@@ -107,14 +113,20 @@ class FormulaPaginator {
      * @brief Glyphs for displaying the formula.
      *
      */
-    FormulaGlyphArray formulaGlyphs;
+    GlyphArray6x8<MaxFormulaGlyphs> formulaGlyphs;
+
+    static constexpr size_t MaxFormulaQueueSize = 32;
+
+    static_assert(
+        MaxFormulaQueueSize > (Number::MaxHexDigits + 4),
+        "MaxFormulaQueueSize must be greater than MaxDisplayDigits + 4");
 
     /**
      * @brief A queue to store pending glyphs to be inserted into the
-     * formulaGlyphs. MaxDisplayDigits + 4 for number, space and operator.
+     * formulaGlyphs.
      *
      */
-    CircularQueue<Glyph, 32> formulaQueue;
+    CircularQueue<Glyph, MaxFormulaQueueSize> formulaQueue;
 
     enum {
         Evaluated,
@@ -188,7 +200,7 @@ class ViewModel : private NonCopyable {
         return valueManager.GetValueDigitsPerByte<N>(i, base);
     }
 
-    const GlyphArray6x8<MaxFormulaGlyphs> &
+    const auto
     GetFormulaGlyphs() const {
         return formulaPaginator.GetFormulaGlyphs();
     }
