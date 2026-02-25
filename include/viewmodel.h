@@ -140,7 +140,11 @@ class ViewModel : private NonCopyable {
     GlyphArray6x8<MaxFormulaGlyphs> formulaGlyphs;
     CircularQueue<Glyph, MaxDisplayDigits> formulaGlyphQueue;
 
-    bool lastGlyphWasOperator;
+    enum {
+        Evaluated,
+        InputOperator,
+        InputDigit,
+    } formulaState;
 
     void notifyFormulaUpdate(void);
 

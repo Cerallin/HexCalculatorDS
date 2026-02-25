@@ -130,16 +130,16 @@ FormulaModel::handleInput(const Event &e) {
         auto width = config.Width();
         auto sign = config.Sign();
 
+        auto digit = eventData.data.digit;
+
         auto maxValue = NumberMax(width, sign);
-        bool willOverflow = (currentNumber > maxValue / base) ||
-                            (currentNumber == maxValue / base &&
-                             eventData.data.digit > maxValue % base);
+        bool willOverflow = (currentNumber > (maxValue - digit) / base);
 
         if (willOverflow) {
             // reject
         } else {
             // join the new digit to the current number
-            currentNumber = (currentNumber * base) + eventData.data.digit;
+            currentNumber = (currentNumber * base) + digit;
             valueChanged = true;
         }
     }
