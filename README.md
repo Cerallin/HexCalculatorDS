@@ -32,7 +32,7 @@ An integer calculator for Nintendo DS.
 - [x] evaluate the formula
 - [x] disable number buttons with base
 - [x] Implement backspace
-- [ ] Implement bitwise not & negative
+- [x] Implement bitwise not & negative
 
 ### v1.1.0
 

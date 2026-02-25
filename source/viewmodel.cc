@@ -166,6 +166,11 @@ DigitGlyph(Digit digit) {
 
 void
 FormulaPaginator::formulaInsertOp(OperatorType op) {
+    if (op == BitwiseNot || op == Negate) {
+        // bitwise not and negate are handled immediately in the model, so do
+        // not insert them into the formula view
+        return;
+    }
     // If the first input is an operator, insert the current number as
     // the left operand. For example, if the user inputs '+' first, it
     // will be treated as '0 +'.
@@ -205,7 +210,15 @@ FormulaPaginator::formulaInsertDigits() {
         formulaQueue.Enqueue(Glyph(FontEmpty));
     }
     auto base = vm.GetNumberBase();
+    auto sign = vm.GetNumberSign();
     auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
+    if (base == NumberBase::Decimal && sign == NumberSign::Signed) {
+        // Insert a space if the number is negative
+        // e.g. '1 +' + '-2' -> '1 + -2'
+        if (digits.negative) {
+            formulaQueue.Enqueue(Glyph(Font6x8Minus));
+        }
+    }
     // reverse insert digits into the queue
     for (size_t i = digits.size; i > 0; i--) {
         formulaQueue.Enqueue(DigitGlyph(digits[i - 1]));
