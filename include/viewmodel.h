@@ -67,7 +67,7 @@ class ValueManager {
         auto width = GetNumberWidth();
 
         auto currentNumber = formulaModel.CurrentNumber();
-        auto byteNumber = (currentNumber >> (i * 16)) & 0xFFFF;
+        uint16_t byteNumber = (currentNumber >> (i * 16)) & 0xFFFF;
         Number number(byteNumber, width, sign);
         auto digits = number.Transcode<N>(base);
 
@@ -111,10 +111,10 @@ class FormulaPaginator {
 
     /**
      * @brief A queue to store pending glyphs to be inserted into the
-     * formulaGlyphs.
+     * formulaGlyphs. MaxDisplayDigits + 4 for number, space and operator.
      *
      */
-    CircularQueue<Glyph, MaxDisplayDigits> formulaQueue;
+    CircularQueue<Glyph, 32> formulaQueue;
 
     enum {
         Evaluated,
