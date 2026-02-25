@@ -72,8 +72,10 @@ class FormulaModel {
     void notifyFormulaUpdate(void);
     void notifyValueChange(void);
     void notifyWidthChange(NumberWidth width);
+    void notifyAcceptOperator(OperatorType op);
+    void notifyAcceptNumber(NumberDataType number);
 
-    void handleInput(const Event &e);
+    EventResult handleInput(const Event &e);
     void handleBaseChange(const Event &e);
 };
 

@@ -27,8 +27,7 @@ FormulaModel::HandleEvent(const Event &e) {
         }
         valueChanged = true;
     } else if (e.type == InputEvent) {
-        handleInput(e);
-        return Consumed;
+        return handleInput(e);
     } else if (e.type == ClearEvent) {
         if (inputState == PlaceHolder && currentNumber == NumberZero) {
             formulaTree.Clear();
@@ -39,7 +38,11 @@ FormulaModel::HandleEvent(const Event &e) {
         valueChanged = true;
     } else if (e.type == EvaluateEvent) {
         debugf("input number: %llu\n", currentNumber);
-        formulaTree.Input(FormulaData(currentNumber));
+        bool inserted = formulaTree.Input(FormulaData(currentNumber));
+        if (inserted) {
+            notifyAcceptNumber(currentNumber);
+        }
+        // TODO get error message if insertion failed
         bool evaluated = formulaTree.Evaluate();
         debugf("Evaluation result: %s\n", evaluated ? "OK" : "Error");
         if (evaluated) {
@@ -49,6 +52,7 @@ FormulaModel::HandleEvent(const Event &e) {
         }
 
         formulaTree.Clear();
+        // Always true because we just cleared the tree
         formulaTree.Input(FormulaData(currentNumber));
         inputState = PlaceHolder;
 
@@ -64,6 +68,7 @@ FormulaModel::HandleEvent(const Event &e) {
         }
         valueChanged = true;
     } else {
+        // Skip unhandled event type
         return Skipped;
     }
 
@@ -94,16 +99,30 @@ FormulaModel::notifyWidthChange(NumberWidth width) {
 }
 
 void
+FormulaModel::notifyAcceptOperator(OperatorType op) {
+    bus.Post(Event{op, OperatorAcceptEvent});
+}
+
+void
+FormulaModel::notifyAcceptNumber(NumberDataType number) {
+    // cast number (uint64_t) into 2 int32_t number
+    auto low32 = static_cast<int32_t>(number & 0xFFFFFFFF);
+    auto high32 = static_cast<int32_t>((number >> 32) & 0xFFFFFFFF);
+    bus.Post(Event{low32, NumberAcceptEvent});
+    bus.Post(Event{high32, NumberAcceptEvent});
+}
+
+EventResult
 FormulaModel::handleInput(const Event &e) {
     bool valueChanged = false;
     bool formulaChanged = false;
 
-    auto eventData = InputEventData(e.data);
+    InputEventData eventData(e.data);
 
     if (eventData.isOp) { // is operator
         OperatorType op = eventData.data.op;
-        // bitwise not and negate can be applied immediately without waiting for
-        // the next number input, so handle them separately here.
+        // bitwise not and negate can be applied immediately without waiting
+        // for the next number input, so handle them separately here.
         if (op == BitwiseNot) {
             currentNumber = ~currentNumber;
             currentNumber &= WidthMask(config.Width());
@@ -112,28 +131,34 @@ FormulaModel::handleInput(const Event &e) {
         } else if (op == Negate) {
             auto width = config.Width();
             auto widthMask = WidthMask(width);
-            // Two's complement negation: invert all bits and add 1, then apply
-            // width mask to fit the number into the current width.
+            // Two's complement negation: invert all bits and add 1, then
+            // apply width mask to fit the number into the current width.
             currentNumber = ((currentNumber ^ widthMask) + 1) & widthMask;
             inputState = InputNumber;
             valueChanged = true;
         } else {
             // continue to handle other operators
-
             if (inputState == PlaceHolder) {
                 // try to insert operator
-                formulaTree.Input(FormulaData(op));
-                formulaChanged = true;
+                bool inserted = formulaTree.Input(FormulaData(op));
+                if (inserted) {
+                    notifyAcceptOperator(op);
+                    formulaChanged = true;
+                }
             } else {
+                bool inserted = true;
                 // 1. insert current number into formula tree
                 debugf("input number: %llu\n", currentNumber);
-                formulaTree.Input(FormulaData(currentNumber));
+                inserted &= formulaTree.Input(FormulaData(currentNumber));
+                if (inserted) {
+                    notifyAcceptNumber(currentNumber);
+                }
                 // 2. evaluate the formula tree
                 auto lastOp = formulaTree.LastOperator();
                 if (Operator::HigherThan(op, lastOp)) {
-                    // do not evaluate if current operator has higher precedence
-                    // than the previous one, otherwise it will cause wrong
-                    // result for expressions like "1 + 2 * 3"
+                    // do not evaluate if current operator has higher
+                    // precedence than the previous one, otherwise it will
+                    // cause wrong result for expressions like "1 + 2 * 3"
                 } else { // op <= lastOp
                     bool evaluated = formulaTree.EvaluatePartial();
                     debugf("Partial evaluation result: %s\n",
@@ -146,14 +171,17 @@ FormulaModel::handleInput(const Event &e) {
                     }
                 }
                 // 3. insert operator into formula tree
-                // must after evaluation, otherwise the new operator will affect
-                // the evaluation
+                // must after evaluation, otherwise the new operator will
+                // affect the evaluation
                 debugf("input op: %d\n", op);
-                formulaTree.Input(FormulaData(op));
-                formulaChanged = true;
-                // 4. Mark the current number as placeholder, so that the next
-                // digit input will start a new number instead of joining the
-                // current number.
+                inserted &= formulaTree.Input(FormulaData(op));
+                if (inserted) {
+                    notifyAcceptOperator(op);
+                    formulaChanged = true;
+                }
+                // 4. Mark the current number as placeholder, so that the
+                // next digit input will start a new number instead of
+                // joining the current number.
                 inputState = PlaceHolder;
             }
         }
@@ -190,6 +218,8 @@ FormulaModel::handleInput(const Event &e) {
     if (valueChanged) {
         notifyValueChange();
     }
+
+    return Consumed;
 }
 
 void
