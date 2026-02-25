@@ -20,16 +20,15 @@ enum EventType {
     KeyInputEvent,    // when the user presses or releases a key
     TouchScreenEvent, // when the user touches or releases the touchscreen
     // logical events
-    InputEvent,           // when the user inputs a number or an operator
-    BackspaceEvent,       // when the user presses backspace
-    ClearEvent,           // when the user clears the formula
-    FormulaInputEvent,    // when a formula element should be input
-    FormulaEvaluateEvent, // when the user evaluates the formula
-    UpdateBaseEvent,      // when the user changes the number base
-    UpdateWidthEvent,     // when the user changes the number width
-    UpdateSignEvent,      // when the user changes the number sign
-    FormulaUpdatedEvent,  // formula model invalidated
-    ValueChangedEvent,    // value model invalidated
+    InputEvent,          // when the user inputs a number or an operator
+    BackspaceEvent,      // when the user presses backspace
+    ClearEvent,          // when the user clears the formula
+    EvaluateEvent,       // when the user evaluates the formula
+    UpdateBaseEvent,     // when the user changes the number base
+    UpdateWidthEvent,    // when the user changes the number width
+    UpdateSignEvent,     // when the user changes the number sign
+    FormulaUpdatedEvent, // formula model invalidated
+    ValueChangedEvent,   // value model invalidated
 };
 
 using EventDataType = int32_t;

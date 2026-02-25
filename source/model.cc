@@ -26,7 +26,7 @@ FormulaModel::HandleEvent(const Event &e) {
         inputState = InputNumber;
         currentNumber = NumberZero;
         valueChanged = true;
-    } else if (e.type == FormulaEvaluateEvent) {
+    } else if (e.type == EvaluateEvent) {
         debugf("input number: %llu\n", currentNumber);
         formulaTree.Input(FormulaData(currentNumber));
         bool evaluated = formulaTree.Evaluate();

@@ -40,11 +40,14 @@ class ViewModel : private NonCopyable {
      *
      */
     void DispatchEvents(void);
+
     /**
      * @brief Handle user inputs and generate events for models
      *
      */
     void HandleInputs(void);
+
+    EventResult HandleEvent(const Event &e);
 
     EventBus &
     Bus(void) {
@@ -98,7 +101,18 @@ class ViewModel : private NonCopyable {
         return digits;
     }
 
+    static constexpr size_t MaxFormulaGlyphs = 128;
+
+    const GlyphArray6x8<MaxFormulaGlyphs> &
+    GetFormulaGlyphs() const {
+        return formulaGlyphs;
+    }
+
   private:
+    /**
+     * @brief Event bus for communication between input, models and views
+     *
+     */
     EventBus eventBus;
 
     /**
@@ -118,6 +132,20 @@ class ViewModel : private NonCopyable {
      *
      */
     KeyInputHandler keyInputHandler;
+
+    /**
+     * @brief Glyphs for displaying the formula
+     *
+     */
+    GlyphArray6x8<MaxFormulaGlyphs> formulaGlyphs;
+    CircularQueue<Glyph, MaxDisplayDigits> formulaGlyphQueue;
+
+    bool lastGlyphWasOperator;
+
+    void notifyFormulaUpdate(void);
+
+    void formulaInsertOp(OperatorType op);
+    void formulaInsertDigit(Digit digit);
 
     /**
      * @brief Identify key inputs and generate events

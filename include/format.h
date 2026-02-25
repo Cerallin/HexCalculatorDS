@@ -108,6 +108,12 @@ class GlyphArray {
         return negative;
     }
 
+    void
+    Clear() {
+        size = 0;
+        negative = false;
+    }
+
   protected:
     Glyph glyphs[N];
     size_t size;

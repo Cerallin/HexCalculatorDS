@@ -143,7 +143,7 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
-          vm(vm), glyphs{}, page(0) {}
+          vm(vm), page(0) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -168,12 +168,7 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr size_t CharHeight = 8;
 
   private:
-    static constexpr size_t maxGlyphs = 1024;
-
-    static_assert(maxGlyphs % sizeof(uint32_t) == 0);
-
     ViewModel &vm;
-    GlyphArray6x8<maxGlyphs> glyphs;
     int page;
 
     /**

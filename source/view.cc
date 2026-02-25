@@ -283,63 +283,25 @@ FormulaView::ForceUpdate(void) {
     Area6x8 area(viewArea);
 
     clear();
+    // TODO pagination
     bake();
 
-    // TODO pagination
-    GlyphArray6x8<FormulaView::maxGlyphs> glyphs6x8(glyphs);
+    const auto &glyphs = vm.GetFormulaGlyphs();
 
     auto skipGlyphs = area.w - glyphs.Size();
-    Point start(viewArea.x + skipGlyphs * glyphs6x8.CharWidth, viewArea.y);
-    display.PrintLine(glyphs6x8, start);
+    Point start(viewArea.x + skipGlyphs * glyphs.CharWidth, viewArea.y);
+    display.PrintLine(glyphs, start);
 }
 
 void
 FormulaView::clear(void) {
-    dmaFillWords(0, &glyphs, sizeof(glyphs));
+    Point start(viewArea.x, viewArea.y);
+    display.ClearLine(start, CharWidth);
 }
 
 void
 FormulaView::bake(void) {
     // TODO bake formulaTree to glyphs
-
-    // glyphs.Insert(Glyph(Font6x8LBrac));    // (
-    // glyphs.Insert(Glyph(Font6x8One));      // 1
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8Multiply)); // x
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8Two));      // 2
-    // glyphs.Insert(Glyph(Font6x8Five));     // 5
-    // glyphs.Insert(Glyph(Font6x8Divide));   // /
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8C));        // C
-    // glyphs.Insert(Glyph(Font6x8E));        // E
-    // glyphs.Insert(Glyph(Font6x8RBrac));    // )
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8And));      // &
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8A));        // A
-    // glyphs.Insert(Glyph(Font6x8F));        // F
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8RShift));   // >>
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8C));        // C
-    // glyphs.Insert(Glyph(Font6x8C));        // C
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8LShift));   // <<
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8Two));      // 2
-    // glyphs.Insert(Glyph(Font6x8Five));     // 5
-    // glyphs.Insert(Glyph(Font6x8Six));      // 6
-    // glyphs.Insert(Glyph(Font6x8Zero));     // 0
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8Or));       // |
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8Zero));     // 0
-    // glyphs.Insert(Glyph(Font6x8Seven));    // 7
-    // glyphs.Insert(Glyph(Font6x8Two));      // 2
-    // glyphs.Insert(Glyph(Font6x8One));      // 1
-    // glyphs.Insert(Glyph(FontEmpty));       //
-    // glyphs.Insert(Glyph(Font6x8Equal));    // =
 }
 
 EventResult
