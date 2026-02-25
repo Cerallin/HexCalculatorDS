@@ -171,6 +171,10 @@ FormulaPaginator::formulaInsertOp(OperatorType op) {
         // not insert them into the formula view
         return;
     }
+    if (formulaState == InputOp) {
+        // 2 operators cannot be adjacent, ignore the new operator
+        return;
+    }
     // If the first input is an operator, insert the current number as
     // the left operand. For example, if the user inputs '+' first, it
     // will be treated as '0 +'.
