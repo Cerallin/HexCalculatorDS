@@ -8,15 +8,9 @@
 
 An integer calculator for Nintendo DS.
 
-## Proto design
+## Screenshot (DeSmuME)
 
-*Will change to real screen shots when all done.*
-
-![](design/HexCalculatorDS-icon.bmp)
-
-![](design/HexCalculatorDS-main.png)
-
-![](design/HexCalculatorDS-sub.png)
+![screenshot](images/screenshot.png)
 
 ## Milestones
 
