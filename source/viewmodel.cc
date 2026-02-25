@@ -20,8 +20,8 @@ ViewModel::ViewModel(void)
       formulaModel(eventBus),
       // input
       keyInputHandler(commands),
-      // cache
-      formulaPaginator(eventBus, *this) {
+      // managers
+      valueManager(formulaModel), formulaPaginator(eventBus, valueManager) {
     eventBus.Subscribe(config);
     // must subscribe before subscribing formulaModel
     eventBus.Subscribe(formulaPaginator);
@@ -70,17 +70,17 @@ ViewModel::HandleInputs(void) {
 }
 
 NumberWidth
-ViewModel::GetNumberWidth(void) const {
+ValueManager::GetNumberWidth(void) const {
     return config.Width();
 }
 
 NumberSign
-ViewModel::GetNumberSign(void) const {
+ValueManager::GetNumberSign(void) const {
     return config.Sign();
 }
 
 NumberBase
-ViewModel::GetNumberBase(void) const {
+ValueManager::GetNumberBase(void) const {
     return config.Base();
 }
 
@@ -204,7 +204,8 @@ FormulaPaginator::formulaInsertDigits() {
         // Insert a space if '1 /' + '2' -> '1 / 2'
         formulaQueue.Enqueue(Glyph(FontEmpty));
     }
-    auto digits = vm.GetValueDigits<MaxDisplayDigits>(vm.GetNumberBase());
+    auto base = vm.GetNumberBase();
+    auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
     for (size_t i = 0; i < digits.size; ++i) {
         formulaQueue.Enqueue(DigitGlyph(digits[i]));
     }

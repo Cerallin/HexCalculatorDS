@@ -36,9 +36,51 @@ constexpr size_t MaxFormulaGlyphs = 128;
 
 class ViewModel;
 
+class ValueManager {
+  public:
+    ValueManager(FormulaModel &formulaModel) : formulaModel(formulaModel) {}
+
+    NumberWidth GetNumberWidth(void) const;
+
+    NumberSign GetNumberSign(void) const;
+
+    NumberBase GetNumberBase(void) const;
+
+    template <size_t N>
+    DigitArray<N>
+    GetValueDigits(NumberBase base) const {
+        auto sign = GetNumberSign();
+        auto width = GetNumberWidth();
+
+        Number number(formulaModel.CurrentNumber(), width, sign);
+        auto digits = number.Transcode<N>(base);
+
+        return digits;
+    }
+
+    template <size_t N>
+    DigitArray<N>
+    GetValueDigitsPerByte(int i, NumberBase base) const {
+        assert(i >= 0 && i < 4); // valid byte index for 64-bit number
+
+        auto sign = GetNumberSign();
+        auto width = GetNumberWidth();
+
+        auto currentNumber = formulaModel.CurrentNumber();
+        auto byteNumber = (currentNumber >> (i * 16)) & 0xFFFF;
+        Number number(byteNumber, width, sign);
+        auto digits = number.Transcode<N>(base);
+
+        return digits;
+    }
+
+  private:
+    FormulaModel &formulaModel;
+};
+
 class FormulaPaginator {
   public:
-    FormulaPaginator(EventBus &eventBus, ViewModel &vm)
+    FormulaPaginator(EventBus &eventBus, ValueManager &vm)
         : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaQueue(),
           formulaState(Evaluated) {}
 
@@ -59,7 +101,7 @@ class FormulaPaginator {
   private:
     EventBus &eventBus;
 
-    ViewModel &vm;
+    ValueManager &vm;
 
     /**
      * @brief Glyphs for displaying the formula.
@@ -119,38 +161,31 @@ class ViewModel : private NonCopyable {
         return commands;
     }
 
-    NumberWidth GetNumberWidth(void) const;
+    NumberWidth
+    GetNumberWidth(void) const {
+        return valueManager.GetNumberWidth();
+    }
 
-    NumberSign GetNumberSign(void) const;
+    NumberSign
+    GetNumberSign(void) const {
+        return valueManager.GetNumberSign();
+    }
 
-    NumberBase GetNumberBase(void) const;
+    NumberBase
+    GetNumberBase(void) const {
+        return valueManager.GetNumberBase();
+    }
 
     template <size_t N>
     DigitArray<N>
     GetValueDigits(NumberBase base) const {
-        auto sign = GetNumberSign();
-        auto width = GetNumberWidth();
-
-        Number number(formulaModel.CurrentNumber(), width, sign);
-        auto digits = number.Transcode<N>(base);
-
-        return digits;
+        return valueManager.GetValueDigits<N>(base);
     }
 
     template <size_t N>
     DigitArray<N>
     GetValueDigitsPerByte(int i, NumberBase base) const {
-        assert(i >= 0 && i < 4); // valid byte index for 64-bit number
-
-        auto sign = GetNumberSign();
-        auto width = GetNumberWidth();
-
-        auto currentNumber = formulaModel.CurrentNumber();
-        auto byteNumber = (currentNumber >> (i * 16)) & 0xFFFF;
-        Number number(byteNumber, width, sign);
-        auto digits = number.Transcode<N>(base);
-
-        return digits;
+        return valueManager.GetValueDigitsPerByte<N>(i, base);
     }
 
     const GlyphArray6x8<MaxFormulaGlyphs> &
@@ -182,6 +217,12 @@ class ViewModel : private NonCopyable {
      *
      */
     KeyInputHandler keyInputHandler;
+
+    /**
+     * @brief Manager for current value and its digit representation
+     *
+     */
+    ValueManager valueManager;
 
     /**
      * @brief Manager for formula glyphs
