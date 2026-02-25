@@ -40,7 +40,7 @@ An integer calculator for Nintendo DS.
 
 ### v1.2.0
 
-- [ ] Add background to configView (the `UINT32` on topleft)
+- [ ] Add background to the `UINT32` on topleft
 - [ ] Modify the font shadows
 - [ ] Add animations
 
