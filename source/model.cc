@@ -47,6 +47,7 @@ FormulaModel::HandleEvent(const Event &e) {
         debugf("Evaluation result: %s\n", evaluated ? "OK" : "Error");
         if (evaluated) {
             currentNumber = formulaTree.Result();
+            notifyAcceptOperator(OperatorType::Equal);
         } else {
             currentNumber = NumberZero;
         }
@@ -105,11 +106,11 @@ FormulaModel::notifyAcceptOperator(OperatorType op) {
 
 void
 FormulaModel::notifyAcceptNumber(NumberDataType number) {
-    // cast number (uint64_t) into 2 int32_t number
-    auto low32 = static_cast<int32_t>(number & 0xFFFFFFFF);
-    auto high32 = static_cast<int32_t>((number >> 32) & 0xFFFFFFFF);
-    bus.Post(Event{low32, NumberAcceptEvent});
-    bus.Post(Event{high32, NumberAcceptEvent});
+    // Split into two 32-bit chunks; keep raw bits through int32 events.
+    auto low32 = static_cast<uint32_t>(number & WidthMask(DWord));
+    auto high32 = static_cast<uint32_t>((number >> DWord) & WidthMask(DWord));
+    bus.Post(Event{static_cast<EventDataType>(high32), NumberAcceptEvent});
+    bus.Post(Event{static_cast<EventDataType>(low32), NumberAcceptEvent});
 }
 
 EventResult

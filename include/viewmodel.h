@@ -62,7 +62,8 @@ class FormulaPaginator {
   public:
     FormulaPaginator(EventBus &eventBus, ValueManager &vm)
         : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaQueue(),
-          formulaState(Evaluated) {}
+          formulaState(Evaluated), currentNumber(NumberZero),
+          collectingNumber(false) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -133,6 +134,10 @@ class FormulaPaginator {
         InputOp,
         InputDigit,
     } formulaState;
+
+    NumberDataType currentNumber;
+
+    bool collectingNumber;
 
     void notifyFormulaUpdate(void);
 

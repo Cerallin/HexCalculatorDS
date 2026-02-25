@@ -166,14 +166,8 @@ DigitGlyph(Digit digit) {
 
 void
 FormulaPaginator::formulaInsertOp(OperatorType op) {
-    if (op == BitwiseNot || op == Negate) {
-        // bitwise not and negate are handled immediately in the model, so do
-        // not insert them into the formula view
-        return;
-    }
-    if (formulaState == InputOp) {
-        // 2 operators cannot be adjacent, ignore the new operator
-        return;
+    if (formulaState == Evaluated) {
+        formulaGlyphs.Clear();
     }
     // If the first input is an operator, insert the current number as
     // the left operand. For example, if the user inputs '+' first, it
@@ -199,23 +193,32 @@ FormulaPaginator::formulaInsertOp(OperatorType op) {
     while (formulaQueue.Dequeue(glyph)) {
         formulaGlyphs.Insert(glyph);
     }
-    notifyFormulaUpdate();
-    if ((op != OperatorType::LeftBracket) || (op != OperatorType::Equal)) {
+    if ((op != OperatorType::LeftBracket) && (op != OperatorType::Equal)) {
         formulaState = InputOp;
     } else {
         formulaState = InputDigit;
     }
+    notifyFormulaUpdate();
 }
 
 void
 FormulaPaginator::formulaInsertDigits() {
+    if (formulaState == Evaluated) {
+        formulaGlyphs.Clear();
+    }
+
     if (formulaState == InputOp) {
         // Insert a space if '1 /' + '2' -> '1 / 2'
         formulaQueue.Enqueue(Glyph(FontEmpty));
     }
+
     auto base = vm.GetNumberBase();
     auto sign = vm.GetNumberSign();
-    auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
+    auto width = vm.GetNumberWidth();
+
+    Number number(currentNumber, width, sign);
+    auto digits = number.Transcode<MaxDisplayDigits>(base);
+
     if (base == NumberBase::Decimal && sign == NumberSign::Signed) {
         // Insert a space if the number is negative
         // e.g. '1 +' + '-2' -> '1 + -2'
@@ -232,21 +235,26 @@ FormulaPaginator::formulaInsertDigits() {
 
 EventResult
 FormulaPaginator::HandleEvent(const Event &e) {
-    if (e.type == InputEvent) {
-        if (formulaState == Evaluated) {
-            // if the previous formula is evaluated, start a new formula when
-            // inputting a digit or an operator
-            formulaGlyphs.Clear();
-        }
-        // Update formula glyphs
-        InputEventData inputData(e.data);
-        if (inputData.isOp) {
-            formulaInsertOp(inputData.data.op);
+    if (e.type == NumberAcceptEvent) {
+        auto number = static_cast<uint32_t>(e.data);
+        if (!collectingNumber) {
+            currentNumber =
+                static_cast<NumberDataType>(number & WidthMask(DWord));
+            collectingNumber = true;
         } else {
-            // do nothing
+            currentNumber =
+                (currentNumber << DWord) | static_cast<NumberDataType>(number);
+            collectingNumber = false;
+            formulaInsertDigits();
+            notifyFormulaUpdate();
         }
-
-        return Consumed;
+    } else if (e.type == OperatorAcceptEvent) {
+        auto op = static_cast<OperatorType>(e.data);
+        formulaInsertOp(op);
+        notifyFormulaUpdate();
+        if (op == OperatorType::Equal) {
+            formulaState = Evaluated;
+        }
     } else if (e.type == ClearEvent) {
         if (formulaQueue.Empty()) {
             formulaGlyphs.Clear();
@@ -257,24 +265,8 @@ FormulaPaginator::HandleEvent(const Event &e) {
         notifyFormulaUpdate();
 
         return Consumed;
-    } else if (e.type == EvaluateEvent) {
-        if (formulaState == Evaluated) {
-            // if the previous formula is evaluated, start a new formula when
-            // inputting a digit or an operator
-            formulaGlyphs.Clear();
-        }
-        if (formulaState == InputOp) {
-            // if the last input is an operator, append the current number as
-            // the right operand before evaluation. For example, '1 +' will be
-            // treated as '1 + 0'.
-            formulaInsertDigits();
-        }
-        formulaInsertOp(OperatorType::Equal);
-        notifyFormulaUpdate();
-
-        formulaState = Evaluated;
-
-        return Consumed;
+    } else {
+        return Skipped;
     }
 
     return Skipped;
