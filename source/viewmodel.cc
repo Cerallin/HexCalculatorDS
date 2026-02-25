@@ -193,11 +193,11 @@ ViewModel::HandleEvent(const Event &e) {
 
         return Consumed;
     } else if (e.type == ClearEvent) {
-        formulaGlyphs.Clear();
-
-        Glyph glyph;
-        while (formulaGlyphQueue.Dequeue(glyph))
-            ;
+        if (formulaGlyphQueue.Empty()) {
+            formulaGlyphs.Clear();
+        } else {
+            formulaGlyphQueue.Clear();
+        }
 
         notifyFormulaUpdate();
 

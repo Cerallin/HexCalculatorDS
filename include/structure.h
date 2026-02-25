@@ -86,6 +86,16 @@ class CircularQueue : public NonCopyable {
         return size;
     }
 
+    /**
+     * @brief Clear the queue, removing all elements.
+     */
+    void
+    Clear() {
+        head = 0;
+        tail = 0;
+        size = 0;
+    }
+
   private:
     T data[N];
     size_t head;
