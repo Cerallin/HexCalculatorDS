@@ -23,8 +23,9 @@ ViewModel::ViewModel(void)
       // cache
       formulaGlyphs(), formulaState(Evaluated) {
     eventBus.Subscribe(config);
-    eventBus.Subscribe(formulaModel);
+    // must subscribe before subscribing formulaModel
     eventBus.Subscribe(*this);
+    eventBus.Subscribe(formulaModel);
 }
 
 void
@@ -154,10 +155,7 @@ ViewModel::formulaInsertOp(OperatorType op) {
     // the left operand. For example, if the user inputs '+' first, it
     // will be treated as '0 +'.
     if (formulaGlyphQueue.Empty()) {
-        auto digits = GetValueDigits<MaxDisplayDigits>(GetNumberBase());
-        for (size_t i = 0; i < digits.size; ++i) {
-            formulaInsertDigit(digits[i]);
-        }
+        formulaInsertDigits();
     }
     // Insert a space if '1' + '+' -> '1 +'
     if (formulaState == InputDigit) {
@@ -179,19 +177,22 @@ ViewModel::formulaInsertOp(OperatorType op) {
     }
     notifyFormulaUpdate();
     if ((op != OperatorType::LeftBracket) || (op != OperatorType::Equal)) {
-        formulaState = InputOperator;
+        formulaState = InputOp;
     } else {
         formulaState = InputDigit;
     }
 }
 
 void
-ViewModel::formulaInsertDigit(Digit digit) {
-    if (formulaState == InputOperator) {
+ViewModel::formulaInsertDigits() {
+    if (formulaState == InputOp) {
         // Insert a space if '1 /' + '2' -> '1 / 2'
         formulaGlyphQueue.Enqueue(Glyph(FontEmpty));
     }
-    formulaGlyphQueue.Enqueue(DigitGlyph(digit));
+    auto digits = GetValueDigits<MaxDisplayDigits>(GetNumberBase());
+    for (size_t i = 0; i < digits.size; ++i) {
+        formulaGlyphQueue.Enqueue(DigitGlyph(digits[i]));
+    }
     formulaState = InputDigit;
 }
 
@@ -208,7 +209,7 @@ ViewModel::HandleEvent(const Event &e) {
         if (inputData.isOp) {
             formulaInsertOp(inputData.data.op);
         } else {
-            formulaInsertDigit(inputData.data.digit);
+            // do nothing
         }
 
         return Consumed;
@@ -223,11 +224,16 @@ ViewModel::HandleEvent(const Event &e) {
 
         return Consumed;
     } else if (e.type == EvaluateEvent) {
-        if (formulaState == InputOperator) {
-            auto digits = GetValueDigits<MaxDisplayDigits>(GetNumberBase());
-            for (size_t i = 0; i < digits.size; ++i) {
-                formulaInsertDigit(digits[i]);
-            }
+        if (formulaState == Evaluated) {
+            // if the previous formula is evaluated, start a new formula when
+            // inputting a digit or an operator
+            formulaGlyphs.Clear();
+        }
+        if (formulaState == InputOp) {
+            // if the last input is an operator, append the current number as
+            // the right operand before evaluation. For example, '1 +' will be
+            // treated as '1 + 0'.
+            formulaInsertDigits();
         }
         formulaInsertOp(OperatorType::Equal);
         notifyFormulaUpdate();

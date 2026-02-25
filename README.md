@@ -29,14 +29,14 @@ An integer calculator for Nintendo DS.
 - [x] switch base: `hex`/`dec`/`oct`/`bin`
 - [x] switch depth: `QWORD`/`DWORD`/`WORD`/`BYTE`
 - [x] switch sign: `signed`/`unsigned`
-- [ ] evaluate the formula
+- [x] evaluate the formula
 - [x] disable number buttons with base
 
 ### v1.1.0
 
+- [x] Activate last pressed button (show focus sign)
 - [ ] Count unclosed left brackets
 - [ ] Disable width drawer if base == bin
-- [x] Activate last pressed button (show focus sign)
 
 ### v1.2.0
 

@@ -142,14 +142,14 @@ class ViewModel : private NonCopyable {
 
     enum {
         Evaluated,
-        InputOperator,
+        InputOp,
         InputDigit,
     } formulaState;
 
     void notifyFormulaUpdate(void);
 
     void formulaInsertOp(OperatorType op);
-    void formulaInsertDigit(Digit digit);
+    void formulaInsertDigits();
 
     /**
      * @brief Identify key inputs and generate events
