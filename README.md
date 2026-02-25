@@ -33,6 +33,7 @@ An integer calculator for Nintendo DS.
 - [x] Activate last pressed button (show focus sign)
 - [ ] Count unclosed left brackets
 - [ ] Disable width drawer if base == bin
+- [ ] Display version number on the sub screen
 
 ### v1.2.0
 
@@ -65,8 +66,8 @@ This software is under GPL-2.0-or-later license.
 
 ### Third parties
 
-- `libnds` v2.0.1
-- A **modified version** of `ark-pixel-font`
+- [libnds](https://github.com/devkitPro/libnds) v1.8.x
+- A **modified version** of [Ark Pixel Font](https://github.com/TakWolf/ark-pixel-font)
 
 ## Develop
 
