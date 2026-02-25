@@ -7,6 +7,7 @@
 #include "model.h"
 #include "commands.h"
 #include "config.h"
+#include "format.h"
 
 using namespace HexCalc;
 
@@ -193,7 +194,11 @@ FormulaModel::handleInput(const Event &e) {
 
 void
 FormulaModel::handleBaseChange(const Event &e) {
-    constexpr auto maxWidthforBinary = DWord;
+    constexpr auto maxWidthforBinary =
+        (GlyphFormatSize<Binary>(QWord) < MaxDisplayDigits)   ? QWord
+        : (GlyphFormatSize<Binary>(DWord) < MaxDisplayDigits) ? DWord
+        : (GlyphFormatSize<Binary>(Word) < MaxDisplayDigits)  ? Word
+                                                              : Byte;
     if ((config.Base() == Binary) && (config.Width() > maxWidthforBinary)) {
         notifyWidthChange(maxWidthforBinary);
     } else {

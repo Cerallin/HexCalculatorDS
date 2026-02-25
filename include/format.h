@@ -327,10 +327,29 @@ max(size_t a, size_t b, size_t c, size_t d) {
     return std::max(std::max(a, b), std::max(c, d));
 }
 
+template <NumberBase Base>
+constexpr size_t
+GlyphFormatSize(size_t digitCount) {
+    if constexpr (Base == Binary) {
+        return GlyphFormatSize(digitCount, 4, false);
+    } else if constexpr (Base == Octal) {
+        return GlyphFormatSize(digitCount, 3, false);
+    } else if constexpr (Base == Decimal) {
+        return GlyphFormatSize(digitCount, 3, true);
+    } else if constexpr (Base == Hexadecimal) {
+        return GlyphFormatSize(digitCount, 4, false);
+    } else {
+        static_assert(Base == Binary || Base == Octal || Base == Decimal ||
+                          Base == Hexadecimal,
+                      "Invalid NumberBase");
+        return 0;
+    }
+}
+
 constexpr size_t MaxDisplayDigits =
-    max(GlyphFormatSize(Number::MaxBinDigits, 4, false),
-        GlyphFormatSize(Number::MaxOctDigits, 3, false),
-        GlyphFormatSize(Number::MaxDecDigits, 3, true),
-        GlyphFormatSize(Number::MaxHexDigits, 4, false));
+    max(GlyphFormatSize<Binary>(Number::MaxBinDigits),
+        GlyphFormatSize<Octal>(Number::MaxOctDigits),
+        GlyphFormatSize<Decimal>(Number::MaxDecDigits),
+        GlyphFormatSize<Hexadecimal>(Number::MaxHexDigits));
 
 }; // namespace HexCalc
