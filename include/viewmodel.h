@@ -12,17 +12,79 @@
 #include "input.h"
 #include "model.h"
 
-static constexpr size_t
+namespace HexCalc {
+
+constexpr size_t
 max(size_t a, size_t b) {
     return (a > b) ? a : b;
 }
 
-static constexpr size_t
+constexpr size_t
 max(size_t a, size_t b, size_t c, size_t d) {
     return max(max(a, b), max(c, d));
 }
 
-namespace HexCalc {
+constexpr size_t MaxDisplayDigits =
+    max(Number::MaxBinDigits, Number::MaxOctDigits, Number::MaxDecDigits,
+        Number::MaxHexDigits);
+
+constexpr size_t MaxTranscodeDigits =
+    max(MaxDigitsForType<Binary>(), MaxDigitsForType<Octal>(),
+        MaxDigitsForType<Decimal>(), MaxDigitsForType<Hexadecimal>());
+
+constexpr size_t MaxFormulaGlyphs = 128;
+
+class ViewModel;
+
+class FormulaPaginator {
+  public:
+    FormulaPaginator(EventBus &eventBus, ViewModel &vm)
+        : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaQueue(),
+          formulaState(Evaluated) {}
+
+    EventResult HandleEvent(const Event &e);
+
+    using FormulaGlyphArray = GlyphArray6x8<MaxFormulaGlyphs>;
+
+    const FormulaGlyphArray &
+    GetFormulaGlyphs() const {
+        return formulaGlyphs;
+    }
+
+    size_t
+    Size() const {
+        return formulaGlyphs.Size();
+    }
+
+  private:
+    EventBus &eventBus;
+
+    ViewModel &vm;
+
+    /**
+     * @brief Glyphs for displaying the formula.
+     *
+     */
+    FormulaGlyphArray formulaGlyphs;
+
+    /**
+     * @brief A queue to store pending glyphs to be inserted into the
+     * formulaGlyphs.
+     *
+     */
+    CircularQueue<Glyph, MaxDisplayDigits> formulaQueue;
+
+    enum {
+        Evaluated,
+        InputOp,
+        InputDigit,
+    } formulaState;
+
+    void notifyFormulaUpdate(void);
+
+    void formulaInsertOp(OperatorType op);
+    void formulaInsertDigits();
+};
 
 /**
  * @brief The ViewModel class manages the state of the application, including
@@ -47,8 +109,6 @@ class ViewModel : private NonCopyable {
      */
     void HandleInputs(void);
 
-    EventResult HandleEvent(const Event &e);
-
     EventBus &
     Bus(void) {
         return eventBus;
@@ -58,14 +118,6 @@ class ViewModel : private NonCopyable {
     Cmds(void) {
         return commands;
     }
-
-    static constexpr size_t MaxDisplayDigits =
-        max(Number::MaxBinDigits, Number::MaxOctDigits, Number::MaxDecDigits,
-            Number::MaxHexDigits);
-
-    static constexpr size_t MaxTranscodeDigits =
-        max(MaxDigitsForType<Binary>(), MaxDigitsForType<Octal>(),
-            MaxDigitsForType<Decimal>(), MaxDigitsForType<Hexadecimal>());
 
     NumberWidth GetNumberWidth(void) const;
 
@@ -101,11 +153,9 @@ class ViewModel : private NonCopyable {
         return digits;
     }
 
-    static constexpr size_t MaxFormulaGlyphs = 128;
-
     const GlyphArray6x8<MaxFormulaGlyphs> &
     GetFormulaGlyphs() const {
-        return formulaGlyphs;
+        return formulaPaginator.GetFormulaGlyphs();
     }
 
   private:
@@ -134,22 +184,10 @@ class ViewModel : private NonCopyable {
     KeyInputHandler keyInputHandler;
 
     /**
-     * @brief Glyphs for displaying the formula
+     * @brief Manager for formula glyphs
      *
      */
-    GlyphArray6x8<MaxFormulaGlyphs> formulaGlyphs;
-    CircularQueue<Glyph, MaxDisplayDigits> formulaGlyphQueue;
-
-    enum {
-        Evaluated,
-        InputOp,
-        InputDigit,
-    } formulaState;
-
-    void notifyFormulaUpdate(void);
-
-    void formulaInsertOp(OperatorType op);
-    void formulaInsertDigits();
+    FormulaPaginator formulaPaginator;
 
     /**
      * @brief Identify key inputs and generate events

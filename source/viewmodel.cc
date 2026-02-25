@@ -21,24 +21,16 @@ ViewModel::ViewModel(void)
       // input
       keyInputHandler(commands),
       // cache
-      formulaGlyphs(), formulaState(Evaluated) {
+      formulaPaginator(eventBus, *this) {
     eventBus.Subscribe(config);
     // must subscribe before subscribing formulaModel
-    eventBus.Subscribe(*this);
+    eventBus.Subscribe(formulaPaginator);
     eventBus.Subscribe(formulaModel);
 }
 
 void
 ViewModel::DispatchEvents(void) {
     eventBus.DispatchPending();
-}
-
-void
-ViewModel::notifyFormulaUpdate(void) {
-    eventBus.Post(Event{
-        0,
-        EventType::FormulaUpdatedEvent,
-    });
 }
 
 bool
@@ -75,6 +67,29 @@ ViewModel::HandleInputs(void) {
     if (!handleKeyInputs()) {
         handleTouchScreen();
     }
+}
+
+NumberWidth
+ViewModel::GetNumberWidth(void) const {
+    return config.Width();
+}
+
+NumberSign
+ViewModel::GetNumberSign(void) const {
+    return config.Sign();
+}
+
+NumberBase
+ViewModel::GetNumberBase(void) const {
+    return config.Base();
+}
+
+void
+FormulaPaginator::notifyFormulaUpdate(void) {
+    eventBus.Post(Event{
+        0,
+        EventType::FormulaUpdatedEvent,
+    });
 }
 
 static constexpr Glyph
@@ -150,29 +165,29 @@ DigitGlyph(Digit digit) {
 }
 
 void
-ViewModel::formulaInsertOp(OperatorType op) {
+FormulaPaginator::formulaInsertOp(OperatorType op) {
     // If the first input is an operator, insert the current number as
     // the left operand. For example, if the user inputs '+' first, it
     // will be treated as '0 +'.
-    if (formulaGlyphQueue.Empty()) {
+    if (formulaQueue.Empty()) {
         formulaInsertDigits();
     }
     // Insert a space if '1' + '+' -> '1 +'
     if (formulaState == InputDigit) {
-        formulaGlyphQueue.Enqueue(Glyph(FontEmpty));
+        formulaQueue.Enqueue(Glyph(FontEmpty));
     }
     // Insert operator glyph
     if (op == OperatorType::Modulo) {
         // Insert 'mod' for modulo operator
-        formulaGlyphQueue.Enqueue(Glyph(Font6x8M));
-        formulaGlyphQueue.Enqueue(Glyph(Font6x8O));
-        formulaGlyphQueue.Enqueue(Glyph(Font6x8D));
+        formulaQueue.Enqueue(Glyph(Font6x8M));
+        formulaQueue.Enqueue(Glyph(Font6x8O));
+        formulaQueue.Enqueue(Glyph(Font6x8D));
     } else {
-        formulaGlyphQueue.Enqueue(OpGlyph(op));
+        formulaQueue.Enqueue(OpGlyph(op));
     }
     // Update formula glyphs from the queue
     Glyph glyph;
-    while (formulaGlyphQueue.Dequeue(glyph)) {
+    while (formulaQueue.Dequeue(glyph)) {
         formulaGlyphs.Insert(glyph);
     }
     notifyFormulaUpdate();
@@ -184,20 +199,20 @@ ViewModel::formulaInsertOp(OperatorType op) {
 }
 
 void
-ViewModel::formulaInsertDigits() {
+FormulaPaginator::formulaInsertDigits() {
     if (formulaState == InputOp) {
         // Insert a space if '1 /' + '2' -> '1 / 2'
-        formulaGlyphQueue.Enqueue(Glyph(FontEmpty));
+        formulaQueue.Enqueue(Glyph(FontEmpty));
     }
-    auto digits = GetValueDigits<MaxDisplayDigits>(GetNumberBase());
+    auto digits = vm.GetValueDigits<MaxDisplayDigits>(vm.GetNumberBase());
     for (size_t i = 0; i < digits.size; ++i) {
-        formulaGlyphQueue.Enqueue(DigitGlyph(digits[i]));
+        formulaQueue.Enqueue(DigitGlyph(digits[i]));
     }
     formulaState = InputDigit;
 }
 
 EventResult
-ViewModel::HandleEvent(const Event &e) {
+FormulaPaginator::HandleEvent(const Event &e) {
     if (e.type == InputEvent) {
         if (formulaState == Evaluated) {
             // if the previous formula is evaluated, start a new formula when
@@ -214,10 +229,10 @@ ViewModel::HandleEvent(const Event &e) {
 
         return Consumed;
     } else if (e.type == ClearEvent) {
-        if (formulaGlyphQueue.Empty()) {
+        if (formulaQueue.Empty()) {
             formulaGlyphs.Clear();
         } else {
-            formulaGlyphQueue.Clear();
+            formulaQueue.Clear();
         }
 
         notifyFormulaUpdate();
@@ -244,19 +259,4 @@ ViewModel::HandleEvent(const Event &e) {
     }
 
     return Skipped;
-}
-
-NumberWidth
-ViewModel::GetNumberWidth(void) const {
-    return config.Width();
-}
-
-NumberSign
-ViewModel::GetNumberSign(void) const {
-    return config.Sign();
-}
-
-NumberBase
-ViewModel::GetNumberBase(void) const {
-    return config.Base();
 }

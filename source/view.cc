@@ -327,9 +327,9 @@ ValueView::ForceUpdate(void) {
     auto base = vm.GetNumberBase();
     auto width = vm.GetNumberWidth();
 
-    auto digits = vm.GetValueDigits<ViewModel::MaxDisplayDigits>(base);
+    auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
 
-    constexpr auto N = ViewModel::MaxDisplayDigits;
+    constexpr auto N = MaxDisplayDigits;
 
     if (base == Hexadecimal) {
         PrintGlyphs<HexGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
