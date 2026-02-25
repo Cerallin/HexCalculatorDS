@@ -15,7 +15,17 @@ FormulaModel::HandleEvent(const Event &e) {
     bool valueChanged = false;
     bool formulaChanged = false;
 
-    if (e.type == InputEvent) {
+    if (e.type == BackspaceEvent) {
+        if (inputState == PlaceHolder) {
+            currentNumber = NumberZero;
+            inputState = InputNumber;
+        } else { // inputState == InputNumber
+            // remove the last digit
+            auto base = config.Base();
+            currentNumber /= base;
+        }
+        valueChanged = true;
+    } else if (e.type == InputEvent) {
         handleInput(e);
         return Consumed;
     } else if (e.type == ClearEvent) {
@@ -45,7 +55,6 @@ FormulaModel::HandleEvent(const Event &e) {
         valueChanged = true;
     } else if (e.type == UpdateBaseEvent) {
         handleBaseChange(e);
-        return Consumed;
     } else if (e.type == UpdateWidthEvent) {
         auto oldValue = currentNumber;
         currentNumber &= WidthMask(config.Width());
