@@ -125,6 +125,7 @@ class InputHandler {
     void updateTouch();
 
     void notifyTouch(const Point &pos);
+    void notifyPreviousTouch();
 };
 
 enum ButtonType : uint8_t {
@@ -304,7 +305,17 @@ class TouchScreenHandler {
                 return true;
             }
         }
+
+        previouslySelected = nullptr;
         return false;
+    }
+
+    void
+    PressPrevious(void) {
+        if (previouslySelected) {
+            auto &button = *previouslySelected;
+            button.ExecuteCommand(commands, button.Type());
+        }
     }
 
     size_t

@@ -229,23 +229,25 @@ InputHandler::Update(void) {
     } else if (input.PressedDown()) {
         commands.SwitchBaseLower();
     } else if (input.PressedLeft()) {
-        // do nothing for now
+        commands.SwitchWidthUpper();
     } else if (input.PressedRight()) {
-        // do nothing for now
+        commands.SwitchWidthLower();
     } else if (input.PressedA()) {
-        // TODO input previous selected button
+        notifyPreviousTouch();
     } else if (input.PressedB()) {
         commands.InputOperatorBackspace();
     } else if (input.PressedX()) {
         commands.Clear();
     } else if (input.PressedY()) {
-        // TODO switch width?
+        commands.ToggleSign();
+    } else if (input.PressedSelect()) {
+        // do nothing for now
     } else if (input.PressedStart()) {
         commands.Evaluate();
     } else if (input.PressedL()) {
-        // TODO
+        // do nothing for now
     } else if (input.PressedR()) {
-        // TODO
+        // do nothing for now
     }
 
     // handle touch input
@@ -335,5 +337,13 @@ InputHandler::notifyTouch(const Point &pos) {
     eventBus.Post(Event{
         .data = pos.ToInt(),
         .type = TouchScreenEvent,
+    });
+}
+
+void
+HexCalc::InputHandler::notifyPreviousTouch() {
+    eventBus.Post(Event{
+        .data = 0,
+        .type = PreviousTouchEvent,
     });
 }

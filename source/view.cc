@@ -133,6 +133,9 @@ InputView::HandleEvent(const Event &e) {
     } else if (e.type == EventType::UpdateWidthEvent) {
         BasicView::markDirty();
         return Consumed;
+    } else if (e.type == EventType::PreviousTouchEvent) {
+        handler.PressPrevious();
+        return Consumed;
     } else if (e.type == EventType::TouchScreenEvent) {
         Point touchPoint(e.data);
 
