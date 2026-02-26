@@ -25,8 +25,9 @@ An integer calculator for Nintendo DS.
 - [x] switch sign: `signed`/`unsigned`
 - [x] evaluate the formula
 - [x] disable number buttons with base
-- [x] Implement backspace
 - [x] Implement bitwise not & negative
+- [x] Implement backspace
+- [x] Implement brackets
 
 ### v1.1.0
 
