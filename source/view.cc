@@ -154,11 +154,11 @@ InputView::HandleEvent(const Event &e) {
         BasicView::markDirty();
         return Consumed;
     } else if (e.type == EventType::MoveFocusEvent) {
-        auto *focused = handler.FocusedButton();
-        if (focused == nullptr) {
-            return Skipped;
+        Point pos{0, 0};
+        const auto *focused = handler.FocusedButton();
+        if (focused != nullptr) {
+            pos = focused->Position();
         }
-        auto pos = focused->Position();
         auto dir = static_cast<Direction>(e.data);
         auto &button = getFocus(pos, dir);
         handler.ChangeFocus(&button);
@@ -166,7 +166,7 @@ InputView::HandleEvent(const Event &e) {
         BasicView::markDirty();
         return Consumed;
     } else if (e.type == EventType::PreviousTouchEvent) {
-        handler.PressPrevious();
+        handler.PressFocus();
         return Consumed;
     } else if (e.type == EventType::TouchScreenEvent) {
         Point touchPoint(e.data);

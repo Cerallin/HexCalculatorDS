@@ -356,11 +356,23 @@ class TouchScreenHandler {
         return false;
     }
 
-    TouchButton *
-    FocusedButton() {
+    /**
+     * @brief Get the currently focused button. Use ChangeFocus() to change the
+     * focused button.
+     *
+     * @return const TouchButton* currently focused button, or nullptr if no
+     * button is currently selected
+     */
+    const TouchButton *
+    FocusedButton() const {
         return previouslySelected;
     }
 
+    /**
+     * @brief Change the currently focused button to the given button.
+     *
+     * @param button The button to focus, or nullptr to clear the focus.
+     */
     void
     ChangeFocus(TouchButton *button) {
         if (previouslySelected != nullptr) {
@@ -395,7 +407,7 @@ class TouchScreenHandler {
     }
 
     void
-    PressPrevious(void) {
+    PressFocus(void) {
         if (previouslySelected) {
             auto &button = *previouslySelected;
             button.ExecuteCommand(commands, button.Type());
