@@ -135,18 +135,14 @@ FormulaModel::handleInput(const Event &e) {
             currentNumber = ((currentNumber ^ widthMask) + 1) & widthMask;
             inputState = InputNumber;
             valueChanged = true;
-        } else {
-            // continue to handle other operators
-
-            bool placeholder = (inputState == PlaceHolder);
-            bool isLBrac = (op == LeftBracket);
-            if (placeholder && isLBrac) {
+        } else if (op == LeftBracket) {
+            if (inputState == PlaceHolder) {
                 bool inserted = formulaTree.Input(FormulaData(op));
                 if (inserted) {
                     notifyAcceptOperator(op);
                     formulaChanged = true;
                 }
-            } else if (!placeholder && isLBrac) {
+            } else {
                 bool inserted = true;
                 // 1. insert current number into formula tree
                 debugf("input number: %llu\n", currentNumber);
@@ -155,8 +151,8 @@ FormulaModel::handleInput(const Event &e) {
                     notifyAcceptNumber(currentNumber);
                     formulaChanged = true;
                 }
-                // 2. insert multiplication operator into formula tree, so that
-                // '2 (' will be treated as '2 x ('
+                // 2. insert multiplication operator into formula tree, so
+                // that '2 (' will be treated as '2 x ('
                 inserted &=
                     formulaTree.Input(FormulaData(OperatorType::Multiply));
                 if (inserted) {
@@ -172,45 +168,52 @@ FormulaModel::handleInput(const Event &e) {
                 currentNumber = NumberZero;
                 inputState = PlaceHolder;
                 valueChanged = true;
-            } else {
-                bool inserted = true;
-                // 1. insert current number into formula tree
-                debugf("input number: %llu\n", currentNumber);
-                inserted &= formulaTree.Input(FormulaData(currentNumber));
-                if (inserted) {
-                    notifyAcceptNumber(currentNumber);
-                }
-                // 2. evaluate the formula tree
-                auto lastOp = formulaTree.LastOperator();
-                if (Operator::HigherThan(op, lastOp)) {
-                    // do not evaluate if current operator has higher
-                    // precedence than the previous one, otherwise it will
-                    // cause wrong result for expressions like "1 + 2 * 3"
-                } else { // op <= lastOp
-                    bool evaluated = formulaTree.EvaluatePartial();
-                    debugf("Partial evaluation result: %s\n",
-                           evaluated ? "OK" : "Error");
-                    if (evaluated) {
-                        currentNumber = formulaTree.Result();
-                        valueChanged = true;
-                    } else {
-                        // do not update current number if evaluation failed
-                    }
-                }
-                // 3. insert operator into formula tree
-                // must after evaluation, otherwise the new operator will
-                // affect the evaluation
-                debugf("input op: %d\n", op);
-                inserted &= formulaTree.Input(FormulaData(op));
-                if (inserted) {
-                    notifyAcceptOperator(op);
-                    formulaChanged = true;
-                }
-                // 4. Mark the current number as placeholder, so that the
-                // next digit input will start a new number instead of
-                // joining the current number.
-                inputState = PlaceHolder;
             }
+        } else {
+            // continue to handle other operators
+
+            bool inserted;
+            // 1. insert current number into formula tree
+            debugf("input number: %llu\n", currentNumber);
+            // this may fail, but does not matter, because even if the current
+            // number cannot be inserted. e.g. '(1)' + '2' is invalid because
+            // a number cannot be directly after a right bracket, while
+            // '(1)' + 'x' -> '(1) x' is valid.
+            inserted = formulaTree.Input(FormulaData(currentNumber));
+            if (inserted) {
+                notifyAcceptNumber(currentNumber);
+                formulaChanged = true;
+            }
+            // 2. evaluate the formula tree
+            auto lastOp = formulaTree.LastOperator();
+            if (Operator::HigherThan(op, lastOp)) {
+                // do not evaluate if current operator has higher
+                // precedence than the previous one, otherwise it will
+                // cause wrong result for expressions like "1 + 2 * 3"
+            } else { // op <= lastOp
+                bool evaluated = formulaTree.EvaluatePartial();
+                debugf("Partial evaluation result: %s\n",
+                       evaluated ? "OK" : "Error");
+                if (evaluated) {
+                    currentNumber = formulaTree.Result();
+                    valueChanged = true;
+                } else {
+                    // do not update current number if evaluation failed
+                }
+            }
+            // 3. insert operator into formula tree
+            // must after evaluation, otherwise the new operator will
+            // affect the evaluation
+            debugf("input op: %d\n", op);
+            inserted = formulaTree.Input(FormulaData(op));
+            if (inserted) {
+                notifyAcceptOperator(op);
+                formulaChanged = true;
+            }
+            // 4. Mark the current number as placeholder, so that the
+            // next digit input will start a new number instead of
+            // joining the current number.
+            inputState = PlaceHolder;
         }
     } else { // is number
         if (inputState == PlaceHolder) {
