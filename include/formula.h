@@ -20,12 +20,10 @@ namespace HexCalc {
  */
 class FormulaData {
   public:
-    explicit FormulaData(NumberDataType number, bool shadow = false)
-        : number(number), op(None), isOperator(false), isPaired(false),
-          isShadow(shadow) {}
+    explicit FormulaData(NumberDataType number)
+        : number(number), op(None), isOperator(false), isPaired(false) {}
     explicit FormulaData(OperatorType op)
-        : number(NumberZero), op(op), isOperator(true), isPaired(false),
-          isShadow(false) {}
+        : number(NumberZero), op(op), isOperator(true), isPaired(false) {}
 
     constexpr bool
     IsOperator(void) const {
@@ -54,11 +52,6 @@ class FormulaData {
     }
 
     constexpr bool
-    IsShadow(void) const {
-        return isShadow;
-    }
-
-    constexpr bool
     Paired() const {
         return isPaired;
     }
@@ -75,8 +68,6 @@ class FormulaData {
     bool isOperator;
     // Only for left bracket: whether it has a matching right bracket
     bool isPaired;
-    // Only for number type, if number is just a placeholder
-    bool isShadow;
 };
 
 /**

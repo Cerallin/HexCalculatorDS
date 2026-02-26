@@ -52,13 +52,10 @@ TEST(FormulaTree, TestInputSingleNumber) {
 
 TEST(FormulaTree, TestInputSingleOperator) {
     HexCalc::FormulaData op(HexCalc::OperatorType::Plus);
-    CHECK(formula->Input(op));
+    CHECK_FALSE(formula->Input(op));
 }
 
-TEST(FormulaTree, TestEvaluateEmpty) {
-    CHECK(formula->Evaluate());
-    CHECK_EQUAL(0, formula->Result());
-}
+TEST(FormulaTree, TestEvaluateEmpty) { CHECK_FALSE(formula->Evaluate()); }
 
 TEST(FormulaTree, TestSimpleAdd) {
     // 1 + 2 = 3
@@ -231,6 +228,14 @@ TEST(FormulaTree, TestSimpleBrackets) {
     CHECK_EQUAL(18, formula->Result());
 }
 
+TEST(FormulaTree, TestOmittedMultiplication) {
+    // 2 (
+    using HexCalc::OperatorType;
+
+    CHECK(formula->Input(HexCalc::FormulaData(2)));
+    CHECK_FALSE(formula->Input(HexCalc::FormulaData(LeftBracket)));
+}
+
 TEST(FormulaTree, TestIncompleteBrackets) {
     // 1 + (2 x 6 = error
     using HexCalc::OperatorType;
@@ -324,8 +329,9 @@ TEST(FormulaTree, TestComplexFormula) {
 }
 
 TEST(FormulaTree, TestEvaluatePartialEmpty) {
+    CHECK(formula->Input(HexCalc::FormulaData(2)));
     CHECK(formula->EvaluatePartial());
-    CHECK_EQUAL(0, formula->Result());
+    CHECK_EQUAL(2, formula->Result());
 }
 
 TEST(FormulaTree, TestEvaluatePartial) {

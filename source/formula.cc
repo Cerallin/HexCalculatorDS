@@ -174,7 +174,7 @@ FormulaTree::inputData(const FormulaData &data) {
         // 2 operators cannot be adjacent
         // unless incoming operator is left bracket
         if (data.GetOperator() == LeftBracket) {
-            // create a new node for the number
+            // create a new node for the '('
             auto &node = newNode();
             node.Assign(data);
 
@@ -191,11 +191,8 @@ FormulaTree::inputData(const FormulaData &data) {
         }
     } else if (incomingNumber && currentExpression) {
         // data is a number, current node is an expression
-        auto currentData = currentNode->Get();
-        if (currentData.IsNumber()) {
-            auto newValue = data.GetNumber();
-            currentNode->Assign(FormulaData(newValue));
-        }
+        // 2 numbers/expressions cannot be adjacent
+        return false;
     } else if (incomingNumber && !currentExpression) {
         // data is a number, current node is an incomplete operator
 
@@ -218,7 +215,10 @@ FormulaTree::inputData(const FormulaData &data) {
 
         // bracket handling
         auto op = data.GetOperator();
-        if (op == OperatorType::RightBracket) {
+        if (op == OperatorType::LeftBracket) {
+            // omitted multiplication should not be handled in formula tree
+            return false;
+        } else if (op == OperatorType::RightBracket) {
             auto *leftBracket = currentNode->findUnpairedLBrac();
             if (leftBracket == nullptr) {
                 return false;
@@ -237,13 +237,10 @@ FormulaTree::inputData(const FormulaData &data) {
         node.Assign(data);
 
         // current node must have a parent operator
-        debugf("current parent is nullptr: %s\n",
-               (currentNode->Parent() == nullptr) ? "true" : "false");
         auto &parent = *currentNode->Parent();
         auto parentOp = parent.Get().GetOperator();
 
         if ((parentOp == Equal) || (parentOp == LeftBracket)) {
-
             if (parent.Left() == currentNode) {
                 parent.ConnectLeft(node);
             } else {
@@ -252,8 +249,6 @@ FormulaTree::inputData(const FormulaData &data) {
             node.ConnectLeft(*currentNode);
         } else if (Operator::LowerThan(op, parent.Get().GetOperator())) {
             // new operator has lower precedence than parent operator
-            debugf("grandParent is nullptr: %s\n",
-                   (currentNode->Parent() == nullptr) ? "true" : "false");
             auto grandParent = parent.Parent();
             // new operator becomes the parent of the parent node
             if (grandParent->Left() == &parent) {
@@ -281,16 +276,8 @@ FormulaTree::inputData(const FormulaData &data) {
 
 void
 FormulaTree::Clear(void) {
-    // reset counter
+    currentNode = &root;
     size = 0;
-
-    // create a new node with number 0
-    auto &node = newNode();
-    node.Assign(FormulaData(NumberZero, true));
-    // connect the new node to the dummy root node
-    root.ConnectLeft(node);
-    // point current node to the new node
-    currentNode = &node;
 }
 
 bool
