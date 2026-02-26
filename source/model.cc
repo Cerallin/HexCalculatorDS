@@ -33,7 +33,7 @@ FormulaModel::HandleEvent(const Event &e) {
             formulaTree.Clear();
             formulaChanged = true;
         }
-        inputState = InputNumber;
+        inputState = PlaceHolder;
         currentNumber = NumberZero;
         valueChanged = true;
     } else if (e.type == EvaluateEvent) {
@@ -53,8 +53,6 @@ FormulaModel::HandleEvent(const Event &e) {
         }
 
         formulaTree.Clear();
-        // Always true because we just cleared the tree
-        formulaTree.Input(FormulaData(currentNumber));
         inputState = PlaceHolder;
 
         formulaChanged = true;
@@ -139,13 +137,41 @@ FormulaModel::handleInput(const Event &e) {
             valueChanged = true;
         } else {
             // continue to handle other operators
-            if (inputState == PlaceHolder) {
-                // try to insert operator
+
+            bool placeholder = (inputState == PlaceHolder);
+            bool isLBrac = (op == LeftBracket);
+            if (placeholder && isLBrac) {
                 bool inserted = formulaTree.Input(FormulaData(op));
                 if (inserted) {
                     notifyAcceptOperator(op);
                     formulaChanged = true;
                 }
+            } else if (!placeholder && isLBrac) {
+                bool inserted = true;
+                // 1. insert current number into formula tree
+                debugf("input number: %llu\n", currentNumber);
+                inserted &= formulaTree.Input(FormulaData(currentNumber));
+                if (inserted) {
+                    notifyAcceptNumber(currentNumber);
+                    formulaChanged = true;
+                }
+                // 2. insert multiplication operator into formula tree, so that
+                // '2 (' will be treated as '2 x ('
+                inserted &=
+                    formulaTree.Input(FormulaData(OperatorType::Multiply));
+                if (inserted) {
+                    notifyAcceptOperator(OperatorType::Multiply);
+                    formulaChanged = true;
+                }
+                // 3. insert left bracket into formula tree
+                inserted &= formulaTree.Input(FormulaData(op));
+                if (inserted) {
+                    notifyAcceptOperator(op);
+                    formulaChanged = true;
+                }
+                currentNumber = NumberZero;
+                inputState = PlaceHolder;
+                valueChanged = true;
             } else {
                 bool inserted = true;
                 // 1. insert current number into formula tree
