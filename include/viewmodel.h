@@ -9,7 +9,6 @@
 #include "commands.h"
 #include "event.h"
 #include "format.h"
-#include "input.h"
 #include "model.h"
 
 namespace HexCalc {
@@ -147,19 +146,13 @@ class FormulaPaginator {
  */
 class ViewModel : private NonCopyable {
   public:
-    ViewModel(void);
+    ViewModel(EventBus &eventBus, Commands &commands);
 
     /**
      * @brief Dispatch events from event queue to models and views
      *
      */
     void DispatchEvents(void);
-
-    /**
-     * @brief Handle user inputs and generate events for models
-     *
-     */
-    void HandleInputs(void);
 
     EventBus &
     Bus(void) {
@@ -208,25 +201,19 @@ class ViewModel : private NonCopyable {
      * @brief Event bus for communication between input, models and views
      *
      */
-    EventBus eventBus;
+    EventBus &eventBus;
 
     /**
      * @brief Commands that can be triggered by user inputs
      *
      */
-    Commands commands;
+    Commands &commands;
 
     /**
      * @brief Formula tree and current input number
      *
      */
     FormulaModel formulaModel;
-
-    /**
-     * @brief Key input handler to identify key inputs and generate events
-     *
-     */
-    KeyInputHandler keyInputHandler;
 
     /**
      * @brief Manager for current value and its digit representation
@@ -239,19 +226,6 @@ class ViewModel : private NonCopyable {
      *
      */
     FormulaPaginator formulaPaginator;
-
-    /**
-     * @brief Identify key inputs and generate events
-     *
-     * @return true if key pressed, false if no keys are pressed
-     */
-    bool handleKeyInputs(void);
-    /**
-     * @brief Handle touch screen with input view
-     *
-     * @return true if a button is touched, false otherwise
-     */
-    bool handleTouchScreen(void);
 };
 
 }; // namespace HexCalc

@@ -9,42 +9,6 @@
 
 using namespace HexCalc;
 
-bool
-KeyInputHandler::Handle(const KeyInput &input) {
-    bool res = false;
-
-    if (input.PressedUp()) {
-        commands.SwitchBaseUpper();
-        res = true;
-    } else if (input.PressedDown()) {
-        commands.SwitchBaseLower();
-        res = true;
-    } else if (input.PressedLeft()) {
-        // do nothing for now
-    } else if (input.PressedRight()) {
-        // do nothing for now
-    } else if (input.PressedA()) {
-        // TODO input previous selected button
-    } else if (input.PressedB()) {
-        commands.InputOperatorBackspace();
-        res = true;
-    } else if (input.PressedX()) {
-        commands.Clear();
-        res = true;
-    } else if (input.PressedY()) {
-        // TODO switch width
-    } else if (input.PressedStart()) {
-        commands.Evaluate();
-        res = true;
-    } else if (input.PressedL()) {
-        // TODO
-    } else if (input.PressedR()) {
-        // TODO
-    }
-
-    return res;
-}
-
 void
 TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     switch (type) {
@@ -152,5 +116,117 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
         break;
     default:
         break;
+    }
+}
+
+void
+InputHandler::Update(void) {
+    scanKeys();
+
+    updateKeys();
+    updateTouch();
+
+    handleKeyInput(KeyInput{currentKeys});
+    handleTouchInput(TouchInput{smoothPos, stablePressed});
+}
+
+bool
+InputHandler::KeyDown(uint32_t k) const {
+    return (currentKeys & k) && !(previousKeys & k);
+}
+
+bool
+InputHandler::KeyUp(uint32_t k) const {
+    return !(currentKeys & k) && (previousKeys & k);
+}
+
+bool
+InputHandler::TouchDown() const {
+    return stablePressed && !previousTouch;
+}
+
+bool
+InputHandler::TouchUp() const {
+    return !stablePressed && previousTouch;
+}
+
+void
+InputHandler::updateKeys(void) {
+    previousKeys = currentKeys;
+    currentKeys = keysHeld();
+}
+
+void
+InputHandler::updateTouch() {
+    previousTouch = stablePressed;
+
+    touchPosition pos{};
+    touchRead(&pos);
+
+    bool rawPressed = currentKeys & KEY_TOUCH;
+
+    // debounce
+    if (rawPressed) {
+        pressCount++;
+        releaseCount = 0;
+        if (pressCount >= PRESS_TH) {
+            stablePressed = true;
+        }
+    } else {
+        pressCount = 0;
+        releaseCount++;
+        if (releaseCount >= RELEASE_TH) {
+            stablePressed = false;
+        }
+    }
+
+    // update position
+    if (stablePressed) {
+        if (!previousTouch) {
+            // use raw position for the first frame to avoid lag
+            smoothPos.x = pos.px;
+            smoothPos.y = pos.py;
+        } else {
+            // smooth the position to reduce jitter
+            smoothPos.x = (smoothPos.x + pos.px) / 2;
+            smoothPos.y = (smoothPos.y + pos.py) / 2;
+        }
+    }
+}
+
+void
+InputHandler::handleKeyInput(const KeyInput &input) {
+    if (input.PressedUp()) {
+        commands.SwitchBaseUpper();
+    } else if (input.PressedDown()) {
+        commands.SwitchBaseLower();
+    } else if (input.PressedLeft()) {
+        // do nothing for now
+    } else if (input.PressedRight()) {
+        // do nothing for now
+    } else if (input.PressedA()) {
+        // TODO input previous selected button
+    } else if (input.PressedB()) {
+        commands.InputOperatorBackspace();
+    } else if (input.PressedX()) {
+        commands.Clear();
+    } else if (input.PressedY()) {
+        // TODO switch width
+    } else if (input.PressedStart()) {
+        commands.Evaluate();
+    } else if (input.PressedL()) {
+        // TODO
+    } else if (input.PressedR()) {
+        // TODO
+    }
+}
+
+void
+InputHandler::handleTouchInput(const TouchInput &input) {
+    if (TouchDown()) {
+        eventBus.Post(Event{
+            .data = input.point.ToInt(),
+            .type = TouchScreenEvent,
+        });
     }
 }

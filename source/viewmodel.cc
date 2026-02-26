@@ -11,15 +11,13 @@
 
 using namespace HexCalc;
 
-ViewModel::ViewModel(void)
+ViewModel::ViewModel(EventBus &eventBus, Commands &commands)
     : // event bus
-      eventBus(),
+      eventBus(eventBus),
       // commands
-      commands(eventBus),
+      commands(commands),
       // models
       formulaModel(eventBus),
-      // input
-      keyInputHandler(commands),
       // managers
       valueManager(formulaModel), formulaPaginator(eventBus, valueManager) {
     eventBus.Subscribe(config);
@@ -31,42 +29,6 @@ ViewModel::ViewModel(void)
 void
 ViewModel::DispatchEvents(void) {
     eventBus.DispatchPending();
-}
-
-bool
-ViewModel::handleKeyInputs(void) {
-    auto keyInput = ReadKeyInput();
-    if (keyInput.Active()) {
-        return keyInputHandler.Handle(keyInput);
-    }
-
-    return false;
-}
-
-bool
-ViewModel::handleTouchScreen(void) {
-    auto touchInput = ReadTouchInput();
-    if (!touchInput.Active()) {
-        return false;
-    }
-
-    // Get the touch point and post a TouchScreenEvent with the point data
-    Point touchPoint = touchInput.point;
-    eventBus.Post(Event{
-        touchPoint.ToInt(),
-        EventType::TouchScreenEvent,
-    });
-
-    return true;
-}
-
-void
-ViewModel::HandleInputs(void) {
-    // First try to handle key inputs,
-    // if no keys are pressed, try to handle touch screen inputs.
-    if (!handleKeyInputs()) {
-        handleTouchScreen();
-    }
 }
 
 NumberWidth
@@ -183,12 +145,6 @@ FormulaPaginator::formulaInsertOp(OperatorType op) {
                 formulaGlyphs.Insert(Glyph(FontEmpty));
             }
         }
-        // If the first input is an operator, insert the current number as
-        // the left operand. For example, if the user inputs '+' first, it
-        // will be treated as '0 +'.
-        // if (formulaQueue.Empty()) {
-        //     formulaInsertDigits();
-        // }
     }
     // Insert a space if '1' + '+' -> '1 +'
     if (formulaState == InputDigit) {

@@ -169,46 +169,49 @@ struct TouchInput {
     }
 };
 
-inline KeyInput
-ReadKeyInput(void) {
-    scanKeys();
-    KeyInput input{keysDownRepeat()};
-    return input;
-}
-
-inline TouchInput
-ReadTouchInput(void) {
-    touchPosition touchPos{};
-    touchRead(&touchPos);
-    bool pressed = (touchPos.px != 0) || (touchPos.py != 0);
-    TouchInput input{Point(touchPos), pressed};
-    return input;
-}
-
-class KeyInputHandler {
+/**
+ * @brief The InputHandler class is for reading inputs from the keys and the
+ * touch screen.
+ *
+ */
+class InputHandler {
   public:
-    KeyInputHandler(Commands &commands) : commands(commands), previousKeys(0) {}
+    InputHandler(EventBus &eventBus, Commands &commands)
+        : eventBus(eventBus), commands(commands) {}
 
-    /**
-     * @brief Handle the key input and execute corresponding commands. It also
-     * updates the previous key states to detect key presses and releases.
-     *
-     * @param input The current key input state
-     * @return true if the input is handled, false otherwise
-     */
-    bool Handle(const KeyInput &input);
+    void Update(void);
+
+    bool KeyDown(uint32_t k) const;
+
+    bool KeyUp(uint32_t k) const;
+
+    bool TouchDown() const;
+
+    bool TouchUp() const;
 
   private:
-    /**
-     * @brief Commands instance to execute commands based on key inputs.
-     *
-     */
+    EventBus &eventBus;
     Commands &commands;
-    /**
-     * @brief Previously input states
-     *
-     */
-    uint32_t previousKeys;
+
+    uint32_t currentKeys = 0;
+    uint32_t previousKeys = 0;
+
+    bool stablePressed = false;
+    bool previousTouch = false;
+
+    Point smoothPos{0, 0};
+
+    int pressCount = 0;
+    int releaseCount = 0;
+
+    static constexpr int PRESS_TH = 2;
+    static constexpr int RELEASE_TH = 3;
+
+    void updateKeys(void);
+    void updateTouch();
+
+    void handleKeyInput(const KeyInput &input);
+    void handleTouchInput(const TouchInput &input);
 };
 
 enum ButtonType : uint8_t {
