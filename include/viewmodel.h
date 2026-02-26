@@ -61,9 +61,8 @@ class ValueManager {
 class FormulaPaginator {
   public:
     FormulaPaginator(EventBus &eventBus, ValueManager &vm)
-        : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaQueue(),
-          formulaState(Evaluated), currentNumber(NumberZero),
-          collectingNumber(false) {}
+        : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaState(Evaluated),
+          currentNumber(NumberZero), collectingNumber(false) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -121,13 +120,6 @@ class FormulaPaginator {
     static_assert(
         MaxFormulaQueueSize > (Number::MaxHexDigits + 4),
         "MaxFormulaQueueSize must be greater than MaxDisplayDigits + 4");
-
-    /**
-     * @brief A queue to store pending glyphs to be inserted into the
-     * formulaGlyphs.
-     *
-     */
-    CircularQueue<Glyph, MaxFormulaQueueSize> formulaQueue;
 
     enum {
         Evaluated,

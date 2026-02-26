@@ -168,32 +168,45 @@ void
 FormulaPaginator::formulaInsertOp(OperatorType op) {
     if (formulaState == Evaluated) {
         formulaGlyphs.Clear();
-    }
-    // If the first input is an operator, insert the current number as
-    // the left operand. For example, if the user inputs '+' first, it
-    // will be treated as '0 +'.
-    if (formulaQueue.Empty()) {
-        formulaInsertDigits();
+    } else {
+        if (op == OperatorType::LeftBracket) {
+            // Insert a multiplication operator if the user inputs '(' after a
+            // digit, e.g. '2' + '(' -> '2 x ('
+            // TODO this is not implemented yet
+            if (formulaState == InputDigit) {
+                formulaInsertOp(OperatorType::Multiply);
+            }
+
+            // Insert a space between last operator and the left bracket
+            // e.g. '1 x' + '(' -> '1 x ('
+            if (formulaState == InputOp) {
+                formulaGlyphs.Insert(Glyph(FontEmpty));
+            }
+        }
+        // If the first input is an operator, insert the current number as
+        // the left operand. For example, if the user inputs '+' first, it
+        // will be treated as '0 +'.
+        // if (formulaQueue.Empty()) {
+        //     formulaInsertDigits();
+        // }
     }
     // Insert a space if '1' + '+' -> '1 +'
     if (formulaState == InputDigit) {
-        formulaQueue.Enqueue(Glyph(FontEmpty));
+        if (op != OperatorType::RightBracket) {
+            formulaGlyphs.Insert(Glyph(FontEmpty));
+        }
     }
     // Insert operator glyph
     if (op == OperatorType::Modulo) {
         // Insert 'mod' for modulo operator
-        formulaQueue.Enqueue(Glyph(Font6x8M));
-        formulaQueue.Enqueue(Glyph(Font6x8O));
-        formulaQueue.Enqueue(Glyph(Font6x8D));
+        formulaGlyphs.Insert(Glyph(Font6x8M));
+        formulaGlyphs.Insert(Glyph(Font6x8O));
+        formulaGlyphs.Insert(Glyph(Font6x8D));
     } else {
-        formulaQueue.Enqueue(OpGlyph(op));
+        formulaGlyphs.Insert(OpGlyph(op));
     }
-    // Update formula glyphs from the queue
-    Glyph glyph;
-    while (formulaQueue.Dequeue(glyph)) {
-        formulaGlyphs.Insert(glyph);
-    }
-    if ((op != OperatorType::LeftBracket) && (op != OperatorType::Equal)) {
+    if ((op != OperatorType::LeftBracket) &&
+        (op != OperatorType::RightBracket) && (op != OperatorType::Equal)) {
         formulaState = InputOp;
     } else {
         formulaState = InputDigit;
@@ -209,7 +222,7 @@ FormulaPaginator::formulaInsertDigits() {
 
     if (formulaState == InputOp) {
         // Insert a space if '1 /' + '2' -> '1 / 2'
-        formulaQueue.Enqueue(Glyph(FontEmpty));
+        formulaGlyphs.Insert(Glyph(FontEmpty));
     }
 
     auto base = vm.GetNumberBase();
@@ -223,12 +236,12 @@ FormulaPaginator::formulaInsertDigits() {
         // Insert a space if the number is negative
         // e.g. '1 +' + '-2' -> '1 + -2'
         if (digits.negative) {
-            formulaQueue.Enqueue(Glyph(Font6x8Minus));
+            formulaGlyphs.Insert(Glyph(Font6x8Minus));
         }
     }
     // reverse insert digits into the queue
     for (size_t i = digits.size; i > 0; i--) {
-        formulaQueue.Enqueue(DigitGlyph(digits[i - 1]));
+        formulaGlyphs.Insert(DigitGlyph(digits[i - 1]));
     }
     formulaState = InputDigit;
 }
@@ -237,6 +250,7 @@ EventResult
 FormulaPaginator::HandleEvent(const Event &e) {
     if (e.type == NumberAcceptEvent) {
         auto number = static_cast<uint32_t>(e.data);
+        debugf("NumberAcceptEvent: 0x%X\n", number);
         if (!collectingNumber) {
             currentNumber =
                 static_cast<NumberDataType>(number & WidthMask(DWord));
@@ -250,17 +264,15 @@ FormulaPaginator::HandleEvent(const Event &e) {
         }
     } else if (e.type == OperatorAcceptEvent) {
         auto op = static_cast<OperatorType>(e.data);
+        debugf("OperatorAcceptEvent: %d\n", op);
         formulaInsertOp(op);
         notifyFormulaUpdate();
         if (op == OperatorType::Equal) {
             formulaState = Evaluated;
         }
     } else if (e.type == ClearEvent) {
-        if (formulaQueue.Empty()) {
-            formulaGlyphs.Clear();
-        } else {
-            formulaQueue.Clear();
-        }
+        formulaGlyphs.Clear();
+        formulaState = Evaluated;
 
         notifyFormulaUpdate();
 
