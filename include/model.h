@@ -43,7 +43,7 @@ static_assert(sizeof(InputEventData) <= sizeof(EventDataType),
 class FormulaModel {
   public:
     explicit FormulaModel(EventBus &eventBus)
-        : bus(eventBus), formulaTree(), inputState(InputNumber),
+        : bus(eventBus), formulaTree(), inputState(PlaceHolder),
           currentNumber(NumberZero) {}
 
     EventResult HandleEvent(const Event &e);
@@ -63,8 +63,8 @@ class FormulaModel {
     FormulaTree formulaTree;
 
     enum InputState {
-        InputNumber,
         PlaceHolder,
+        InputNumber,
     } inputState;
 
     NumberDataType currentNumber;
