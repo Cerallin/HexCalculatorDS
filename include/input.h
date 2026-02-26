@@ -93,25 +93,22 @@ struct Area8x8 {
  */
 class InputHandler {
   public:
-    InputHandler(EventBus &eventBus, Commands &commands)
-        : eventBus(eventBus), commands(commands) {}
+    InputHandler(EventBus &eventBus, Commands &commands);
+
+    void SetRepeat(int delay, int rate);
 
     void Update(void);
-
-    bool KeyDown(uint32_t k) const;
-
-    bool KeyUp(uint32_t k) const;
-
-    bool TouchDown() const;
-
-    bool TouchUp() const;
 
   private:
     EventBus &eventBus;
     Commands &commands;
 
+    uint32_t heldKeys = 0;
     uint32_t currentKeys = 0;
     uint32_t previousKeys = 0;
+
+    int repeatDelay = 20;
+    int repeatRate = 4;
 
     bool stablePressed = false;
     bool previousTouch = false;

@@ -11,6 +11,13 @@
 
 using namespace HexCalc;
 
+struct KeyRepeatState {
+    int counter = 0;
+    bool repeating = false;
+};
+
+static KeyRepeatState keyStates[32];
+
 void
 TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     switch (type) {
@@ -205,6 +212,9 @@ struct TouchInput {
     }
 };
 
+InputHandler::InputHandler(EventBus &eventBus, Commands &commands)
+    : eventBus(eventBus), commands(commands) {}
+
 void
 InputHandler::Update(void) {
     scanKeys();
@@ -236,37 +246,50 @@ InputHandler::Update(void) {
         // TODO
     } else if (input.PressedR()) {
         // TODO
-    } else if (input.Touched()) {
-        if (stablePressed) {
-            notifyTouch(smoothPos);
-        }
+    }
+
+    // handle touch input
+    if ((KeyInput{heldKeys}.Touched()) && stablePressed) {
+        notifyTouch(smoothPos);
     }
 }
 
-bool
-InputHandler::KeyDown(uint32_t k) const {
-    return (currentKeys & k) && !(previousKeys & k);
-}
-
-bool
-InputHandler::KeyUp(uint32_t k) const {
-    return !(currentKeys & k) && (previousKeys & k);
-}
-
-bool
-InputHandler::TouchDown() const {
-    return stablePressed && !previousTouch;
-}
-
-bool
-InputHandler::TouchUp() const {
-    return !stablePressed && previousTouch;
+void
+InputHandler::SetRepeat(int delay, int rate) {
+    repeatDelay = delay;
+    repeatRate = rate;
 }
 
 void
-InputHandler::updateKeys(void) {
+InputHandler::updateKeys() {
+    heldKeys = keysHeld();
+
     previousKeys = currentKeys;
-    currentKeys = keysHeld();
+    currentKeys = 0;
+
+    for (int i = 0; i < 32; ++i) {
+
+        uint32_t mask = (1u << i);
+
+        if (!(heldKeys & mask)) {
+            keyStates[i].counter = 0;
+            keyStates[i].repeating = false;
+            continue;
+        }
+
+        auto &s = keyStates[i];
+
+        if (s.counter == 0) {
+            currentKeys |= mask; // first press
+        } else if (s.counter > repeatDelay) {
+
+            if ((s.counter - repeatDelay) % repeatRate == 0) {
+                currentKeys |= mask;
+            }
+        }
+
+        s.counter++;
+    }
 }
 
 void
@@ -276,7 +299,7 @@ InputHandler::updateTouch() {
     touchPosition pos{};
     touchRead(&pos);
 
-    bool rawPressed = currentKeys & KEY_TOUCH;
+    bool rawPressed = heldKeys & KEY_TOUCH;
 
     // debounce
     if (rawPressed) {
