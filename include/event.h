@@ -34,6 +34,8 @@ enum EventType {
     UpdateBaseEvent,  // when the user changes the number base
     UpdateWidthEvent, // when the user changes the number width
     UpdateSignEvent,  // when the user changes the number sign
+    // move focus
+    MoveFocusEvent, // when the user moves focus between buttons
 };
 
 using EventDataType = int32_t;

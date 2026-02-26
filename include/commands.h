@@ -54,6 +54,11 @@ class Commands {
 
     void Clear(void);
 
+    void MoveFocusUp(void);
+    void MoveFocusDown(void);
+    void MoveFocusLeft(void);
+    void MoveFocusRight(void);
+
   private:
     EventBus &bus;
 };

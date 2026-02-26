@@ -358,13 +358,15 @@ class InputView : public SubView<InputView> {
   private:
     ViewModel &vm;
     // FIXME magic numbers
-    TouchScreenHandler<34> handler;
+    TouchScreenHandler<5, 7> handler;
     TouchButton *numberButtons[16];
     TouchButton *rightBracketButton;
 
     void handleBaseChange(void);
     void handleWidthChange(void);
     void handleSignChange(void);
+
+    TouchButton &getFocus(Point position, Direction dir);
 };
 
 }; // namespace HexCalc

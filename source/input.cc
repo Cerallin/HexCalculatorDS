@@ -225,13 +225,13 @@ InputHandler::Update(void) {
     auto input = KeyInput{currentKeys};
 
     if (input.PressedUp()) {
-        commands.SwitchBaseUpper();
+        commands.MoveFocusUp();
     } else if (input.PressedDown()) {
-        commands.SwitchBaseLower();
+        commands.MoveFocusDown();
     } else if (input.PressedLeft()) {
-        commands.SwitchWidthUpper();
+        commands.MoveFocusLeft();
     } else if (input.PressedRight()) {
-        commands.SwitchWidthLower();
+        commands.MoveFocusRight();
     } else if (input.PressedA()) {
         notifyPreviousTouch();
     } else if (input.PressedB()) {
@@ -239,15 +239,15 @@ InputHandler::Update(void) {
     } else if (input.PressedX()) {
         commands.Clear();
     } else if (input.PressedY()) {
-        commands.ToggleSign();
+        commands.SwitchWidthLower();
     } else if (input.PressedSelect()) {
-        // do nothing for now
+        commands.ToggleSign();
     } else if (input.PressedStart()) {
         commands.Evaluate();
     } else if (input.PressedL()) {
-        // do nothing for now
+        commands.SwitchBaseUpper();
     } else if (input.PressedR()) {
-        // do nothing for now
+        commands.SwitchBaseLower();
     }
 
     // handle touch input

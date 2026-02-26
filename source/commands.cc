@@ -6,6 +6,7 @@
  */
 #include "commands.h"
 #include "config.h"
+#include "input.h"
 #include "model.h"
 #include "number.h"
 
@@ -421,5 +422,41 @@ Commands::Clear(void) {
     bus.Post(Event{
         0,
         EventType::ClearEvent,
+    });
+}
+
+void
+Commands::MoveFocusUp(void) {
+    debugf("Move focus up triggered\n");
+    bus.Post(Event{
+        Direction::DirUp,
+        EventType::MoveFocusEvent,
+    });
+}
+
+void
+Commands::MoveFocusDown(void) {
+    debugf("Move focus down triggered\n");
+    bus.Post(Event{
+        Direction::DirDown,
+        EventType::MoveFocusEvent,
+    });
+}
+
+void
+Commands::MoveFocusLeft(void) {
+    debugf("Move focus left triggered\n");
+    bus.Post(Event{
+        Direction::DirLeft,
+        EventType::MoveFocusEvent,
+    });
+}
+
+void
+Commands::MoveFocusRight(void) {
+    debugf("Move focus right triggered\n");
+    bus.Post(Event{
+        Direction::DirRight,
+        EventType::MoveFocusEvent,
     });
 }

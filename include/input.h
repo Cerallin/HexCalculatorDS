@@ -11,6 +11,14 @@
 
 namespace HexCalc {
 
+enum Direction {
+    InvalidDir = 0,
+    DirUp,
+    DirDown,
+    DirLeft,
+    DirRight,
+};
+
 struct Point {
     int16_t x;
     int16_t y;
@@ -24,6 +32,32 @@ struct Point {
     int
     ToInt() const {
         return (static_cast<int>(x) << 16) | static_cast<int>(y);
+    }
+
+    constexpr Point
+    NextPosition(Direction dir) {
+        auto x = this->x;
+        auto y = this->y;
+
+        switch (dir) {
+        case Direction::DirUp:
+            y -= 1;
+            break;
+        case Direction::DirDown:
+            y += 1;
+            break;
+        case Direction::DirLeft:
+            x -= 1;
+            break;
+        case Direction::DirRight:
+            x += 1;
+            break;
+        default:
+            // should never reach here
+            break;
+        }
+
+        return Point(x, y);
     }
 };
 
@@ -159,11 +193,11 @@ enum ButtonType : uint8_t {
 class TouchButton {
   public:
     constexpr TouchButton(void)
-        : area(0, 0, 0, 0), type(ButtonInvalid), disabled(true),
-          selected(false) {}
+        : TouchButton(Area(0, 0, 0, 0), ButtonInvalid, 0, 0) {}
 
-    constexpr TouchButton(Area area, ButtonType type)
-        : area(area), type(type), disabled(false), selected(false) {}
+    constexpr TouchButton(Area area, ButtonType type, int16_t x, int16_t y)
+        : area(area), type(type), position{x, y}, disabled(false),
+          selected(false) {}
 
     /**
      * @brief Handle the touch input and execute corresponding commands if the
@@ -237,6 +271,11 @@ class TouchButton {
         return type;
     }
 
+    Point
+    Position() const {
+        return position;
+    }
+
     static void ExecuteCommand(Commands &commands, ButtonType type);
 
   private:
@@ -250,6 +289,9 @@ class TouchButton {
      * when the button is touched.
      */
     ButtonType type;
+
+    Point position;
+
     /**
      * @brief Whether the button is currently disabled. If true, the button will
      * not respond to touch inputs.
@@ -261,18 +303,25 @@ class TouchButton {
     bool selected;
 };
 
-template <size_t N>
+template <size_t M, size_t N>
 class TouchScreenHandler {
   public:
     TouchScreenHandler(Commands &commands)
-        : commands(commands), buttons(), previouslySelected(nullptr), size(0) {}
+        : commands(commands), buttons(),
+          previouslySelected(nullptr), buttonMatrix{{nullptr}}, size(0) {}
 
     TouchButton *
-    RegisterButton(const Area &area, ButtonType type) {
-        assert(size < N);
-        buttons[size++] = TouchButton(area, type);
+    RegisterButton(const Area &area, ButtonType type, int16_t m, int16_t n) {
+        assert(m >= 0 && m < M);
+        assert(n >= 0 && n < N);
+        assert(size < Capacity());
 
-        return &buttons[size - 1];
+        auto &button = buttons[size++];
+        button = TouchButton(area, type, m, n);
+
+        buttonMatrix[m][n] = &button;
+
+        return &button;
     }
 
     TouchButton &
@@ -281,23 +330,65 @@ class TouchScreenHandler {
         return buttons[index];
     }
 
+    TouchButton *
+    GetMatrix(Point position) {
+        auto m = (position.x + M) % M;
+        auto n = (position.y + N) % N;
+
+        return buttonMatrix[m][n];
+    }
+
     bool
     Handle(const Point &input) {
-        for (size_t i = 0; i < N; i++) {
-            TouchButton &button = buttons[i];
+        for (size_t i = 0; i < Capacity(); i++) {
+            auto &button = buttons[i];
             if (button.Active() && button.ResponsibleFor(input)) {
                 button.ExecuteCommand(commands, button.Type());
-                if (previouslySelected) {
-                    previouslySelected->Unselect();
-                }
-                button.MarkSelected();
-                previouslySelected = &button;
+                ChangeFocus(&button);
                 return true;
             }
         }
 
-        previouslySelected = nullptr;
+        ChangeFocus(nullptr);
         return false;
+    }
+
+    TouchButton *
+    FocusedButton() {
+        return previouslySelected;
+    }
+
+    void
+    ChangeFocus(TouchButton *button) {
+        if (previouslySelected != nullptr) {
+            previouslySelected->Unselect();
+        }
+        if (button != nullptr) {
+            button->MarkSelected();
+        }
+        previouslySelected = button;
+    }
+
+    Point
+    NavigateFocus(Point position, Direction dir) {
+        Point nextPos = position.NextPosition(dir);
+
+        auto *button = GetMatrix(nextPos);
+
+        // this must be under '+'
+        if (button == nullptr) {
+            nextPos = nextPos.NextPosition(DirUp);
+        }
+        // skip width and sign drawers
+        if (((nextPos.x == 3) || (nextPos.x == 4)) && (nextPos.y == 0)) {
+            nextPos = nextPos.NextPosition(DirDown);
+        }
+        // skip evaluate button
+        if (nextPos.x == 4 && nextPos.y == 6) {
+            nextPos = nextPos.NextPosition(dir);
+        }
+
+        return nextPos;
     }
 
     void
@@ -313,11 +404,19 @@ class TouchScreenHandler {
         return size;
     }
 
+    static constexpr size_t Width = M;
+    static constexpr size_t Height = N;
+
+    static constexpr size_t
+    Capacity() {
+        return (M * N);
+    }
+
   private:
     Commands &commands;
-    TouchButton buttons[N];
+    TouchButton buttons[Capacity()];
+    TouchButton *buttonMatrix[M][N];
     TouchButton *previouslySelected;
     size_t size;
 };
-
 }; // namespace HexCalc
