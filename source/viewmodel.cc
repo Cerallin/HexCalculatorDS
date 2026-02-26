@@ -205,11 +205,12 @@ FormulaPaginator::formulaInsertOp(OperatorType op) {
     } else {
         formulaGlyphs.Insert(OpGlyph(op));
     }
-    if ((op != OperatorType::LeftBracket) &&
-        (op != OperatorType::RightBracket) && (op != OperatorType::Equal)) {
-        formulaState = InputOp;
-    } else {
+    if (op == OperatorType::LeftBracket) {
+        formulaState = InputBracket;
+    } else if (op == OperatorType::RightBracket) {
         formulaState = InputDigit;
+    } else {
+        formulaState = InputOp;
     }
     notifyFormulaUpdate();
 }

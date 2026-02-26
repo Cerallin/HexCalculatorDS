@@ -125,6 +125,7 @@ class FormulaPaginator {
         Evaluated,
         InputOp,
         InputDigit,
+        InputBracket,
     } formulaState;
 
     NumberDataType currentNumber;
