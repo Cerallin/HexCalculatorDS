@@ -7,6 +7,8 @@
 #include "input.h"
 #include "commands.h"
 
+#include <nds.h>
+
 using namespace HexCalc;
 
 void
@@ -119,6 +121,90 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     }
 }
 
+struct KeyInput {
+    uint32_t keys;
+
+    bool
+    Active(void) const {
+        return keys != 0;
+    }
+
+    bool
+    PressedUp(void) const {
+        return keys & KEY_UP;
+    }
+
+    bool
+    PressedDown(void) const {
+        return keys & KEY_DOWN;
+    }
+
+    bool
+    PressedLeft(void) const {
+        return keys & KEY_LEFT;
+    }
+
+    bool
+    PressedRight(void) const {
+        return keys & KEY_RIGHT;
+    }
+
+    bool
+    PressedA(void) const {
+        return keys & KEY_A;
+    }
+
+    bool
+    PressedB(void) const {
+        return keys & KEY_B;
+    }
+
+    bool
+    PressedSelect(void) const {
+        return keys & KEY_SELECT;
+    }
+
+    bool
+    PressedX(void) const {
+        return keys & KEY_X;
+    }
+
+    bool
+    PressedY(void) const {
+        return keys & KEY_Y;
+    }
+
+    bool
+    PressedL(void) const {
+        return keys & KEY_L;
+    }
+
+    bool
+    PressedR(void) const {
+        return keys & KEY_R;
+    }
+
+    bool
+    PressedStart(void) const {
+        return keys & KEY_START;
+    }
+
+    bool
+    Touched(void) const {
+        return keys & KEY_TOUCH;
+    }
+};
+
+struct TouchInput {
+    Point point;
+    bool pressed;
+
+    bool
+    Active(void) const {
+        return pressed;
+    }
+};
+
 void
 InputHandler::Update(void) {
     scanKeys();
@@ -126,8 +212,35 @@ InputHandler::Update(void) {
     updateKeys();
     updateTouch();
 
-    handleKeyInput(KeyInput{currentKeys});
-    handleTouchInput(TouchInput{smoothPos, stablePressed});
+    auto input = KeyInput{currentKeys};
+
+    if (input.PressedUp()) {
+        commands.SwitchBaseUpper();
+    } else if (input.PressedDown()) {
+        commands.SwitchBaseLower();
+    } else if (input.PressedLeft()) {
+        // do nothing for now
+    } else if (input.PressedRight()) {
+        // do nothing for now
+    } else if (input.PressedA()) {
+        // TODO input previous selected button
+    } else if (input.PressedB()) {
+        commands.InputOperatorBackspace();
+    } else if (input.PressedX()) {
+        commands.Clear();
+    } else if (input.PressedY()) {
+        // TODO switch width?
+    } else if (input.PressedStart()) {
+        commands.Evaluate();
+    } else if (input.PressedL()) {
+        // TODO
+    } else if (input.PressedR()) {
+        // TODO
+    } else if (input.Touched()) {
+        if (stablePressed) {
+            notifyTouch(smoothPos);
+        }
+    }
 }
 
 bool
@@ -195,38 +308,9 @@ InputHandler::updateTouch() {
 }
 
 void
-InputHandler::handleKeyInput(const KeyInput &input) {
-    if (input.PressedUp()) {
-        commands.SwitchBaseUpper();
-    } else if (input.PressedDown()) {
-        commands.SwitchBaseLower();
-    } else if (input.PressedLeft()) {
-        // do nothing for now
-    } else if (input.PressedRight()) {
-        // do nothing for now
-    } else if (input.PressedA()) {
-        // TODO input previous selected button
-    } else if (input.PressedB()) {
-        commands.InputOperatorBackspace();
-    } else if (input.PressedX()) {
-        commands.Clear();
-    } else if (input.PressedY()) {
-        // TODO switch width
-    } else if (input.PressedStart()) {
-        commands.Evaluate();
-    } else if (input.PressedL()) {
-        // TODO
-    } else if (input.PressedR()) {
-        // TODO
-    }
-}
-
-void
-InputHandler::handleTouchInput(const TouchInput &input) {
-    if (TouchDown()) {
-        eventBus.Post(Event{
-            .data = input.point.ToInt(),
-            .type = TouchScreenEvent,
-        });
-    }
+InputHandler::notifyTouch(const Point &pos) {
+    eventBus.Post(Event{
+        .data = pos.ToInt(),
+        .type = TouchScreenEvent,
+    });
 }

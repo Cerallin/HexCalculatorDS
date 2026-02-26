@@ -17,10 +17,6 @@ struct Point {
 
     constexpr Point(int16_t px, int16_t py) : x(px), y(py) {}
 
-    constexpr Point(touchPosition touchPosition)
-        : x(static_cast<int16_t>(touchPosition.px)),
-          y(static_cast<int16_t>(touchPosition.py)) {}
-
     constexpr Point(int data)
         : x(static_cast<int16_t>(data >> 16)),
           y(static_cast<int16_t>(data & 0xFFFF)) {}
@@ -90,85 +86,6 @@ struct Area8x8 {
     static constexpr uint8_t lineHeight = 2;
 };
 
-struct KeyInput {
-    uint32_t keys;
-
-    bool
-    Active(void) const {
-        return keys != 0;
-    }
-
-    bool
-    PressedUp(void) const {
-        return keys & KEY_UP;
-    }
-
-    bool
-    PressedDown(void) const {
-        return keys & KEY_DOWN;
-    }
-
-    bool
-    PressedLeft(void) const {
-        return keys & KEY_LEFT;
-    }
-
-    bool
-    PressedRight(void) const {
-        return keys & KEY_RIGHT;
-    }
-
-    bool
-    PressedA(void) const {
-        return keys & KEY_A;
-    }
-
-    bool
-    PressedB(void) const {
-        return keys & KEY_B;
-    }
-
-    bool
-    PressedSelect(void) const {
-        return keys & KEY_SELECT;
-    }
-
-    bool
-    PressedX(void) const {
-        return keys & KEY_X;
-    }
-
-    bool
-    PressedY(void) const {
-        return keys & KEY_Y;
-    }
-
-    bool
-    PressedL(void) const {
-        return keys & KEY_L;
-    }
-
-    bool
-    PressedR(void) const {
-        return keys & KEY_R;
-    }
-
-    bool
-    PressedStart(void) const {
-        return keys & KEY_START;
-    }
-};
-
-struct TouchInput {
-    Point point;
-    bool pressed;
-
-    bool
-    Active(void) const {
-        return pressed;
-    }
-};
-
 /**
  * @brief The InputHandler class is for reading inputs from the keys and the
  * touch screen.
@@ -210,8 +127,7 @@ class InputHandler {
     void updateKeys(void);
     void updateTouch();
 
-    void handleKeyInput(const KeyInput &input);
-    void handleTouchInput(const TouchInput &input);
+    void notifyTouch(const Point &pos);
 };
 
 enum ButtonType : uint8_t {

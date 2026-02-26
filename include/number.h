@@ -161,7 +161,7 @@ class Number {
             // check the sign bit
             bool negative;
             if (width < 64) {
-                negative = ((v & BIT(width - 1)) != 0);
+                negative = ((v & (uint64_t(1) << (width - 1))) != 0);
                 if (negative) {
                     v = (v ^ widthMask) + 1;
                     v &= widthMask;

@@ -8,9 +8,20 @@
 #include "viewhost.h"
 #include "viewmodel.h"
 
+#if (_LIBNDS_MAJOR_ == 2)
+#error "This project is not compatable to libnds v2.0.0+!"
+#endif
+
+static inline void
+debugInit(void) {
+#ifndef NDEBUG
+    consoleDebugInit(DebugDevice_NOCASH);
+#endif
+}
+
 int
 main(void) {
-    // debug
+    // debug console
     debugInit();
 
     HexCalc::EventBus eventBus;

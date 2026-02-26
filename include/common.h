@@ -16,19 +16,6 @@
 #include <cstring>
 #include <type_traits>
 
-#include <nds.h>
-
-#if (_LIBNDS_MAJOR_ == 2)
-#error "This project is not compatable to libnds v2.0.0+!"
-#endif
-
-static inline void
-debugInit(void) {
-#ifndef NDEBUG
-    consoleDebugInit(DebugDevice_NOCASH);
-#endif
-}
-
 static inline int
 debugf(const char *fmt, ...) {
     int result = 0;

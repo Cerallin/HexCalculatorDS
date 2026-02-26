@@ -12,8 +12,6 @@
 #include "subFont.h"
 #include "subscreenImage.h"
 
-#include <array>
-
 using namespace HexCalc;
 
 static constexpr int VRAM_C_SIZE = 128 * 1024;    // 128 Kb

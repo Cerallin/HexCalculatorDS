@@ -11,8 +11,6 @@
 #include "layer.h"
 #include "traits.h"
 
-#include <type_traits>
-
 namespace HexCalc {
 template <class Derived, typename DisplayType, size_t BorderWidth,
           size_t BorderHeight, size_t TextCount, size_t TextGlyphCount>

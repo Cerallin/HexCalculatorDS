@@ -9,8 +9,6 @@
 #include "number.h"
 #include "operator.h"
 
-#include <iterator>
-
 namespace HexCalc {
 
 using FontType = uint8_t;

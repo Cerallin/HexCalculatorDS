@@ -11,6 +11,8 @@
 #include "format.h"
 #include "model.h"
 
+#include <nds.h>
+
 namespace HexCalc {
 
 class ViewModel;

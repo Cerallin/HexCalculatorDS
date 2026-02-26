@@ -10,6 +10,8 @@
 #include "display.h"
 #include "font.h"
 
+#include <nds.h>
+
 namespace HexCalc {
 
 class MainDisplay;

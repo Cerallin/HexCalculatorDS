@@ -11,7 +11,6 @@
 #include "event.h"
 #include "format.h"
 #include "input.h"
-#include "model.h"
 #include "viewmodel.h"
 
 namespace HexCalc {
