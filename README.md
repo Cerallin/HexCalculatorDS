@@ -4,7 +4,7 @@
 [![test](https://github.com/Cerallin/HexCalculatorDS/actions/workflows/test.yml/badge.svg)](https://github.com/Cerallin/HexCalculatorDS/actions/workflows/test.yml)
 [![publish-container](https://github.com/Cerallin/HexCalculatorDS/actions/workflows/publish-container.yml/badge.svg)](https://github.com/Cerallin/HexCalculatorDS/actions/workflows/publish-container.yml)
 [![release](https://img.shields.io/github/v/release/Cerallin/HexCalculatorDS?include_prereleases)](https://github.com/Cerallin/HexCalculatorDS/releases)
-[![license](https://img.shields.io/github/license/Cerallin/HexCalculatorDS)](https://github.com/Cerallin/HexCalculatorDS/blob/main/LICENSE)
+[![license](https://img.shields.io/github/license/Cerallin/HexCalculatorDS)](https://github.com/Cerallin/HexCalculatorDS/blob/master/LICENSE)
 
 An integer calculator for Nintendo DS.
 
