@@ -55,36 +55,26 @@ struct Area {
         : x(px), y(py), w(width), h(height) {}
 };
 
+template <int8_t W, int8_t H, uint8_t L>
+struct CharArea {
+    int8_t x;
+    int8_t y;
+    uint8_t w;
+    uint8_t h;
+
+    explicit CharArea(Area area)
+        : x(area.x / W), y(area.y / H), w(area.w / W), h(area.h / (L * H)) {}
+
+    static constexpr uint8_t lineHeight = L;
+};
+
 /**
  * @brief Area space for 6x8 font glyphs. Each unit corresponds to a 6x8 pixel
  * area on the screen, which is the size of a single glyph.
  *
  */
-struct Area6x8 {
-    int8_t x;
-    int8_t y;
-    uint8_t w;
-    uint8_t h;
-
-    explicit Area6x8(Area area)
-        : x(area.x / 6), y(area.y / 8), w(area.w / 6),
-          h(area.h / (lineHeight * 8)) {}
-
-    static constexpr uint8_t lineHeight = 2;
-};
-
-struct Area8x8 {
-    int8_t x;
-    int8_t y;
-    uint8_t w;
-    uint8_t h;
-
-    explicit Area8x8(Area area)
-        : x(area.x / 8), y(area.y / 8), w(area.w / 8),
-          h(area.h / (lineHeight * 8)) {}
-
-    static constexpr uint8_t lineHeight = 2;
-};
+using Area6x8 = CharArea<6, 8, 2>;
+using Area8x8 = CharArea<8, 8, 2>;
 
 /**
  * @brief The InputHandler class is for reading inputs from the keys and the
