@@ -222,38 +222,8 @@ InputHandler::Update(void) {
     updateKeys();
     updateTouch();
 
-    auto input = KeyInput{currentKeys};
-
-    if (input.PressedUp()) {
-        commands.MoveFocusUp();
-    } else if (input.PressedDown()) {
-        commands.MoveFocusDown();
-    } else if (input.PressedLeft()) {
-        commands.MoveFocusLeft();
-    } else if (input.PressedRight()) {
-        commands.MoveFocusRight();
-    } else if (input.PressedA()) {
-        notifyPreviousTouch();
-    } else if (input.PressedB()) {
-        commands.InputOperatorBackspace();
-    } else if (input.PressedX()) {
-        commands.Clear();
-    } else if (input.PressedY()) {
-        commands.SwitchWidthLower();
-    } else if (input.PressedSelect()) {
-        commands.ToggleSign();
-    } else if (input.PressedStart()) {
-        commands.Evaluate();
-    } else if (input.PressedL()) {
-        commands.SwitchBaseUpper();
-    } else if (input.PressedR()) {
-        commands.SwitchBaseLower();
-    }
-
-    // handle touch input
-    if ((KeyInput{heldKeys}.Touched()) && stablePressed) {
-        notifyTouch(smoothPos);
-    }
+    handleKeyInput();
+    handleTouchInput();
 }
 
 void
@@ -329,6 +299,46 @@ InputHandler::updateTouch() {
             smoothPos.x = (smoothPos.x + pos.px) / 2;
             smoothPos.y = (smoothPos.y + pos.py) / 2;
         }
+    }
+}
+
+void
+InputHandler::handleKeyInput(void) {
+    auto keys = KeyInput{currentKeys};
+
+    if (keys.PressedUp()) {
+        commands.MoveFocusUp();
+    } else if (keys.PressedDown()) {
+        commands.MoveFocusDown();
+    } else if (keys.PressedLeft()) {
+        commands.MoveFocusLeft();
+    } else if (keys.PressedRight()) {
+        commands.MoveFocusRight();
+    } else if (keys.PressedA()) {
+        notifyPreviousTouch();
+    } else if (keys.PressedB()) {
+        commands.InputOperatorBackspace();
+    } else if (keys.PressedX()) {
+        commands.Clear();
+    } else if (keys.PressedY()) {
+        commands.SwitchWidthLower();
+    } else if (keys.PressedSelect()) {
+        commands.ToggleSign();
+    } else if (keys.PressedStart()) {
+        commands.Evaluate();
+    } else if (keys.PressedL()) {
+        commands.SwitchBaseUpper();
+    } else if (keys.PressedR()) {
+        commands.SwitchBaseLower();
+    }
+}
+
+void
+InputHandler::handleTouchInput(void) {
+    auto keys = KeyInput{heldKeys};
+
+    if (keys.Touched() && stablePressed) {
+        notifyTouch(smoothPos);
     }
 }
 

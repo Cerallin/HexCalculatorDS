@@ -148,6 +148,9 @@ class InputHandler {
     void updateKeys(void);
     void updateTouch();
 
+    void handleKeyInput(void);
+    void handleTouchInput(void);
+
     void notifyTouch(const Point &pos);
     void notifyPreviousTouch();
 };
