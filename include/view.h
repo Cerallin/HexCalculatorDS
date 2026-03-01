@@ -237,11 +237,11 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
 
     EventResult
     HandleEvent(const Event &e) {
-        if ((e.type == EventType::UpdateBaseEvent) ||
-            (e.type == EventType::ClearEvent)) {
-            return handleBaseChanged();
-        } else if (e.type == EventType::ValueChangedEvent) {
-            return handleValueChanged();
+        if (e.type == EventType::ValueChangedEvent) {
+            BasicView<TranscodeView<base>, MainDisplay>::markDirty();
+            debugf("TranscodeView(%d) refreshed\n", static_cast<int>(base));
+            printNumber();
+            return Consumed;
         }
 
         return Skipped;
@@ -311,26 +311,8 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
 
     static constexpr HeaderGlyphArray6x8 header = MakeHeader();
 
-    static constexpr int barOffsetX = 2;
-
     ViewModel &vm;
     bool selected;
-
-    /**
-     * @brief Handle UpdateBase Event.
-     *
-     * @return EventResult Consumed if the event is handled and the view needs
-     * to be updated, Skipped if the event is not relevant to this view.
-     */
-    EventResult handleBaseChanged(void);
-
-    /**
-     * @brief Handle ValueChanged Event.
-     *
-     * @return EventResult Consumed if the event is handled and the view needs
-     * to be updated, Skipped if the event is not relevant to this view.
-     */
-    EventResult handleValueChanged(void);
 
     void printHeader(void) const;
     void printNumber(void) const;
@@ -340,6 +322,32 @@ using HexView = TranscodeView<Hexadecimal>;
 using DecView = TranscodeView<Decimal>;
 using OctView = TranscodeView<Octal>;
 using BinView = TranscodeView<Binary>;
+
+class IndicatorView : public MainView<IndicatorView, AlignLeft> {
+  public:
+    static constexpr auto TileHeight = MainDisplay::TileHeight;
+    static constexpr auto TileWidth = MainDisplay::TileWidth;
+
+    IndicatorView(MainDisplay &display, ViewModel &vm)
+        : MainView(Area(barOffsetX, indicatorAreaY, TileWidth,
+                        indicatorAreaHeight * TileHeight),
+                   display),
+          vm(vm), currentBase(vm.GetNumberBase()) {}
+
+    EventResult HandleEvent(const Event &e);
+
+    void ForceUpdate(void);
+
+  private:
+    static constexpr int16_t barOffsetX = 2;
+    static constexpr int16_t indicatorAreaY = 8 * TileHeight;
+    static constexpr int16_t indicatorAreaHeight = 15;
+
+    ViewModel &vm;
+    NumberBase currentBase;
+
+    int16_t getIndicatorY(NumberBase base) const;
+};
 
 template <class Derived>
 class SubView : public BasicView<Derived, SubDisplay> {

@@ -13,7 +13,7 @@ ViewHost::ViewHost(ViewModel &viewModel)
       formulaView(mainDisplay, viewModel), valueView(mainDisplay, viewModel),
       hexView(mainDisplay, viewModel), decView(mainDisplay, viewModel),
       octView(mainDisplay, viewModel), binView(mainDisplay, viewModel),
-      inputView(subDisplay, viewModel) {
+      indicatorView(mainDisplay, viewModel), inputView(subDisplay, viewModel) {
     RegisterViews(viewModel);
 }
 
@@ -28,6 +28,7 @@ ViewHost::RegisterViews(ViewModel &viewModel) {
     bus.Subscribe(decView);
     bus.Subscribe(octView);
     bus.Subscribe(binView);
+    bus.Subscribe(indicatorView);
     bus.Subscribe(inputView);
 }
 
@@ -41,6 +42,7 @@ ViewHost::Update(void) {
     decView.Update();
     octView.Update();
     binView.Update();
+    indicatorView.Update();
     inputView.Update();
 
     // Must be called once per frame --said by libnds

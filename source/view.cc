@@ -393,48 +393,76 @@ ValueView::ForceUpdate(void) {
     }
 }
 
-template <NumberBase base>
 EventResult
-TranscodeView<base>::handleBaseChanged(void) {
-    if (base != vm.GetNumberBase()) {
-        return Skipped;
+IndicatorView::HandleEvent(const Event &e) {
+    if (e.type == EventType::UpdateBaseEvent) {
+        auto nextBase = vm.GetNumberBase();
+        if (nextBase == currentBase) {
+            return Skipped;
+        }
+
+        BasicView::markDirty();
+        return Consumed;
     }
 
-    auto &viewArea = this->viewArea;
-    BasicView<TranscodeView<base>, MainDisplay>::markDirty();
-    debugf("TranscodeView(%d) base changed\n", static_cast<int>(base));
-
-    // Clear indicator Area
-    // FIXME create a new view for the indicator bar
-    constexpr size_t indicatorAreaY = 8 * MainDisplay::TileHeight;
-    constexpr size_t indicatorAreaHeight = 15;
-    for (size_t j = 0; j < indicatorAreaHeight; j++) {
-        this->display.template PutTile(
-            barOffsetX, indicatorAreaY + (j * TileHeight), FontEmpty);
-    }
-
-    // Draw the indicator bar
-    Area6x8 area(viewArea);
-    auto middleH = (area.y + (area.h / 2)) * CharHeight;
-    if constexpr (base == Binary) {
-        middleH += CharHeight;
-    }
-    for (size_t i = 0; i < BarTileCount; i++) {
-        this->display.template PutTile(barOffsetX + viewArea.x,
-                                       middleH + i * TileHeight, BarTiles[i]);
-    }
-
-    return Consumed;
+    return Skipped;
 }
 
-template <NumberBase base>
-EventResult
-TranscodeView<base>::handleValueChanged(void) {
-    BasicView<TranscodeView<base>, MainDisplay>::markDirty();
-    debugf("TranscodeView(%d) refreshed\n", static_cast<int>(base));
-    // TODO render transcoded value to glyphs
-    printNumber();
-    return Consumed;
+void
+IndicatorView::ForceUpdate(void) {
+    debugf("IndicatorView refreshed\n");
+
+    auto previousY = getIndicatorY(currentBase);
+    for (size_t i = 0; i < BarTileCount; i++) {
+        this->display.PutTile(viewArea.x, previousY + i * TileHeight,
+                              FontEmpty);
+    }
+
+    auto nextBase = vm.GetNumberBase();
+    auto indicatorY = getIndicatorY(nextBase);
+    for (size_t i = 0; i < BarTileCount; i++) {
+        this->display.PutTile(viewArea.x, indicatorY + i * TileHeight,
+                              BarTiles[i]);
+    }
+
+    currentBase = nextBase;
+}
+
+int16_t
+IndicatorView::getIndicatorY(NumberBase base) const {
+    int16_t line = HexView::line;
+    int16_t height = HexView::height;
+
+    switch (base) {
+    case Hexadecimal:
+        line = HexView::line;
+        height = HexView::height;
+        break;
+    case Decimal:
+        line = DecView::line;
+        height = DecView::height;
+        break;
+    case Octal:
+        line = OctView::line;
+        height = OctView::height;
+        break;
+    case Binary:
+        line = BinView::line;
+        height = BinView::height;
+        break;
+    default:
+        break;
+    }
+
+    Area baseArea(0, line * HexView::TileHeight,
+                  HexView::lineWidth * HexView::TileWidth,
+                  height * HexView::TileHeight);
+    Area6x8 area(baseArea);
+    auto middleY = (area.y + (area.h / 2)) * HexView::CharHeight;
+    if (base == Binary) {
+        middleY += HexView::CharHeight;
+    }
+    return middleY;
 }
 
 template <NumberBase base>
@@ -491,7 +519,6 @@ template <>
 void
 TranscodeView<Hexadecimal>::ForceUpdate(void) {
     debugf("HexView refreshed\n");
-    handleBaseChanged();
     printHeader();
     printNumber();
 }
@@ -500,7 +527,6 @@ template <>
 void
 TranscodeView<Decimal>::ForceUpdate(void) {
     debugf("DecView refreshed\n");
-    handleBaseChanged();
     printHeader();
     printNumber();
 }
@@ -509,7 +535,6 @@ template <>
 void
 TranscodeView<Octal>::ForceUpdate(void) {
     debugf("OctView refreshed\n");
-    handleBaseChanged();
     printHeader();
     printNumber();
 }
@@ -518,7 +543,6 @@ template <>
 void
 TranscodeView<Binary>::ForceUpdate(void) {
     debugf("BinView refreshed\n");
-    handleBaseChanged();
     printHeader();
     printNumber();
 }

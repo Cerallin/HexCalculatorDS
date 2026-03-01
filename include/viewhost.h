@@ -38,6 +38,7 @@ class ViewHost : private NonCopyable {
     TranscodeView<Decimal> decView;
     TranscodeView<Octal> octView;
     TranscodeView<Binary> binView;
+    IndicatorView indicatorView;
     InputView inputView;
 };
 

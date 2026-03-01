@@ -63,9 +63,8 @@ FormulaModel::HandleEvent(const Event &e) {
         auto oldValue = currentNumber;
         currentNumber &= WidthMask(config.Width());
         if (currentNumber != oldValue) {
-            notifyValueChange();
+            valueChanged = true;
         }
-        valueChanged = true;
     } else {
         // Skip unhandled event type
         return Skipped;
