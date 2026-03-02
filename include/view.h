@@ -370,6 +370,8 @@ class InputView : public SubView<InputView> {
     TouchButton *numberButtons[16];
     TouchButton *rightBracketButton;
 
+    int leftBracketCount;
+
     void handleBaseChange(void);
     void handleWidthChange(void);
     void handleSignChange(void);

@@ -10,7 +10,7 @@
 using namespace HexCalc;
 
 InputView::InputView(SubDisplay &display, ViewModel &vm)
-    : SubView(display), vm(vm), handler(vm.Cmds()) {
+    : SubView(display), vm(vm), handler(vm.Cmds()), leftBracketCount(0) {
     // Ordered by button position, left to right then top to bottom
     auto buttonAnd =
         handler.RegisterButton(Area(AREA_0_X, AREA_0_Y, AREA_0_W, AREA_0_H),
@@ -134,6 +134,9 @@ InputView::InputView(SubDisplay &display, ViewModel &vm)
     numberButtons[0x0F] = buttonF;
 
     rightBracketButton = buttonRBrac;
+    // Initially disable right bracket button since there is no left bracket in
+    // the formula
+    rightBracketButton->Disable();
 
     handleBaseChange();
 }
@@ -185,6 +188,24 @@ InputView::HandleEvent(const Event &e) {
         BasicView::markDirty();
 
         return Consumed;
+    } else if (e.type == EventType::OperatorAcceptEvent) {
+        auto newLeftBracketCount = vm.GetLeftBracketCount();
+        if (newLeftBracketCount != leftBracketCount) {
+            leftBracketCount = newLeftBracketCount;
+            // Update right bracket button state
+            if (leftBracketCount <= 0) {
+                rightBracketButton->Disable();
+            } else {
+                rightBracketButton->Enable();
+            }
+            // TODO show number on left bracket button
+
+            BasicView::markDirty();
+
+            return Consumed;
+        }
+
+        return Skipped;
     }
 
     return Skipped;
