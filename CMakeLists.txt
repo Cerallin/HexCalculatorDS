@@ -165,9 +165,8 @@ find_program(NDSTOOL ndstool REQUIRED)
 
 set(NDS_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.nds)
 
-set(GAME_TITLE "Hex Calculator")
-set(GAME_SUBTITLE1 "c 2026")
-set(GAME_SUBTITLE2 "Cerallin")
+set(GAME_TITLE "HexCalcDS")
+set(GAME_AUTHOR "Cerallin")
 set(GAME_ICON ${CMAKE_SOURCE_DIR}/design/HexCalculatorDS-icon.bmp)
 
 add_custom_command(
@@ -175,8 +174,8 @@ add_custom_command(
     COMMAND ${NDSTOOL}
         -c ${NDS_FILE}
         -9 $<TARGET_FILE:${PROJECT_NAME}.elf>
-        -b ${GAME_ICON}
-        "${GAME_TITLE}\;${GAME_SUBTITLE1}\;${GAME_SUBTITLE2}"
+        -b ${GAME_ICON} "${GAME_TITLE}\;${GAME_AUTHOR}"
+        -g CALC
     DEPENDS ${PROJECT_NAME}.elf
     COMMENT "Generating NDS ROM"
 )
