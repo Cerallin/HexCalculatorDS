@@ -106,6 +106,11 @@ class FormulaManager {
         return formulaGlyphs.Size();
     }
 
+    int
+    GetLeftBracketCount() const {
+        return leftBracketCount;
+    }
+
   private:
     EventBus &eventBus;
 
@@ -203,6 +208,11 @@ class ViewModel : private NonCopyable {
     const auto
     GetFormulaGlyphs() const {
         return formulaManager.GetFormulaGlyphs();
+    }
+
+    auto
+    GetLeftBracketCount() const {
+        return formulaManager.GetLeftBracketCount();
     }
 
   private:
