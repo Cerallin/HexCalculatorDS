@@ -19,10 +19,10 @@ ViewModel::ViewModel(EventBus &eventBus, Commands &commands)
       // models
       formulaModel(eventBus),
       // managers
-      valueManager(formulaModel), formulaPaginator(eventBus, valueManager) {
+      valueManager(formulaModel), formulaManager(eventBus, valueManager) {
     eventBus.Subscribe(config);
     // must subscribe before subscribing formulaModel
-    eventBus.Subscribe(formulaPaginator);
+    eventBus.Subscribe(formulaManager);
     eventBus.Subscribe(formulaModel);
 }
 
@@ -47,7 +47,7 @@ ValueManager::GetNumberBase(void) const {
 }
 
 void
-FormulaPaginator::notifyFormulaUpdate(void) {
+FormulaManager::notifyFormulaUpdate(void) {
     eventBus.Post(Event{
         0,
         EventType::FormulaUpdatedEvent,
@@ -127,7 +127,7 @@ DigitGlyph(Digit digit) {
 }
 
 void
-FormulaPaginator::formulaInsertOp(OperatorType op) {
+FormulaManager::formulaInsertOp(OperatorType op) {
     if (formulaState == Evaluated) {
         formulaGlyphs.Clear();
     } else {
@@ -161,10 +161,13 @@ FormulaPaginator::formulaInsertOp(OperatorType op) {
     } else {
         formulaGlyphs.Insert(OpGlyph(op));
     }
+    // Set formula state
     if (op == OperatorType::LeftBracket) {
         formulaState = InputBracket;
+        leftBracketCount++;
     } else if (op == OperatorType::RightBracket) {
         formulaState = InputDigit;
+        leftBracketCount--;
     } else {
         formulaState = InputOp;
     }
@@ -172,7 +175,7 @@ FormulaPaginator::formulaInsertOp(OperatorType op) {
 }
 
 void
-FormulaPaginator::formulaInsertDigits() {
+FormulaManager::formulaInsertDigits() {
     if (formulaState == Evaluated) {
         formulaGlyphs.Clear();
     }
@@ -204,7 +207,7 @@ FormulaPaginator::formulaInsertDigits() {
 }
 
 EventResult
-FormulaPaginator::HandleEvent(const Event &e) {
+FormulaManager::HandleEvent(const Event &e) {
     if (e.type == NumberAcceptEvent) {
         auto number = static_cast<uint32_t>(e.data);
         debugf("NumberAcceptEvent: 0x%X\n", number);
@@ -222,11 +225,22 @@ FormulaPaginator::HandleEvent(const Event &e) {
     } else if (e.type == OperatorAcceptEvent) {
         auto op = static_cast<OperatorType>(e.data);
         debugf("OperatorAcceptEvent: %d\n", op);
+        // insert ')'s before inserting '=' if there are unclosed left brackets,
+        // e.g. '(1 + 0' + '=' -> '(1 + 0)'
+        if (op == OperatorType::Equal) {
+            while (leftBracketCount > 0) {
+                // leftBracketCount will be decremented in formulaInsertOp when
+                // inserting right bracket, so we do not need to decrement it
+                // here.
+                formulaInsertOp(OperatorType::RightBracket);
+            }
+        }
         formulaInsertOp(op);
-        notifyFormulaUpdate();
+        // must after '=' is inserted
         if (op == OperatorType::Equal) {
             formulaState = Evaluated;
         }
+        notifyFormulaUpdate();
     } else if (e.type == ClearEvent) {
         formulaGlyphs.Clear();
         formulaState = Evaluated;

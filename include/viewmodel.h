@@ -59,11 +59,12 @@ class ValueManager {
     FormulaModel &formulaModel;
 };
 
-class FormulaPaginator {
+class FormulaManager {
   public:
-    FormulaPaginator(EventBus &eventBus, ValueManager &vm)
+    FormulaManager(EventBus &eventBus, ValueManager &vm)
         : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaState(Evaluated),
-          currentNumber(NumberZero), collectingNumber(false) {}
+          currentNumber(NumberZero), leftBracketCount(0),
+          collectingNumber(false) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -131,6 +132,12 @@ class FormulaPaginator {
 
     NumberDataType currentNumber;
 
+    /**
+     * @brief Count unclosed left brackets.
+     *
+     */
+    int leftBracketCount;
+
     bool collectingNumber;
 
     void notifyFormulaUpdate(void);
@@ -195,7 +202,7 @@ class ViewModel : private NonCopyable {
 
     const auto
     GetFormulaGlyphs() const {
-        return formulaPaginator.GetFormulaGlyphs();
+        return formulaManager.GetFormulaGlyphs();
     }
 
   private:
@@ -227,7 +234,7 @@ class ViewModel : private NonCopyable {
      * @brief Manager for formula glyphs
      *
      */
-    FormulaPaginator formulaPaginator;
+    FormulaManager formulaManager;
 };
 
 }; // namespace HexCalc
