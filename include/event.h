@@ -66,7 +66,7 @@ class EventListener {
   public:
     using Handler = EventResult (*)(void *, const Event &);
 
-    EventListener() : context(nullptr), handler(nullptr) {}
+    EventListener(void) : context(nullptr), handler(nullptr) {}
 
     template <typename T>
     static EventListener
@@ -109,7 +109,7 @@ class EventListener {
 template <size_t ListenerCapacity, size_t QueueCapacity>
 class EventDispatcher : NonCopyable {
   public:
-    EventDispatcher() : eventQueue(), listeners(), listenerCount(0) {}
+    EventDispatcher(void) : eventQueue(), listeners(), listenerCount(0) {}
 
     /**
      * @brief Publish an event to all subscribed listeners.

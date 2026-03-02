@@ -18,7 +18,7 @@
 template <typename T, size_t N>
 class CircularQueue : public NonCopyable {
   public:
-    CircularQueue() : head(0), tail(0), size(0) {}
+    CircularQueue(void) : head(0), tail(0), size(0) {}
 
     /**
      * @brief Enqueue an element into the queue.
@@ -62,7 +62,7 @@ class CircularQueue : public NonCopyable {
      * @return true if the queue is empty, otherwise returns false.
      */
     bool
-    Empty() const {
+    Empty(void) const {
         return size == 0;
     }
 
@@ -72,7 +72,7 @@ class CircularQueue : public NonCopyable {
      * @return true if the queue is full, otherwise returns false.
      */
     bool
-    Full() const {
+    Full(void) const {
         return size == N;
     }
 
@@ -82,7 +82,7 @@ class CircularQueue : public NonCopyable {
      * @return The number of elements currently in the queue.
      */
     size_t
-    Size() const {
+    Size(void) const {
         return size;
     }
 
@@ -90,7 +90,7 @@ class CircularQueue : public NonCopyable {
      * @brief Clear the queue, removing all elements.
      */
     void
-    Clear() {
+    Clear(void) {
         head = 0;
         tail = 0;
         size = 0;
@@ -118,7 +118,7 @@ class Stack : public NonCopyable {
     /**
      * @brief Constructs an empty stack.
      */
-    Stack() : top(0) {}
+    Stack(void) : top(0) {}
 
     /**
      * @brief Pushes a value onto the stack.
@@ -158,7 +158,7 @@ class Stack : public NonCopyable {
      * @return true if the stack contains no elements, false otherwise.
      */
     bool
-    Empty() const {
+    Empty(void) const {
         return top == 0;
     }
 
@@ -169,7 +169,7 @@ class Stack : public NonCopyable {
      * @return false Otherwise.
      */
     bool
-    Full() const {
+    Full(void) const {
         return top == N;
     }
 
@@ -197,27 +197,27 @@ class TreeNode {
     }
 
     DataType
-    Get() const {
+    Get(void) const {
         return value;
     }
 
     Derived *
-    Left() const {
+    Left(void) const {
         return left;
     }
 
     Derived *
-    Right() const {
+    Right(void) const {
         return right;
     }
 
     Derived *
-    Parent() const {
+    Parent(void) const {
         return parent;
     }
 
     int
-    ChildCount() const {
+    ChildCount(void) const {
         int count = 0;
 
         if (left != nullptr) {
@@ -243,7 +243,7 @@ class TreeNode {
     }
 
     void
-    Reset() {
+    Reset(void) {
         value = DataType(0);
         left = nullptr;
         right = nullptr;

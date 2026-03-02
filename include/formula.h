@@ -52,7 +52,7 @@ class FormulaData {
     }
 
     constexpr bool
-    Paired() const {
+    Paired(void) const {
         return isPaired;
     }
 
@@ -114,7 +114,7 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
      *
      * @return true if the node is a valid expression, false otherwise
      */
-    bool Expression() const;
+    bool Expression(void) const;
 
     /**
      * @brief Check if the node is completed, which means it has enough
@@ -124,7 +124,7 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
      *
      * @return true if the node is completed, false otherwise
      */
-    bool Completed() const;
+    bool Completed(void) const;
 
     /**
      * @brief Find the nearest unpaired left bracket node from the current

@@ -30,7 +30,7 @@ struct Point {
           y(static_cast<int16_t>(data & 0xFFFF)) {}
 
     int
-    ToInt() const {
+    ToInt(void) const {
         return (static_cast<int>(x) << 16) | static_cast<int>(y);
     }
 
@@ -146,7 +146,7 @@ class InputHandler {
     static constexpr int RELEASE_TH = 3;
 
     void updateKeys(void);
-    void updateTouch();
+    void updateTouch(void);
 
     void handleKeyInput(void);
     void handleTouchInput(void);
@@ -221,7 +221,7 @@ class TouchButton {
      *
      */
     void
-    Disable() {
+    Disable(void) {
         disabled = true;
         selected = false;
     }
@@ -231,7 +231,7 @@ class TouchButton {
      *
      */
     void
-    Enable() {
+    Enable(void) {
         disabled = false;
     }
 
@@ -242,7 +242,7 @@ class TouchButton {
      * @return true if the button is disabled, false otherwise
      */
     bool
-    Active() const {
+    Active(void) const {
         return !disabled;
     }
 
@@ -253,29 +253,29 @@ class TouchButton {
      * @return true if the button is selected, false otherwise
      */
     bool
-    Selected() const {
+    Selected(void) const {
         return selected && Active();
     }
 
     void
-    MarkSelected() {
+    MarkSelected(void) {
         if (Active()) {
             selected = true;
         }
     }
 
     void
-    Unselect() {
+    Unselect(void) {
         selected = false;
     }
 
     ButtonType
-    Type() const {
+    Type(void) const {
         return type;
     }
 
     Point
-    Position() const {
+    Position(void) const {
         return position;
     }
 
@@ -415,7 +415,7 @@ class TouchScreenHandler {
     }
 
     size_t
-    Size() const {
+    Size(void) const {
         return size;
     }
 
@@ -423,7 +423,7 @@ class TouchScreenHandler {
     static constexpr size_t Height = N;
 
     static constexpr size_t
-    Capacity() {
+    Capacity(void) {
         return (M * N);
     }
 

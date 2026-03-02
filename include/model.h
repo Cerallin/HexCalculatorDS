@@ -32,7 +32,7 @@ struct InputEventData {
           isOp((value & 0x100) != 0) {}
 
     int
-    ToInt() const {
+    ToInt(void) const {
         return ((isOp ? 0x100 : 0) | (data.digit & 0xFF));
     }
 };

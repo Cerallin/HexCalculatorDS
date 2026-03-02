@@ -7,8 +7,8 @@
 #pragma once
 
 struct NonCopyable {
-    constexpr NonCopyable() = default;
-    ~NonCopyable() = default;
+    constexpr NonCopyable(void) = default;
+    ~NonCopyable(void) = default;
 
     NonCopyable(const NonCopyable &) = delete;
     NonCopyable &operator=(const NonCopyable &) = delete;

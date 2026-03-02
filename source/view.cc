@@ -342,8 +342,8 @@ FormulaView::HandleEvent(const Event &e) {
     }
 
     BasicView::markDirty();
-    // TODO render formulaTree to glyphs
     debugf("FormulaView invalidated\n");
+
     return Consumed;
 }
 

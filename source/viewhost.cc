@@ -34,7 +34,7 @@ ViewHost::RegisterViews(ViewModel &viewModel) {
 
 void
 ViewHost::Update(void) {
-    // TODO render dirty views instead of drawing placeholder glyphs
+    // render dirty views instead of drawing placeholder glyphs
     configView.Update();
     formulaView.Update();
     valueView.Update();
@@ -45,6 +45,6 @@ ViewHost::Update(void) {
     indicatorView.Update();
     inputView.Update();
 
-    // Must be called once per frame --said by libnds
+    // Must be called once per frame --said libnds
     bgUpdate();
 }

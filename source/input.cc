@@ -265,7 +265,7 @@ InputHandler::updateKeys() {
 }
 
 void
-InputHandler::updateTouch() {
+InputHandler::updateTouch(void) {
     previousTouch = stablePressed;
 
     touchPosition pos{};

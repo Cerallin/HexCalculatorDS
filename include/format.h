@@ -86,29 +86,29 @@ class GlyphArray {
     }
 
     iterator
-    begin() {
+    begin(void) {
         return glyphs;
     }
     iterator
-    end() {
+    end(void) {
         return glyphs + size;
     }
 
     const_iterator
-    begin() const {
+    begin(void) const {
         return glyphs;
     }
     const_iterator
-    end() const {
+    end(void) const {
         return glyphs + size;
     }
 
     const_iterator
-    cbegin() const {
+    cbegin(void) const {
         return glyphs;
     }
     const_iterator
-    cend() const {
+    cend(void) const {
         return glyphs + size;
     }
 
@@ -118,7 +118,7 @@ class GlyphArray {
     }
 
     void
-    Clear() {
+    Clear(void) {
         size = 0;
         negative = false;
     }

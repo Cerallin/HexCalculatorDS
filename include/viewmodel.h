@@ -102,7 +102,7 @@ class FormulaManager {
     }
 
     size_t
-    Size() const {
+    Size(void) const {
         return formulaGlyphs.Size();
     }
 
