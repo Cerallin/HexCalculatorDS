@@ -38,15 +38,19 @@ An integer calculator for Nintendo DS.
 
 ### v1.2.0
 
+- [ ] Scroll the formula
 - [ ] Add background to the `UINT32` on topleft
 - [ ] Modify the font shadows
+
+### v1.3.0
+
+- [ ] New input view for binary input
 - [ ] Add animations
 
 ### v2.0.0
 
-- [ ] scroll the formula
-- [ ] add color type for GBA/NDS 16-bit color
-- [ ] enable download play
+- [ ] New view for GBA/NDS 16-bit color
+- [ ] Enable download play
 
 ### License
 
