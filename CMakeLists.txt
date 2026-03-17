@@ -8,10 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Build types
 # ----------------------------------------
 
-set(CMAKE_C_FLAGS "-Wall")
-set(CMAKE_C_FLAGS_DEBUG "-g -O0")
-set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wno-unused-variable -O2 -s -w -flto -ffast-math")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-DNDEBUG -g -O2")
+set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Wno-unused-variable -O2 -s -w -flto -ffast-math")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-DNDEBUG -g -O2 -flto -ffast-math")
 
 # ----------------------------------------
 # Environments
@@ -176,6 +176,7 @@ add_custom_command(
         -9 $<TARGET_FILE:${PROJECT_NAME}.elf>
         -b ${GAME_ICON} "${GAME_TITLE}\;${GAME_AUTHOR}"
         -g CALC
+        -n 2 0
     DEPENDS ${PROJECT_NAME}.elf
     COMMENT "Generating NDS ROM"
 )

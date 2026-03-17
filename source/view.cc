@@ -433,17 +433,20 @@ void
 IndicatorView::ForceUpdate(void) {
     debugf("IndicatorView refreshed\n");
 
+    auto x = viewArea.x;
     auto previousY = getIndicatorY(currentBase);
-    for (size_t i = 0; i < BarTileCount; i++) {
-        this->display.PutTile(viewArea.x, previousY + i * TileHeight,
-                              FontEmpty);
+
+    for (size_t j = 0; j < BarTileCount; j++) {
+        auto y = previousY + j * TileHeight;
+        this->display.PutTile(x, y, FontEmpty);
     }
 
     auto nextBase = vm.GetNumberBase();
     auto indicatorY = getIndicatorY(nextBase);
-    for (size_t i = 0; i < BarTileCount; i++) {
-        this->display.PutTile(viewArea.x, indicatorY + i * TileHeight,
-                              BarTiles[i]);
+
+    for (size_t j = 0; j < BarTileCount; j++) {
+        auto y = indicatorY + j * TileHeight;
+        this->display.PutTile(x, y, BarTiles[j]);
     }
 
     currentBase = nextBase;
