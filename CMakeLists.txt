@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(HexCalculatorDS VERSION 1.0.4 LANGUAGES C CXX)
+project(HexCalculatorDS VERSION 1.0.5 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -174,9 +174,10 @@ add_custom_command(
     COMMAND ${NDSTOOL}
         -c ${NDS_FILE}
         -9 $<TARGET_FILE:${PROJECT_NAME}.elf>
-        -b ${GAME_ICON} "${GAME_TITLE}\;${GAME_AUTHOR}"
+        -b ${GAME_ICON} "${GAME_TITLE} v${PROJECT_VERSION}\;made by ${GAME_AUTHOR}"
         -g CALC
         -n 2 0
+        >/dev/null
     DEPENDS ${PROJECT_NAME}.elf
     COMMENT "Generating NDS ROM"
 )
