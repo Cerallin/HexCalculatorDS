@@ -13,8 +13,8 @@
 #include "traits.h"
 
 namespace HexCalc {
-template <class Derived, typename DisplayType, size_t BorderWidth,
-          size_t BorderHeight, size_t TextCount, size_t TextGlyphCount>
+template <class Derived, typename DisplayType, int BorderWidth,
+          int BorderHeight, int TextCount, int TextGlyphCount>
 class DrawerManager {
   public:
     constexpr DrawerManager(TileLayer<DisplayType> &borderLayer,

@@ -315,8 +315,11 @@ class TouchScreenHandler {
 
     TouchButton *
     RegisterButton(const Area &area, ButtonType type, int16_t m, int16_t n) {
-        assert(m >= 0 && m < M);
-        assert(n >= 0 && n < N);
+        constexpr int16_t width = static_cast<int16_t>(M);
+        constexpr int16_t height = static_cast<int16_t>(N);
+
+        assert(m >= 0 && m < width);
+        assert(n >= 0 && n < height);
         assert(size < Capacity());
 
         auto &button = buttons[size++];
