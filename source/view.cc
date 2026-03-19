@@ -422,10 +422,7 @@ void
 ValueView::ForceUpdate(void) {
     debugf("ValueView refreshed\n");
 
-    auto sign = vm.GetNumberSign();
     auto base = vm.GetNumberBase();
-    auto width = vm.GetNumberWidth();
-
     auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
 
     constexpr auto N = MaxDisplayDigits;
@@ -555,8 +552,6 @@ void
 TranscodeView<Binary>::printNumber(void) const {
     // TODO Adjust the height of TranscodeView dynamically to accommodate
     // different widths of number display
-    auto width = vm.GetNumberWidth();
-    auto sign = vm.GetNumberSign();
     for (int i = 0; i < 4; i++) {
         auto digits = vm.GetValueDigitsPerByte<Number::MaxBinDigits>(i, Binary);
         GlyphArray6x8<Number::MaxBinDigits> glyphArray(digits, false);

@@ -289,7 +289,7 @@ class MainDisplay : public Display<MainDisplay> {
         // print glyphs
         size_t index = 0;
         for (const auto &glyph : glyphRange) {
-            auto glyphX = start.x + (index * charWidth);
+            auto glyphX = x + (index * charWidth);
             this->PrintGlyph(glyphX, y, glyph);
             index++;
         }
