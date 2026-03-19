@@ -26,8 +26,6 @@ class ViewHost : private NonCopyable {
     void Update(void);
 
   private:
-    void RegisterViews(ViewModel &viewModel);
-
     MainDisplay mainDisplay;
     SubDisplay subDisplay;
 
@@ -40,6 +38,8 @@ class ViewHost : private NonCopyable {
     TranscodeView<Binary> binView;
     IndicatorView indicatorView;
     InputView inputView;
+
+    void registerViews(ViewModel &viewModel);
 };
 
 }; // namespace HexCalc

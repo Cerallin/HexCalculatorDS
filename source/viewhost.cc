@@ -14,11 +14,11 @@ ViewHost::ViewHost(ViewModel &viewModel)
       hexView(mainDisplay, viewModel), decView(mainDisplay, viewModel),
       octView(mainDisplay, viewModel), binView(mainDisplay, viewModel),
       indicatorView(mainDisplay, viewModel), inputView(subDisplay, viewModel) {
-    RegisterViews(viewModel);
+    registerViews(viewModel);
 }
 
 void
-ViewHost::RegisterViews(ViewModel &viewModel) {
+ViewHost::registerViews(ViewModel &viewModel) {
     auto &bus = viewModel.Bus();
 
     bus.Subscribe(configView);
@@ -47,4 +47,6 @@ ViewHost::Update(void) {
 
     // Must be called once per frame --said libnds
     bgUpdate();
+
+    subDisplay.UpdateSprites();
 }

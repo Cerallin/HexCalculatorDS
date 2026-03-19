@@ -9,6 +9,7 @@
 #include "common.h"
 #include "input.h"
 #include "layer.h"
+#include "sprite.h"
 #include "traits.h"
 
 namespace HexCalc {
@@ -211,6 +212,8 @@ class SubDisplay;
 template <typename DisplayType>
 class Display : private NonCopyable {
   public:
+    Display(void) : sm() {}
+
     void
     SetBackdrop(uint16_t color) const {
         if constexpr (std::is_same_v<DisplayType, MainDisplay>) {
@@ -230,6 +233,14 @@ class Display : private NonCopyable {
         uint16_t color = RGB15(_r, _g, _b);
         SetBackdrop(color);
     }
+
+    void
+    UpdateSprites(void) {
+        sm.Update();
+    }
+
+  protected:
+    SpriteManager<DisplayType> sm;
 };
 
 /**
@@ -294,7 +305,8 @@ class MainDisplay : public Display<MainDisplay> {
      * @brief all 4 layers are text layers
      *
      */
-    static constexpr auto VideoMode = MODE_0_2D;
+    static constexpr auto VideoMode =
+        MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D_LAYOUT;
     static constexpr int TileBGNum = 4;
     static constexpr int OffsetPerBG = TileWidth / TileBGNum;
     static constexpr int MaxTileNum = 256;
@@ -331,11 +343,11 @@ class SubDisplay : public Display<SubDisplay> {
     void UpdateWidthDrawer(NumberWidth width);
     void UpdateSignDrawer(NumberSign sign);
 
-    /**
-     * @brief
-     *
-     */
-    static constexpr auto VideoMode = MODE_3_2D;
+    Sprite<SubDisplay> *AddSprite(Point position, int priority = 0);
+
+    // FIXME sprites
+    static constexpr auto VideoMode =
+        MODE_3_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D_LAYOUT;
     static constexpr int TileBGNum = 3;
     static constexpr int MaxTileNum = 320;
 

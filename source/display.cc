@@ -25,7 +25,8 @@ align64(int x) {
 };
 
 MainDisplay::MainDisplay(void)
-    : // the offset is because of 6x8 tiles on 8x8 tile map
+    : Display(),
+      // the offset is because of 6x8 tiles on 8x8 tile map
       layers{
           TileLayer<MainDisplay>(offsetX - (0 * OffsetPerBG), offsetY + 0),
           TileLayer<MainDisplay>(offsetX - (1 * OffsetPerBG), offsetY + 0),
@@ -94,7 +95,7 @@ MainDisplay::ClearLine(Point &start, int charWidth, bool underline) const {
 }
 
 SubDisplay::SubDisplay(void)
-    : bmpLayer(0, 0),
+    : Display(), bmpLayer(0, 0),
       tileLayers{
           TileLayer<SubDisplay>(0, 0),     // unused
           TileLayer<SubDisplay>(-152, 0),  // border layer
@@ -174,4 +175,9 @@ SubDisplay::UpdateWidthDrawer(NumberWidth width) {
 void
 SubDisplay::UpdateSignDrawer(NumberSign sign) {
     signManager.DrawText(sign, 0, 0);
+}
+
+Sprite<SubDisplay> *
+SubDisplay::AddSprite(Point position, int priority) {
+    return sm.Add(position, priority);
 }
