@@ -133,6 +133,10 @@ InputView::InputView(SubDisplay &display, ViewModel &vm)
     numberButtons[0x0E] = buttonE;
     numberButtons[0x0F] = buttonF;
 
+    // Initialize left bracket sprites
+    leftBracketSprites[0] = display.AddSprite(Point(82, 73));
+    leftBracketSprites[1] = display.AddSprite(Point(82 + 5, 73));
+
     rightBracketButton = buttonRBrac;
     // Initially disable right bracket button since there is no left bracket in
     // the formula
@@ -198,7 +202,27 @@ InputView::HandleEvent(const Event &e) {
             } else {
                 rightBracketButton->Enable();
             }
-            // TODO show number on left bracket button
+            // Update left bracket count sprites
+            if (leftBracketCount > 99) {
+                leftBracketCount = 99;
+            }
+            auto num1 = leftBracketCount / 10;
+            auto num2 = leftBracketCount % 10;
+            debugf("Left bracket count: %d, num1: %d, num2: %d\n",
+                   leftBracketCount, num1, num2);
+
+            if (leftBracketCount != 0) {
+                if (num1 == 0) {
+                    leftBracketSprites[0]->SetTileOffset(num2 + 1);
+                    leftBracketSprites[1]->SetTileOffset(0);
+                } else {
+                    leftBracketSprites[0]->SetTileOffset(num1 + 1);
+                    leftBracketSprites[1]->SetTileOffset(num2 + 1);
+                }
+            } else {
+                leftBracketSprites[0]->SetTileOffset(0);
+                leftBracketSprites[1]->SetTileOffset(0);
+            }
 
             BasicView::markDirty();
 
