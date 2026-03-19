@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "operator.h"
+#include "common.h"
 #include "config.h"
 #include "number.h"
 
@@ -32,8 +33,9 @@ _signExtend(uint64_t v, NumberWidth w) {
     }
     return static_cast<T>(v);
 }
+
 template <typename T>
-constexpr uint64_t
+static HEXCALC_ARM_CODE constexpr uint64_t
 _doOp(OperatorType op, T a, T b) {
     switch (op) {
     case OperatorType::Plus:

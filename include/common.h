@@ -18,6 +18,12 @@
 
 #define HEXCALC_GCC_UNUSED [[maybe_unused]]
 
+#if defined(__GNUC__) && (defined(__arm__) || defined(__thumb__))
+#define HEXCALC_ARM_CODE __attribute__((target("arm")))
+#else
+#define HEXCALC_ARM_CODE
+#endif
+
 static inline int
 debugf(const char *fmt, ...) {
     int result = 0;
