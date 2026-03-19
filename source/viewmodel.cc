@@ -245,6 +245,8 @@ FormulaManager::HandleEvent(const Event &e) {
         formulaGlyphs.Clear();
         formulaState = Evaluated;
 
+        leftBracketCount = 0;
+
         notifyFormulaUpdate();
 
         return Consumed;

@@ -376,6 +376,7 @@ class InputView : public SubView<InputView> {
     void handleBaseChange(void);
     void handleWidthChange(void);
     void handleSignChange(void);
+    void updateLBrackCount(int count);
 
     TouchButton &getFocus(Point position, Direction dir);
 };

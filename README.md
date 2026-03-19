@@ -32,7 +32,7 @@ An integer calculator for Nintendo DS.
 ### v1.1.0
 
 - [x] Activate last pressed button (show focus sign)
-- [ ] Count unclosed left brackets
+- [x] Count unclosed left brackets
 - [ ] Disable width drawer if base == bin
 - [ ] Display version number on the sub screen
 
