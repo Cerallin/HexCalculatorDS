@@ -1,3 +1,4 @@
 .vscode/
+reports/*.md
 build*/
 **/__pycache__/

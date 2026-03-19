@@ -33,13 +33,13 @@ An integer calculator for Nintendo DS.
 
 - [x] Activate last pressed button (show focus sign)
 - [x] Count unclosed left brackets
-- [ ] Disable width drawer if base == bin
 - [ ] Display version number on the sub screen
 
 ### v1.2.0
 
 - [ ] Scroll the formula
-- [ ] Add background to the `UINT32` on topleft
+- [ ] Implement color themes
+- [ ] Add background color to the `UINT32`
 - [ ] Modify the font shadows
 
 ### v1.3.0
