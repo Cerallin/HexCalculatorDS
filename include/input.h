@@ -310,8 +310,8 @@ template <size_t M, size_t N>
 class TouchScreenHandler {
   public:
     TouchScreenHandler(Commands &commands)
-        : commands(commands), buttons(),
-          previouslySelected(nullptr), buttonMatrix{{nullptr}}, size(0) {}
+        : commands(commands), buttons(), buttonMatrix{{nullptr}},
+          previouslySelected(nullptr), size(0) {}
 
     TouchButton *
     RegisterButton(const Area &area, ButtonType type, int16_t m, int16_t n) {

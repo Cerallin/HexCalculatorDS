@@ -19,7 +19,7 @@ template <class Derived, typename DisplayType>
 class BasicView {
   public:
     // Initially, the view needs to be rendered at least once.
-    BasicView(DisplayType &display) : dirty(true), display(display) {}
+    BasicView(DisplayType &display) : display(display), dirty(true) {}
 
     EventResult
     HandleEvent(const Event &e) {

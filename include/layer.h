@@ -22,7 +22,7 @@ class BasicLayer {
   public:
     BasicLayer(const Point &offset) : BasicLayer(offset.x, offset.y) {}
     BasicLayer(int16_t offsetX = 0, int16_t offsetY = 0)
-        : bg(-1), mapPtr(nullptr), offsetX(offsetX), offsetY(offsetY) {}
+        : mapPtr(nullptr), bg(-1), offsetX(offsetX), offsetY(offsetY) {}
 
     void
     Init(int layer, int mapBase, int tileBase) {
