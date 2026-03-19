@@ -6,6 +6,9 @@
  */
 #pragma once
 
+#include "project.h"
+
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdarg>
@@ -15,6 +18,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <type_traits>
+#include <utility>
 
 #define HEXCALC_GCC_UNUSED [[maybe_unused]]
 

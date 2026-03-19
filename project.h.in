@@ -1,0 +1,12 @@
+/**
+ * HexCalculatorDS - An integer calculator for Nintendo DS.
+ * Copyright (C) 2026  Cerallin <cerallin@cerallin.top>
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+#pragma once
+
+#define HEXCALCDS_PROJECT_VERSION "@PROJECT_VERSION@"
+#define HEXCALCDS_PROJECT_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define HEXCALCDS_PROJECT_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define HEXCALCDS_PROJECT_VERSION_PATCH @PROJECT_VERSION_PATCH@

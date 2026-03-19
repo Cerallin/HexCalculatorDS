@@ -27,6 +27,12 @@ set(LIBNDS ${DEVKITPRO}/libnds)
 find_program(GRIT grit REQUIRED)
 find_program(PYTHON python3 REQUIRED)
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/project.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/project.h
+    @ONLY
+)
+
 # ----------------------------------------
 # Font tiles
 # ----------------------------------------
