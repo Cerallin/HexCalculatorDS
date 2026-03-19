@@ -79,7 +79,7 @@ class FormulaData {
 class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
   public:
     FormulaTreeNode(void) : TreeNode() {}
-    FormulaTreeNode(const FormulaData &data) : TreeNode(data) {}
+    explicit FormulaTreeNode(const FormulaData &data) : TreeNode(data) {}
 
     struct EvaluateFlag {
         bool divideByZeroFlag : 1;

@@ -19,7 +19,8 @@ class ViewModel;
 
 class ValueManager {
   public:
-    ValueManager(FormulaModel &formulaModel) : formulaModel(formulaModel) {}
+    explicit ValueManager(FormulaModel &formulaModel)
+        : formulaModel(formulaModel) {}
 
     NumberWidth GetNumberWidth(void) const;
 

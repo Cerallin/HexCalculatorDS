@@ -23,11 +23,13 @@ struct InputEventData {
     } data;
     bool isOp;
 
-    constexpr InputEventData(Digit digit) : data{.digit = digit}, isOp(false) {}
+    explicit constexpr InputEventData(Digit digit)
+        : data{.digit = digit}, isOp(false) {}
 
-    constexpr InputEventData(OperatorType op) : data{.op = op}, isOp(true) {}
+    explicit constexpr InputEventData(OperatorType op)
+        : data{.op = op}, isOp(true) {}
 
-    constexpr InputEventData(EventDataType value)
+    explicit constexpr InputEventData(EventDataType value)
         : data{.digit = static_cast<Digit>(value & 0xFF)},
           isOp((value & 0x100) != 0) {}
 

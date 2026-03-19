@@ -75,7 +75,8 @@ MainDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
 }
 
 void
-MainDisplay::ClearLine(Point &start, int charWidth, bool underline) const {
+MainDisplay::ClearLine(const Point &start, int charWidth,
+                       bool underline) const {
     auto x = start.x;
     auto y = start.y;
 

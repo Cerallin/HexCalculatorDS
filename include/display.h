@@ -295,7 +295,8 @@ class MainDisplay : public Display<MainDisplay> {
         }
     }
 
-    void ClearLine(Point &start, int charWidth, bool underline = false) const;
+    void ClearLine(const Point &start, int charWidth,
+                   bool underline = false) const;
 
     static constexpr int Bpp = 4;
     static constexpr int TileWidth = 8;

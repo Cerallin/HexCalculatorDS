@@ -12,7 +12,7 @@ namespace HexCalc {
 
 class Commands {
   public:
-    Commands(EventBus &eventBus) : bus(eventBus) {}
+    explicit Commands(EventBus &eventBus) : bus(eventBus) {}
 
     void InputNumber0(void);
     void InputNumber1(void);

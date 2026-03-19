@@ -145,7 +145,7 @@ class Glyph {
      * @param font The font to load the glyph from.
      * @return The loaded glyph or InvalidGlyph if the font is invalid.
      */
-    constexpr Glyph(FontType font);
+    explicit constexpr Glyph(FontType font);
 
     FontType
     Upper(void) const {

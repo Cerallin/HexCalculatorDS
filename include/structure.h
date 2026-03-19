@@ -18,7 +18,7 @@
 template <typename T, size_t N>
 class CircularQueue : public NonCopyable {
   public:
-    CircularQueue(void) : head(0), tail(0), size(0) {}
+    CircularQueue(void) : data{}, head(0), tail(0), size(0) {}
 
     /**
      * @brief Enqueue an element into the queue.
@@ -188,7 +188,7 @@ class TreeNode {
   public:
     TreeNode(void)
         : value(DataType(0)), left(nullptr), right(nullptr), parent(nullptr) {}
-    TreeNode(const DataType &val)
+    explicit TreeNode(const DataType &val)
         : value(val), left(nullptr), right(nullptr), parent(nullptr) {}
 
     void
@@ -274,11 +274,11 @@ class TreeNode {
                 Derived *peek;
                 stack.Pop(peek); // temporary pop to inspect
 
-                auto *right = peek->Right();
-                if (right != nullptr && lastVisited != right) {
+                auto *rightChild = peek->Right();
+                if (rightChild != nullptr && lastVisited != rightChild) {
                     // Right subtree not visited yet
-                    stack.Push(peek); // push back
-                    current = right;  // traverse right
+                    stack.Push(peek);     // push back
+                    current = rightChild; // traverse right
                 } else {
                     // Visit node
                     visit(*peek);

@@ -246,18 +246,6 @@ InputView::handleBaseChange(void) {
 }
 
 void
-InputView::handleWidthChange(void) {
-    auto width = vm.GetNumberWidth();
-    display.UpdateWidthDrawer(width);
-}
-
-void
-InputView::handleSignChange(void) {
-    auto sign = vm.GetNumberSign();
-    display.UpdateSignDrawer(sign);
-}
-
-void
 InputView::updateLBrackCount(int count) {
     leftBracketCount = count;
     if (leftBracketCount < 0) {

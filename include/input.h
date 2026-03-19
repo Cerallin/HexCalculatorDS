@@ -25,7 +25,7 @@ struct Point {
 
     constexpr Point(int16_t px, int16_t py) : x(px), y(py) {}
 
-    constexpr Point(int data)
+    explicit constexpr Point(int data)
         : x(static_cast<int16_t>(data >> 16)),
           y(static_cast<int16_t>(data & 0xFFFF)) {}
 
@@ -36,28 +36,28 @@ struct Point {
 
     constexpr Point
     NextPosition(Direction dir) {
-        auto x = this->x;
-        auto y = this->y;
+        auto nextX = this->x;
+        auto nextY = this->y;
 
         switch (dir) {
         case Direction::DirUp:
-            y -= 1;
+            nextY -= 1;
             break;
         case Direction::DirDown:
-            y += 1;
+            nextY += 1;
             break;
         case Direction::DirLeft:
-            x -= 1;
+            nextX -= 1;
             break;
         case Direction::DirRight:
-            x += 1;
+            nextX += 1;
             break;
         default:
             // should never reach here
             break;
         }
 
-        return Point(x, y);
+        return Point(nextX, nextY);
     }
 };
 
@@ -309,7 +309,7 @@ class TouchButton {
 template <size_t M, size_t N>
 class TouchScreenHandler {
   public:
-    TouchScreenHandler(Commands &commands)
+    explicit TouchScreenHandler(Commands &commands)
         : commands(commands), buttons(), buttonMatrix{{nullptr}},
           previouslySelected(nullptr), size(0) {}
 

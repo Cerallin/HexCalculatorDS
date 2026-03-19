@@ -41,12 +41,12 @@ class GlyphArray {
     constexpr GlyphArray(const GlyphArray<W, H, M> &other, size_t offset,
                          size_t limit)
         : glyphs{}, size(0), negative(false) {
-        auto end = std::min(offset + limit, other.Size());
-        for (size_t i = offset; i < end; i++) {
+        auto endIndex = std::min(offset + limit, other.Size());
+        for (size_t i = offset; i < endIndex; i++) {
             this->Insert(other[i]);
         }
     }
-    constexpr GlyphArray(DigitArray<N> digits, bool reverse = false)
+    explicit constexpr GlyphArray(DigitArray<N> digits, bool reverse = false)
         : glyphs{}, size(0), negative(digits.negative) {
         if (reverse) {
             for (size_t i = 0; i < digits.size; i++) {
@@ -148,9 +148,6 @@ class HeaderGlyphArray6x8 : public GlyphArray6x8<3> {
         this->glyphs[2] = h3;
         this->size = 3;
     }
-
-    static constexpr int CharWidth = Base::CharWidth;
-    static constexpr int CharHeight = Base::CharHeight;
 };
 
 /**
@@ -235,7 +232,8 @@ class GlyphFormatArray
     }
 
   public:
-    constexpr GlyphFormatArray(const GlyphArray<W, H, N> &glyphArray) : Base() {
+    explicit constexpr GlyphFormatArray(const GlyphArray<W, H, N> &glyphArray)
+        : Base() {
         const size_t digitCount = glyphArray.Size();
 
         // ---------- padding ----------
@@ -260,9 +258,6 @@ class GlyphFormatArray
         // ---------- digits ----------
         InsertDigits(glyphArray);
     }
-
-    static constexpr int CharWidth = Base::CharWidth;
-    static constexpr int CharHeight = Base::CharHeight;
 };
 
 template <FontType Separator, int GroupSize, bool Signable, size_t N>
@@ -303,7 +298,7 @@ using OctGlyphArray6x8 =
 class BinGlyphArray6x8
     : public GlyphFormatArray6x8<FontEmpty, 4, false, Number::MaxBinDigits> {
   public:
-    constexpr BinGlyphArray6x8(
+    explicit constexpr BinGlyphArray6x8(
         const GlyphArray6x8<Number::MaxBinDigits> &glyphArray)
         : GlyphFormatArray6x8<FontEmpty, 4, false, Number::MaxBinDigits>(
               GlyphFormatArray6x8<FontEmpty, 16, false, Number::MaxBinDigits>(

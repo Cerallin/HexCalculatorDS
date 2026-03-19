@@ -223,9 +223,9 @@ FormulaTree::inputData(const FormulaData &data) {
             if (leftBracket == nullptr) {
                 return false;
             }
-            auto data = leftBracket->Get();
-            data.SetPaired(true);
-            leftBracket->Assign(data);
+            auto leftBracketData = leftBracket->Get();
+            leftBracketData.SetPaired(true);
+            leftBracket->Assign(leftBracketData);
             // point current node to the left bracket
             currentNode = leftBracket;
 

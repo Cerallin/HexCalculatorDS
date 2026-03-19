@@ -20,7 +20,7 @@ class SubDisplay;
 template <class Derived, typename DisplayType>
 class BasicLayer {
   public:
-    BasicLayer(const Point &offset) : BasicLayer(offset.x, offset.y) {}
+    explicit BasicLayer(const Point &offset) : BasicLayer(offset.x, offset.y) {}
     BasicLayer(int16_t offsetX = 0, int16_t offsetY = 0)
         : mapPtr(nullptr), bg(-1), offsetX(offsetX), offsetY(offsetY) {}
 
@@ -118,8 +118,6 @@ class BmpLayer : public BasicLayer<BmpLayer<DisplayType>, DisplayType> {
     static constexpr int BitmapSize = Width * Height * sizeof(uint8_t);
 
   private:
-    int16_t offsetX;
-    int16_t offsetY;
 };
 
 }; // namespace HexCalc

@@ -19,7 +19,7 @@ template <class Derived, typename DisplayType>
 class BasicView {
   public:
     // Initially, the view needs to be rendered at least once.
-    BasicView(DisplayType &display) : display(display), dirty(true) {}
+    explicit BasicView(DisplayType &display) : display(display), dirty(true) {}
 
     EventResult
     HandleEvent(const Event &e) {
@@ -352,7 +352,8 @@ class IndicatorView : public MainView<IndicatorView, AlignLeft> {
 template <class Derived>
 class SubView : public BasicView<Derived, SubDisplay> {
   public:
-    SubView(SubDisplay &display) : BasicView<Derived, SubDisplay>(display) {}
+    explicit SubView(SubDisplay &display)
+        : BasicView<Derived, SubDisplay>(display) {}
 };
 
 class InputView : public SubView<InputView> {
@@ -374,8 +375,6 @@ class InputView : public SubView<InputView> {
     int leftBracketCount;
 
     void handleBaseChange(void);
-    void handleWidthChange(void);
-    void handleSignChange(void);
     void updateLBrackCount(int count);
 
     TouchButton &getFocus(Point position, Direction dir);
