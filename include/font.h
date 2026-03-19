@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "common.h"
 #include "number.h"
 #include "operator.h"
 
@@ -104,6 +105,20 @@ enum FontChar : FontType {
     FontColoredSix,
     FontColoredEight,
     FontColoredBarrier,
+
+    FontVersion0 = 160,
+    FontVersion1,
+    FontVersion2,
+    FontVersion3,
+    FontVersion4,
+    FontVersion5,
+    FontVersion6,
+    FontVersion7,
+    FontVersion8,
+    FontVersion9,
+    FontVersionV,
+    FontVersionDot,
+    FontVersionBarrier,
 
     FontEnd = 0xFF,
 };
@@ -457,6 +472,40 @@ constexpr Glyph::Glyph(FontType font)
         *this = InvalidGlyph;
         break;
     }
+}
+
+constexpr FontChar
+versionChar(char c) {
+    if (c >= '0' && c <= '9') {
+        return static_cast<FontChar>(FontVersion0 + (c - '0'));
+    } else {
+        // make lowercase
+        if (c >= 'A' && c <= 'Z') {
+            c += ('a' - 'A');
+        } else {
+            // do nothing
+        }
+
+        if (c == 'v') {
+            return FontVersionV;
+        } else if (c == '.') {
+            return FontVersionDot;
+        } else {
+            return FontEmpty;
+        }
+    }
+}
+
+template <size_t N, size_t... I>
+constexpr auto
+versionStrFontImpl(const char (&str)[N], std::index_sequence<I...>) {
+    return std::array<FontChar, N - 1>{versionChar(str[I])...};
+}
+
+template <size_t N>
+constexpr auto
+versionStrFont(const char (&str)[N]) {
+    return versionStrFontImpl(str, std::make_index_sequence<N - 1>{});
 }
 
 }; // namespace HexCalc

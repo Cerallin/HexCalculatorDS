@@ -79,6 +79,21 @@ add_custom_command(
     COMMENT "Generating sub number tilemap"
 )
 
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subVersion.c
+    COMMAND ${GRIT}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-version.png
+        -ftc
+        -gB4
+        -gzl
+        -gTFF00FF
+        -m
+        -p!
+        -o subVersion
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-version.png
+    COMMENT "Generating sub version tilemap (shared palette with subNumber)"
+)
+
 # ----------------------------------------
 # Subscreen Image
 # ----------------------------------------
@@ -122,6 +137,7 @@ add_executable(${PROJECT_NAME}.elf
     ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subNumber.c
+    ${CMAKE_CURRENT_BINARY_DIR}/subVersion.c
     ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c
 )
 

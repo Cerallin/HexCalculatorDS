@@ -11,15 +11,18 @@
 #include "input.h"
 
 #include "subNumber.h"
+#include "subVersion.h"
 
 #include <nds.h>
+
+#define _(str) versionStrFont(str)
 
 namespace HexCalc {
 
 template <typename DisplayType>
 class Sprite {
   public:
-    static constexpr int TileBytes = 8 * 8;
+    static constexpr int TileBytes = 8 * 8 / 2; // 8x8 pixels, 4bpp
     static constexpr auto &oamState =
         std::is_same_v<DisplayType, MainDisplay> ? oamMain : oamSub;
     static constexpr auto SpriteSize = SpriteSize_8x8;
@@ -103,6 +106,31 @@ class SpriteManager : NonCopyable {
         decompress(subNumberTiles, SpriteGfx(), LZ77Vram);
         dmaCopy(subNumberPal, SPRITE_PALETTE_SUB, 16 * sizeof(uint16_t));
 
+        // Load shared graphics for version numbers
+        decompress(subVersionTiles,
+                   SpriteGfx() + 16 * TileBytes / sizeof(uint16_t), LZ77Vram);
+        // Use the same palette for version
+
+        // Initialize the version string
+        constexpr auto versionArr = _("v" HEXCALCDS_PROJECT_VERSION);
+
+        constexpr auto kerning = [](FontChar font) {
+            if (font == FontVersionDot) {
+                return 3;
+            } else {
+                return 5;
+            }
+        };
+        int16_t offsetX = 0;
+        int16_t offsetY = 1;
+        for (const auto &font : versionArr) {
+            auto sp = Add(Point(10 + offsetX, offsetY));
+            const auto tileIndex = font - FontVersion0 + 16 + 1;
+            // 16 for number tiles, 1 for the backdrop color
+            sp->SetTileOffset(tileIndex);
+            offsetX += kerning(font);
+        }
+
         oamEnable(&oamState);
     }
 
@@ -146,7 +174,7 @@ class SpriteManager : NonCopyable {
         oamUpdate(&oamState);
     }
 
-    constexpr static int MaxSprites = 8;
+    constexpr static int MaxSprites = 32;
 
   private:
     using SpriteIndex = ssize_t;
