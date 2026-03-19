@@ -1,4 +1,5 @@
 .vscode/
 reports/*.md
+reports/*.txt
 build*/
 **/__pycache__/
