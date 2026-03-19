@@ -12,108 +12,108 @@ using namespace HexCalc;
 InputView::InputView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), handler(vm.Cmds()), leftBracketCount(0) {
     // Ordered by button position, left to right then top to bottom
-    auto buttonAnd =
+    HEXCALC_GCC_UNUSED auto buttonAnd =
         handler.RegisterButton(Area(AREA_0_X, AREA_0_Y, AREA_0_W, AREA_0_H),
                                ButtonType::ButtonAnd, 0, 0);
-    auto buttonA =
+    HEXCALC_GCC_UNUSED auto buttonA =
         handler.RegisterButton(Area(AREA_1_X, AREA_1_Y, AREA_1_W, AREA_1_H),
                                ButtonType::ButtonA, 0, 1);
-    auto buttonB =
+    HEXCALC_GCC_UNUSED auto buttonB =
         handler.RegisterButton(Area(AREA_2_X, AREA_2_Y, AREA_2_W, AREA_2_H),
                                ButtonType::ButtonB, 0, 2);
-    auto buttonC =
+    HEXCALC_GCC_UNUSED auto buttonC =
         handler.RegisterButton(Area(AREA_3_X, AREA_3_Y, AREA_3_W, AREA_3_H),
                                ButtonType::ButtonC, 0, 3);
-    auto buttonD =
+    HEXCALC_GCC_UNUSED auto buttonD =
         handler.RegisterButton(Area(AREA_4_X, AREA_4_Y, AREA_4_W, AREA_4_H),
                                ButtonType::ButtonD, 0, 4);
-    auto buttonE =
+    HEXCALC_GCC_UNUSED auto buttonE =
         handler.RegisterButton(Area(AREA_5_X, AREA_5_Y, AREA_5_W, AREA_5_H),
                                ButtonType::ButtonE, 0, 5);
-    auto buttonF =
+    HEXCALC_GCC_UNUSED auto buttonF =
         handler.RegisterButton(Area(AREA_6_X, AREA_6_Y, AREA_6_W, AREA_6_H),
                                ButtonType::ButtonF, 0, 6);
-    auto buttonOr =
+    HEXCALC_GCC_UNUSED auto buttonOr =
         handler.RegisterButton(Area(AREA_7_X, AREA_7_Y, AREA_7_W, AREA_7_H),
                                ButtonType::ButtonOr, 1, 0);
-    auto buttonLShift =
+    HEXCALC_GCC_UNUSED auto buttonLShift =
         handler.RegisterButton(Area(AREA_8_X, AREA_8_Y, AREA_8_W, AREA_8_H),
                                ButtonType::ButtonLShift, 1, 1);
-    auto buttonLBrac =
+    HEXCALC_GCC_UNUSED auto buttonLBrac =
         handler.RegisterButton(Area(AREA_9_X, AREA_9_Y, AREA_9_W, AREA_9_H),
                                ButtonType::ButtonLBrac, 1, 2);
-    auto button7 =
+    HEXCALC_GCC_UNUSED auto button7 =
         handler.RegisterButton(Area(AREA_10_X, AREA_10_Y, AREA_10_W, AREA_10_H),
                                ButtonType::Button7, 1, 3);
-    auto button4 =
+    HEXCALC_GCC_UNUSED auto button4 =
         handler.RegisterButton(Area(AREA_11_X, AREA_11_Y, AREA_11_W, AREA_11_H),
                                ButtonType::Button4, 1, 4);
-    auto button1 =
+    HEXCALC_GCC_UNUSED auto button1 =
         handler.RegisterButton(Area(AREA_12_X, AREA_12_Y, AREA_12_W, AREA_12_H),
                                ButtonType::Button1, 1, 5);
-    auto buttonNegate =
+    HEXCALC_GCC_UNUSED auto buttonNegate =
         handler.RegisterButton(Area(AREA_13_X, AREA_13_Y, AREA_13_W, AREA_13_H),
                                ButtonType::ButtonNegate, 1, 6);
-    auto buttonModulo =
+    HEXCALC_GCC_UNUSED auto buttonModulo =
         handler.RegisterButton(Area(AREA_14_X, AREA_14_Y, AREA_14_W, AREA_14_H),
                                ButtonType::ButtonModulo, 2, 0);
-    auto buttonRShift =
+    HEXCALC_GCC_UNUSED auto buttonRShift =
         handler.RegisterButton(Area(AREA_15_X, AREA_15_Y, AREA_15_W, AREA_15_H),
                                ButtonType::ButtonRShift, 2, 1);
-    auto buttonRBrac =
+    HEXCALC_GCC_UNUSED auto buttonRBrac =
         handler.RegisterButton(Area(AREA_16_X, AREA_16_Y, AREA_16_W, AREA_16_H),
                                ButtonType::ButtonRBrac, 2, 2);
-    auto button8 =
+    HEXCALC_GCC_UNUSED auto button8 =
         handler.RegisterButton(Area(AREA_17_X, AREA_17_Y, AREA_17_W, AREA_17_H),
                                ButtonType::Button8, 2, 3);
-    auto button5 =
+    HEXCALC_GCC_UNUSED auto button5 =
         handler.RegisterButton(Area(AREA_18_X, AREA_18_Y, AREA_18_W, AREA_18_H),
                                ButtonType::Button5, 2, 4);
-    auto button2 =
+    HEXCALC_GCC_UNUSED auto button2 =
         handler.RegisterButton(Area(AREA_19_X, AREA_19_Y, AREA_19_W, AREA_19_H),
                                ButtonType::Button2, 2, 5);
-    auto button0 =
+    HEXCALC_GCC_UNUSED auto button0 =
         handler.RegisterButton(Area(AREA_20_X, AREA_20_Y, AREA_20_W, AREA_20_H),
                                ButtonType::Button0, 2, 6);
-    auto buttonClear =
+    HEXCALC_GCC_UNUSED auto buttonClear =
         handler.RegisterButton(Area(AREA_21_X, AREA_21_Y, AREA_21_W, AREA_21_H),
                                ButtonType::ButtonClear, 3, 1);
-    auto buttonDivide =
+    HEXCALC_GCC_UNUSED auto buttonDivide =
         handler.RegisterButton(Area(AREA_22_X, AREA_22_Y, AREA_22_W, AREA_22_H),
                                ButtonType::ButtonDivide, 3, 2);
-    auto button9 =
+    HEXCALC_GCC_UNUSED auto button9 =
         handler.RegisterButton(Area(AREA_23_X, AREA_23_Y, AREA_23_W, AREA_23_H),
                                ButtonType::Button9, 3, 3);
-    auto button6 =
+    HEXCALC_GCC_UNUSED auto button6 =
         handler.RegisterButton(Area(AREA_24_X, AREA_24_Y, AREA_24_W, AREA_24_H),
                                ButtonType::Button6, 3, 4);
-    auto button3 =
+    HEXCALC_GCC_UNUSED auto button3 =
         handler.RegisterButton(Area(AREA_25_X, AREA_25_Y, AREA_25_W, AREA_25_H),
                                ButtonType::Button3, 3, 5);
-    auto buttonBitwiseNot =
+    HEXCALC_GCC_UNUSED auto buttonBitwiseNot =
         handler.RegisterButton(Area(AREA_26_X, AREA_26_Y, AREA_26_W, AREA_26_H),
                                ButtonType::ButtonBitwiseNot, 3, 6);
-    auto buttonBackspace =
+    HEXCALC_GCC_UNUSED auto buttonBackspace =
         handler.RegisterButton(Area(AREA_27_X, AREA_27_Y, AREA_27_W, AREA_27_H),
                                ButtonType::ButtonBackspace, 4, 1);
-    auto buttonMultiply =
+    HEXCALC_GCC_UNUSED auto buttonMultiply =
         handler.RegisterButton(Area(AREA_28_X, AREA_28_Y, AREA_28_W, AREA_28_H),
                                ButtonType::ButtonMultiply, 4, 2);
-    auto buttonMinus =
+    HEXCALC_GCC_UNUSED auto buttonMinus =
         handler.RegisterButton(Area(AREA_29_X, AREA_29_Y, AREA_29_W, AREA_29_H),
                                ButtonType::ButtonMinus, 4, 3);
-    auto buttonPlus =
+    HEXCALC_GCC_UNUSED auto buttonPlus =
         handler.RegisterButton(Area(AREA_30_X, AREA_30_Y, AREA_30_W, AREA_30_H),
                                ButtonType::ButtonPlus, 4, 4);
 
-    auto buttonEvaluate =
+    HEXCALC_GCC_UNUSED auto buttonEvaluate =
         handler.RegisterButton(Area(AREA_31_X, AREA_31_Y, AREA_31_W, AREA_31_H),
                                ButtonType::ButtonEvaluate, 4, 6);
 
-    auto buttonWidthDrawer = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonWidthDrawer = handler.RegisterButton(
         Area(160 - 6, 0, 218 - 160, 25), ButtonType::ButtonChangeWidth, 3, 0);
 
-    auto buttonSignDrawer = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonSignDrawer = handler.RegisterButton(
         Area(224 - 6, 0, 250 - 224, 25), ButtonType::ButtonToggleSign, 4, 0);
 
     numberButtons[0x00] = button0;

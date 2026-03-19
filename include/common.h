@@ -16,6 +16,8 @@
 #include <cstring>
 #include <type_traits>
 
+#define HEXCALC_GCC_UNUSED [[maybe_unused]]
+
 static inline int
 debugf(const char *fmt, ...) {
     int result = 0;
