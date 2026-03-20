@@ -306,30 +306,30 @@ void
 InputHandler::handleKeyInput(void) {
     auto keys = KeyInput{currentKeys};
 
-    if (keys.PressedUp()) {
+    if (keys.PressedUp()) { // ↑
         commands.MoveFocusUp();
-    } else if (keys.PressedDown()) {
+    } else if (keys.PressedDown()) { // ↓
         commands.MoveFocusDown();
-    } else if (keys.PressedLeft()) {
+    } else if (keys.PressedLeft()) { // ←
         commands.MoveFocusLeft();
-    } else if (keys.PressedRight()) {
+    } else if (keys.PressedRight()) { // →
         commands.MoveFocusRight();
-    } else if (keys.PressedA()) {
+    } else if (keys.PressedA()) { // A
         notifyPreviousTouch();
-    } else if (keys.PressedB()) {
+    } else if (keys.PressedB()) { // B
         commands.InputOperatorBackspace();
-    } else if (keys.PressedX()) {
+    } else if (keys.PressedX()) { // X
         commands.Clear();
-    } else if (keys.PressedY()) {
-        commands.SwitchWidthLower();
-    } else if (keys.PressedSelect()) {
-        commands.ToggleSign();
-    } else if (keys.PressedStart()) {
+    } else if (keys.PressedY()) { // Y
         commands.Evaluate();
-    } else if (keys.PressedL()) {
-        commands.SwitchBaseUpper();
-    } else if (keys.PressedR()) {
+    } else if (keys.PressedSelect()) { // Select
         commands.SwitchBaseLower();
+    } else if (keys.PressedStart()) { // Start
+        commands.SwitchBaseUpper();
+    } else if (keys.PressedL()) { // L
+        commands.SwitchFormulaPageLeft();
+    } else if (keys.PressedR()) { // R
+        commands.SwitchFormulaPageRight();
     }
 }
 

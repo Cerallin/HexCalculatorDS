@@ -12,6 +12,30 @@ An integer calculator for Nintendo DS.
 
 ![screenshot](images/screenshot.png)
 
+## Controls
+
+The calculator supports both touch input on the sub screen and hardware key
+input on the Nintendo DS.
+
+### D-pad
+
+Move to select buttons on the sub screen. The currently selected button will be highlighted with a focus sign. Pressing `A` will activate the
+selected button, which is equivalent to touching the button on the sub screen.
+
+### Face buttons
+
+- `A`: activate the selected button
+- `B`: backspace
+- `X`: clear current input/formula
+- `Y`: evaluate the formula
+
+### System and shoulder buttons
+
+- `Select`: switch to the lower number base
+- `Start`: switch to the upper number base
+- `L`: switch to the previous formula page
+- `R`: switch to the next formula page
+
 ## Milestones
 
 ### v1.0.0
@@ -37,7 +61,7 @@ An integer calculator for Nintendo DS.
 
 ### v1.2.0
 
-- [ ] Scroll the formula
+- [x] Scroll the formula
 - [ ] Implement color themes
 - [ ] Add background color to the `UINT32`
 - [ ] Modify the font shadows

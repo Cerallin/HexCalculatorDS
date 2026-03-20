@@ -9,6 +9,7 @@
 #include "commands.h"
 #include "event.h"
 #include "format.h"
+#include "input.h"
 #include "model.h"
 
 #include <nds.h>
@@ -171,6 +172,17 @@ class FormulaManager {
 
     void formulaInsertOp(OperatorType op);
     void formulaInsertDigits();
+
+    /**
+     * @brief Switch to the next or previous page of the formula display, if
+     * applicable.
+     *
+     * @param dir The direction to switch the page (DirLeft for next page,
+     * DirRight for previous page)
+     * @return true if the page was switched, false if there is no next/previous
+     * page to switch to
+     */
+    bool switchPage(Direction dir);
 };
 
 /**

@@ -206,6 +206,25 @@ FormulaManager::formulaInsertDigits() {
     formulaState = InputDigit;
 }
 
+bool
+FormulaManager::switchPage(Direction dir) {
+    if (dir == DirRight) {
+        if (currentPage > 1) {
+            currentPage--;
+
+            return true;
+        }
+    } else if (dir == DirLeft) {
+        if ((currentPage * MaxPageGlyphs) < formulaGlyphs.Size()) {
+            currentPage++;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 EventResult
 FormulaManager::HandleEvent(const Event &e) {
     if (e.type == NumberAcceptEvent) {
@@ -239,6 +258,7 @@ FormulaManager::HandleEvent(const Event &e) {
         // must after '=' is inserted
         if (op == OperatorType::Equal) {
             formulaState = Evaluated;
+            currentPage = 1;
         }
         notifyFormulaUpdate();
     } else if (e.type == ClearEvent) {
@@ -246,10 +266,20 @@ FormulaManager::HandleEvent(const Event &e) {
         formulaState = Evaluated;
 
         leftBracketCount = 0;
+        currentPage = 1;
 
         notifyFormulaUpdate();
 
         return Consumed;
+    } else if (e.type == SwitchFormulaPageEvent) {
+        auto dir = static_cast<Direction>(e.data);
+        if (switchPage(dir)) {
+            notifyFormulaUpdate();
+
+            return Consumed;
+        }
+
+        return Skipped;
     } else {
         return Skipped;
     }
