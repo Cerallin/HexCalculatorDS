@@ -258,8 +258,10 @@ FormulaManager::HandleEvent(const Event &e) {
         // must after '=' is inserted
         if (op == OperatorType::Equal) {
             formulaState = Evaluated;
-            currentPage = 1;
         }
+        // Always reset current page to 1 after operator is accepted since the
+        // user may want to see the result
+        currentPage = 1;
         notifyFormulaUpdate();
     } else if (e.type == ClearEvent) {
         formulaGlyphs.Clear();
