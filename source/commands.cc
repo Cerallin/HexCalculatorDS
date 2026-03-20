@@ -426,6 +426,24 @@ Commands::Clear(void) {
 }
 
 void
+Commands::SwitchFormulaPageLeft(void) {
+    debugf("Switch formula page left triggered\n");
+    bus.Post(Event{
+        DirLeft,
+        EventType::SwitchFormulaPageEvent,
+    });
+}
+
+void
+Commands::SwitchFormulaPageRight(void) {
+    debugf("Switch formula page right triggered\n");
+    bus.Post(Event{
+        DirRight,
+        EventType::SwitchFormulaPageEvent,
+    });
+}
+
+void
 Commands::MoveFocusUp(void) {
     debugf("Move focus up triggered\n");
     bus.Post(Event{

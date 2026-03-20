@@ -54,6 +54,9 @@ class Commands {
 
     void Clear(void);
 
+    void SwitchFormulaPageLeft(void);
+    void SwitchFormulaPageRight(void);
+
     void MoveFocusUp(void);
     void MoveFocusDown(void);
     void MoveFocusLeft(void);
