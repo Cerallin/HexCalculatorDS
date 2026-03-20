@@ -27,12 +27,12 @@ selected button, which is equivalent to touching the button on the sub screen.
 - `A`: activate the selected button
 - `B`: backspace
 - `X`: clear current input/formula
-- `Y`: evaluate the formula
+- `Y`: switch to the upper number width (QWORD/DWORD/WORD/BYTE)
 
 ### System and shoulder buttons
 
-- `Select`: switch to the lower number base
-- `Start`: switch to the upper number base
+- `Select`: switch to the lower number base (hex/dec/oct/bin)
+- `Start`: evaluate the formula
 - `L`: switch to the previous formula page
 - `R`: switch to the next formula page
 

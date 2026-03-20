@@ -321,11 +321,11 @@ InputHandler::handleKeyInput(void) {
     } else if (keys.PressedX()) { // X
         commands.Clear();
     } else if (keys.PressedY()) { // Y
-        commands.Evaluate();
+        commands.SwitchWidthUpper();
     } else if (keys.PressedSelect()) { // Select
         commands.SwitchBaseLower();
     } else if (keys.PressedStart()) { // Start
-        commands.SwitchBaseUpper();
+        commands.Evaluate();
     } else if (keys.PressedL()) { // L
         commands.SwitchFormulaPageLeft();
     } else if (keys.PressedR()) { // R
