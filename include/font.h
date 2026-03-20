@@ -50,6 +50,8 @@ enum FontChar : FontType {
     Font6x8Plus,
     Font6x8Minus,
     Font6x8Comma,
+    Font6x8LArrow,
+    Font6x8RArrow,
     /**
      * @brief FontChar used for transcode view headers.
      *
@@ -467,6 +469,12 @@ constexpr Glyph::Glyph(FontType font)
         break;
     case Font6x8Divide:
         *this = Glyph(0, 95);
+        break;
+    case Font6x8LArrow:
+        *this = Glyph(0, 103);
+        break;
+    case Font6x8RArrow:
+        *this = Glyph(0, 104);
         break;
     default:
         *this = InvalidGlyph;
