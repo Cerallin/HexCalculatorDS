@@ -196,11 +196,17 @@ InputView::HandleEvent(const Event &e) {
         auto newLeftBracketCount = vm.GetLeftBracketCount();
         if (newLeftBracketCount != leftBracketCount) {
             updateLBrackCount(newLeftBracketCount);
+            // Reset right bracket button status
+            BasicView::markDirty();
+
             return Consumed;
         }
         return Skipped;
     } else if (e.type == EventType::ClearEvent) {
         updateLBrackCount(0);
+        // Reset right bracket button status
+        BasicView::markDirty();
+
         return Consumed;
     }
 
