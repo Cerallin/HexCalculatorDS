@@ -7,9 +7,59 @@
 #include "test_config.h"
 
 #include "config.cc"
+#include "format.h"
 #include "number.h"
 
 static constexpr size_t MaxDigits = 64;
+
+namespace {
+
+constexpr bool
+TestHexFormattingConstexpr(void) {
+    HexCalc::DigitArray<HexCalc::Number::MaxHexDigits> digits;
+    digits[0] = HexCalc::DigitA;
+    digits[1] = HexCalc::DigitB;
+    digits.size = 2;
+
+    auto formatted =
+        HexCalc::MakeFormattedGlyphArray<HexCalc::Hexadecimal, 6, 8>(digits);
+
+    return formatted.Size() == 4;
+}
+
+constexpr bool
+TestDecimalFormattingConstexpr(void) {
+    HexCalc::DigitArray<HexCalc::Number::MaxDecDigits> digits;
+    digits[0] = HexCalc::Digit5;
+    digits.size = 1;
+    digits.negative = true;
+
+    auto formatted =
+        HexCalc::MakeFormattedGlyphArray<HexCalc::Decimal, 6, 8>(digits);
+
+    return formatted.Size() == 2;
+}
+
+constexpr bool
+TestBinaryFormattingConstexpr(void) {
+    HexCalc::DigitArray<HexCalc::Number::MaxBinDigits> digits;
+    digits[0] = HexCalc::Digit1;
+    digits.size = 1;
+
+    auto formatted =
+        HexCalc::MakeFormattedGlyphArray<HexCalc::Binary, 6, 8>(digits);
+
+    return formatted.Size() == 19;
+}
+
+static_assert(TestHexFormattingConstexpr(),
+              "hex formatting should stay constexpr-evaluable");
+static_assert(TestDecimalFormattingConstexpr(),
+              "decimal formatting should stay constexpr-evaluable");
+static_assert(TestBinaryFormattingConstexpr(),
+              "binary formatting should use the shared constexpr pipeline");
+
+} // namespace
 
 TEST_GROUP(Number){};
 

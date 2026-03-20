@@ -67,27 +67,30 @@ class MainView : public BasicView<Derived, MainDisplay> {
 
     static constexpr auto viewAlign = Align;
 
-    template <class FormatArrayType, class GlyphArrayType, size_t N>
+    template <int W, int H, size_t N>
     void
-    PrintGlyphs(DigitArray<N> digits, bool underline = false) const {
+    PrintFormattedGlyphs(NumberBase base, DigitArray<N> digits,
+                         bool underline = false) const {
         Point start(viewArea.x, viewArea.y);
-        if constexpr (Derived::viewAlign == AlignLeft) {
-            GlyphArrayType glyphs(digits, true);
-            FormatArrayType formattedGlyphs(glyphs);
-            this->display.ClearLine(start, formattedGlyphs.CharWidth,
-                                    underline);
-            this->display.PrintLine(formattedGlyphs, start);
-        } else { // align right
-            GlyphArrayType glyphs(digits, false);
-            FormatArrayType formattedGlyphs(glyphs);
-            Area8x8 area(viewArea);
-            auto skipGlyphs = area.w - formattedGlyphs.Size();
-            Point glyphStart(viewArea.x +
-                                 (skipGlyphs * formattedGlyphs.CharWidth),
-                             viewArea.y);
-            this->display.ClearLine(start, glyphs.CharWidth, underline);
-            this->display.PrintLine(formattedGlyphs, glyphStart);
-        }
+        constexpr bool reverse = (Derived::viewAlign == AlignLeft);
+        VisitFormattedGlyphArray<W, H>(
+            base, digits, reverse,
+            [this, start, underline](const auto &formattedGlyphs) {
+                if constexpr (reverse) {
+                    this->display.ClearLine(start, formattedGlyphs.CharWidth,
+                                            underline);
+                    this->display.PrintLine(formattedGlyphs, start);
+                } else {
+                    Area8x8 area(viewArea);
+                    auto skipGlyphs = area.w - formattedGlyphs.Size();
+                    Point glyphStart(
+                        viewArea.x + (skipGlyphs * formattedGlyphs.CharWidth),
+                        viewArea.y);
+                    this->display.ClearLine(start, formattedGlyphs.CharWidth,
+                                            underline);
+                    this->display.PrintLine(formattedGlyphs, glyphStart);
+                }
+            });
     }
 
   protected:

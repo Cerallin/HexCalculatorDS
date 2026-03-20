@@ -418,20 +418,7 @@ ValueView::ForceUpdate(void) {
 
     auto base = vm.GetNumberBase();
     auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
-
-    constexpr auto N = MaxDisplayDigits;
-
-    if (base == Hexadecimal) {
-        PrintGlyphs<HexGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
-    } else if (base == Decimal) {
-        PrintGlyphs<DecGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
-    } else if (base == Octal) {
-        PrintGlyphs<OctGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
-    } else if (base == Binary) {
-        PrintGlyphs<BinGlyphArray8x8<N>, GlyphArray8x8<N>>(digits, true);
-    } else {
-        // should never reach here
-    }
+    PrintFormattedGlyphs<8, 8>(base, digits, true);
 }
 
 EventResult
@@ -526,13 +513,7 @@ template <NumberBase base>
 void
 TranscodeView<base>::printNumber(void) const {
     auto digits = vm.GetValueDigits<MaxDigitsForType<base>()>(base);
-    using GlyphArrayType = std::conditional_t<
-        (base == Hexadecimal), HexGlyphArray6x8,
-        std::conditional_t<(base == Decimal), DecGlyphArray6x8,
-                           std::conditional_t<(base == Octal), OctGlyphArray6x8,
-                                              BinGlyphArray6x8>>>;
-    GlyphArray6x8<MaxDigitsForType<base>()> glyphArray(digits, false);
-    GlyphArrayType glyphs(glyphArray);
+    auto glyphs = MakeFormattedGlyphArray<base, 6, 8>(digits, false);
 
     Point start(this->viewArea.x +
                     (headerSkip + header.Size() + numberGap) * CharWidth,
@@ -548,8 +529,7 @@ TranscodeView<Binary>::printNumber(void) const {
     // different widths of number display
     for (int i = 0; i < 4; i++) {
         auto digits = vm.GetValueDigitsPerByte<Number::MaxBinDigits>(i, Binary);
-        GlyphArray6x8<Number::MaxBinDigits> glyphArray(digits, false);
-        BinGlyphArray6x8 glyphs(glyphArray);
+        auto glyphs = MakeFormattedGlyphArray<Binary, 6, 8>(digits, false);
         Point start(this->viewArea.x +
                         (headerSkip + header.Size() + numberGap) * CharWidth,
                     this->viewArea.y + (3 - i) * lineHeight * CharHeight);

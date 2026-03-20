@@ -95,12 +95,12 @@ template <size_t N>
 struct DigitArray {
     constexpr DigitArray(void) : digits{}, size(0), negative(false) {}
 
-    auto &
+    constexpr auto &
     operator[](size_t index) {
         return digits[index];
     }
 
-    const auto &
+    constexpr const auto &
     operator[](size_t index) const {
         return digits[index];
     }

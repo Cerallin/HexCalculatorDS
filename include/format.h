@@ -61,7 +61,7 @@ class GlyphArray {
         }
     }
 
-    bool
+    constexpr bool
     Insert(const Glyph &glyph) {
         if (size >= N) {
             return false;
@@ -72,7 +72,7 @@ class GlyphArray {
         return true;
     }
 
-    size_t
+    constexpr size_t
     Size(void) const {
         return size;
     }
@@ -80,44 +80,44 @@ class GlyphArray {
     using iterator = Glyph *;
     using const_iterator = const Glyph *;
 
-    const Glyph &
+    constexpr const Glyph &
     operator[](size_t index) const {
         return glyphs[index];
     }
 
-    iterator
+    constexpr iterator
     begin(void) {
         return glyphs;
     }
-    iterator
+    constexpr iterator
     end(void) {
         return glyphs + size;
     }
 
-    const_iterator
+    constexpr const_iterator
     begin(void) const {
         return glyphs;
     }
-    const_iterator
+    constexpr const_iterator
     end(void) const {
         return glyphs + size;
     }
 
-    const_iterator
+    constexpr const_iterator
     cbegin(void) const {
         return glyphs;
     }
-    const_iterator
+    constexpr const_iterator
     cend(void) const {
         return glyphs + size;
     }
 
-    bool
+    constexpr bool
     Negative(void) const {
         return negative;
     }
 
-    void
+    constexpr void
     Clear(void) {
         size = 0;
         negative = false;
@@ -165,9 +165,9 @@ class HeaderGlyphArray6x8 : public GlyphArray6x8<3> {
  */
 constexpr size_t
 GlyphFormatSize(size_t digitCount, int groupSize, bool signable = false) {
-    if (groupSize <= 0) {
-        return digitCount;
-    }
+    // if (digitCount == 0 || groupSize <= 0) {
+    //     return digitCount;
+    // }
     size_t separatorCount = (digitCount - 1) / groupSize;
     // +1 for potential sign
     return digitCount + separatorCount + (signable ? 1 : 0);
@@ -180,72 +180,48 @@ GlyphFormatSize(size_t digitCount, int groupSize, bool signable = false) {
  * decimal, '_' for hexadecimal and octal)
  * @tparam GroupSize The size of each group of digits (e.g. 4 for binary, 3 for
  * octal, etc.)
+ * @tparam PaddingGroupSize The zero-padding group size. Set to 0 to disable
+ * padding.
  * @tparam Signable Whether the number has a sign (true for decimal, false for
  * hexadecimal and octal)
  * @tparam N The maximum number of digits in the number
  */
-template <FontType Separator, int GroupSize, bool Signable, int W, int H,
-          size_t N>
+template <FontType Separator, int GroupSize, int PaddingGroupSize,
+          bool Signable, int W, int H, size_t N>
 class GlyphFormatArray
     : public GlyphArray<W, H, GlyphFormatSize(N, GroupSize, Signable)> {
   private:
     using Base = GlyphArray<W, H, GlyphFormatSize(N, GroupSize, Signable)>;
 
-    template <size_t I>
     constexpr void
-    InsertDigit(const GlyphArray<W, H, N> &src, size_t digitCount) {
-        if constexpr (I < N) {
+    InsertDigit(const Glyph &glyph, size_t index, size_t digitCount) {
+        this->Insert(glyph);
 
-            if (I < digitCount) {
+        if constexpr (GroupSize > 0) {
+            bool isLast = (index + 1 == digitCount);
+            size_t remaining = digitCount - index - 1;
+            bool needSep = (!isLast) && (remaining % GroupSize == 0);
 
-                auto glyph = src[I];
-                this->Insert(glyph);
-
-                constexpr bool enableSep = (GroupSize > 0);
-
-                if constexpr (enableSep) {
-
-                    bool isLast = (I + 1 == digitCount);
-
-                    size_t remaining = digitCount - I - 1;
-
-                    bool needSep = (!isLast) && (remaining % GroupSize == 0);
-
-                    if (needSep) {
-                        this->Insert(Glyph(Separator));
-                    }
-                }
+            if (needSep) {
+                this->Insert(Glyph(Separator));
             }
         }
-    }
-
-    template <size_t... I>
-    constexpr void
-    InsertDigitsImpl(const GlyphArray<W, H, N> &src, size_t digitCount,
-                     std::index_sequence<I...>) {
-        (InsertDigit<I>(src, digitCount), ...);
-    }
-
-    constexpr void
-    InsertDigits(const GlyphArray<W, H, N> &src) {
-        InsertDigitsImpl(src, src.Size(), std::make_index_sequence<N>{});
     }
 
   public:
     explicit constexpr GlyphFormatArray(const GlyphArray<W, H, N> &glyphArray)
         : Base() {
         const size_t digitCount = glyphArray.Size();
+        size_t paddingCount = 0;
 
         // ---------- padding ----------
-        if constexpr (!Signable && GroupSize > 0) {
-
-            size_t zerosCount =
-                (GroupSize - (digitCount % GroupSize)) % GroupSize;
-
-            for (size_t i = 0; i < zerosCount; i++) {
-                this->Insert(Glyph(Base::fontZero));
-            }
+        if constexpr (PaddingGroupSize > 0) {
+            paddingCount =
+                (PaddingGroupSize - (digitCount % PaddingGroupSize)) %
+                PaddingGroupSize;
         }
+
+        const size_t totalDigitCount = digitCount + paddingCount;
 
         // ---------- sign ----------
         if constexpr (Signable) {
@@ -255,67 +231,144 @@ class GlyphFormatArray
             }
         }
 
+        // ---------- leading zeros ----------
+        for (size_t i = 0; i < paddingCount; i++) {
+            InsertDigit(Glyph(Base::fontZero), i, totalDigitCount);
+        }
+
         // ---------- digits ----------
-        InsertDigits(glyphArray);
+        for (size_t i = 0; i < digitCount; i++) {
+            InsertDigit(glyphArray[i], paddingCount + i, totalDigitCount);
+        }
     }
 };
 
-template <FontType Separator, int GroupSize, bool Signable, size_t N>
+template <FontType Separator, int GroupSize, int PaddingGroupSize,
+          bool Signable, size_t N>
 using GlyphFormatArray6x8 =
-    GlyphFormatArray<Separator, GroupSize, Signable, 6, 8, N>;
+    GlyphFormatArray<Separator, GroupSize, PaddingGroupSize, Signable, 6, 8, N>;
 
-template <FontType Separator, int GroupSize, bool Signable, size_t N>
+template <FontType Separator, int GroupSize, int PaddingGroupSize,
+          bool Signable, size_t N>
 using GlyphFormatArray8x8 =
-    GlyphFormatArray<Separator, GroupSize, Signable, 8, 8, N>;
+    GlyphFormatArray<Separator, GroupSize, PaddingGroupSize, Signable, 8, 8, N>;
+
+template <NumberBase Base, int W, int H>
+struct GlyphFormatTraits;
+
+template <int W, int H>
+struct GlyphFormatTraits<Hexadecimal, W, H> {
+    static constexpr FontType Separator = FontEmpty;
+    static constexpr int GroupSize = 4;
+    static constexpr int PaddingGroupSize = 4;
+    static constexpr bool Signable = false;
+};
+
+template <int W, int H>
+struct GlyphFormatTraits<Decimal, W, H> {
+    static constexpr FontType Separator =
+        (W == 8 && H == 8) ? Font8x8Comma : Font6x8Comma;
+    static constexpr int GroupSize = 3;
+    static constexpr int PaddingGroupSize = 0;
+    static constexpr bool Signable = true;
+};
+
+template <int W, int H>
+struct GlyphFormatTraits<Octal, W, H> {
+    static constexpr FontType Separator = FontEmpty;
+    static constexpr int GroupSize = 3;
+    static constexpr int PaddingGroupSize = 3;
+    static constexpr bool Signable = false;
+};
+
+template <int W, int H>
+struct GlyphFormatTraits<Binary, W, H> {
+    static constexpr FontType Separator = FontEmpty;
+    static constexpr int GroupSize = 4;
+    static constexpr int PaddingGroupSize = 16;
+    static constexpr bool Signable = false;
+};
+
+template <NumberBase Base, int W, int H, size_t N>
+using NumberGlyphArray =
+    GlyphFormatArray<GlyphFormatTraits<Base, W, H>::Separator,
+                     GlyphFormatTraits<Base, W, H>::GroupSize,
+                     GlyphFormatTraits<Base, W, H>::PaddingGroupSize,
+                     GlyphFormatTraits<Base, W, H>::Signable, W, H, N>;
+
+template <NumberBase Base, size_t N>
+using NumberGlyphArray6x8 = NumberGlyphArray<Base, 6, 8, N>;
+
+template <NumberBase Base, size_t N>
+using NumberGlyphArray8x8 = NumberGlyphArray<Base, 8, 8, N>;
+
+template <NumberBase Base, int W, int H, size_t N>
+constexpr auto
+MakeFormattedGlyphArray(DigitArray<N> digits, bool reverse = false) {
+    GlyphArray<W, H, N> glyphArray(digits, reverse);
+    return NumberGlyphArray<Base, W, H, N>(glyphArray);
+}
+
+template <int W, int H, size_t N, typename Visitor>
+decltype(auto)
+VisitFormattedGlyphArray(NumberBase base, DigitArray<N> digits, bool reverse,
+                         Visitor &&visitor) {
+    switch (base) {
+    case Hexadecimal:
+        return visitor(
+            MakeFormattedGlyphArray<Hexadecimal, W, H>(digits, reverse));
+    case Decimal:
+        return visitor(MakeFormattedGlyphArray<Decimal, W, H>(digits, reverse));
+    case Octal:
+        return visitor(MakeFormattedGlyphArray<Octal, W, H>(digits, reverse));
+    case Binary:
+        return visitor(MakeFormattedGlyphArray<Binary, W, H>(digits, reverse));
+    default:
+        break;
+    }
+
+    assert(false && "Invalid NumberBase");
+    return visitor(MakeFormattedGlyphArray<Hexadecimal, W, H>(digits, reverse));
+}
 
 /**
  * @brief Glyph array for hexadecimal numbers, with group size of 4 and
  * separator '_'.
  *
  */
-using HexGlyphArray6x8 =
-    GlyphFormatArray6x8<FontEmpty, 4, false, Number::MaxHexDigits>;
+using HexGlyphArray6x8 = NumberGlyphArray6x8<Hexadecimal, Number::MaxHexDigits>;
 /**
  * @brief Glyph array for decimal numbers, with a sign and group size of 3 and
  * separator ','.
  *
  */
-using DecGlyphArray6x8 =
-    GlyphFormatArray6x8<Font6x8Comma, 3, true, Number::MaxDecDigits>;
+using DecGlyphArray6x8 = NumberGlyphArray6x8<Decimal, Number::MaxDecDigits>;
 
 /**
  * @brief Glyph array for octal numbers, with group size of 3 and separator '_'.
  *
  */
-using OctGlyphArray6x8 =
-    GlyphFormatArray6x8<FontEmpty, 3, false, Number::MaxOctDigits>;
+using OctGlyphArray6x8 = NumberGlyphArray6x8<Octal, Number::MaxOctDigits>;
 
 /**
  * @brief Glyph array for binary numbers, with group size of 4 and separator
  * '_'.
  *
+ * Example: 0011010110 -> 0000000011010110 -> 0000_0000_1101_0110
  */
-class BinGlyphArray6x8
-    : public GlyphFormatArray6x8<FontEmpty, 4, false, Number::MaxBinDigits> {
-  public:
-    explicit constexpr BinGlyphArray6x8(
-        const GlyphArray6x8<Number::MaxBinDigits> &glyphArray)
-        : GlyphFormatArray6x8<FontEmpty, 4, false, Number::MaxBinDigits>(
-              GlyphFormatArray6x8<FontEmpty, 16, false, Number::MaxBinDigits>(
-                  glyphArray)) {}
-};
+using BinGlyphArray6x8 = NumberGlyphArray6x8<Binary, Number::MaxBinDigits>;
 
 template <size_t N>
-using HexGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 4, false, N>;
+using HexGlyphArray8x8 = NumberGlyphArray8x8<Hexadecimal, N>;
 
 template <size_t N>
-using DecGlyphArray8x8 = GlyphFormatArray8x8<Font8x8Comma, 3, true, N>;
+using DecGlyphArray8x8 = NumberGlyphArray8x8<Decimal, N>;
 
 template <size_t N>
-using OctGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 3, false, N>;
+using OctGlyphArray8x8 = NumberGlyphArray8x8<Octal, N>;
 
 template <size_t N>
-using BinGlyphArray8x8 = GlyphFormatArray8x8<FontEmpty, 4, false, N>;
+using BinGlyphArray8x8 = NumberGlyphArray8x8<Binary, N>;
 
 constexpr size_t
 max(size_t a, size_t b, size_t c, size_t d) {
