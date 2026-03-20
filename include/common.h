@@ -6,8 +6,6 @@
  */
 #pragma once
 
-#include "project.h"
-
 #include <array>
 #include <cassert>
 #include <cmath>

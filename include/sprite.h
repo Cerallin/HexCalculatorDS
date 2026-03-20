@@ -7,17 +7,14 @@
 #pragma once
 
 #include "common.h"
-#include "display.h"
 #include "input.h"
-
-#include "subNumber.h"
-#include "subVersion.h"
 
 #include <nds.h>
 
-#define _(str) versionStrFont(str)
-
 namespace HexCalc {
+
+class MainDisplay;
+class SubDisplay;
 
 template <typename DisplayType>
 class Sprite {
@@ -98,41 +95,7 @@ class SpriteManager : NonCopyable {
         }
     }
 
-    SpriteManager(void) {
-        // Initialize OAM and VRAM for sprites
-        vramSetBankD(VRAM_D_SUB_SPRITE);
-        oamInit(&oamState, SpriteMapping_1D_256, false);
-        // Load shared graphics for numbers
-        decompress(subNumberTiles, SpriteGfx(), LZ77Vram);
-        dmaCopy(subNumberPal, SPRITE_PALETTE_SUB, 16 * sizeof(uint16_t));
-
-        // Load shared graphics for version numbers
-        decompress(subVersionTiles,
-                   SpriteGfx() + 16 * TileBytes / sizeof(uint16_t), LZ77Vram);
-        // Use the same palette for version
-
-        // Initialize the version string
-        constexpr auto versionArr = _("v" HEXCALCDS_PROJECT_VERSION);
-
-        constexpr auto kerning = [](FontChar font) {
-            if (font == FontVersionDot) {
-                return 3;
-            } else {
-                return 5;
-            }
-        };
-        int16_t offsetX = 0;
-        int16_t offsetY = 1;
-        for (const auto &font : versionArr) {
-            auto sp = Add(Point(10 + offsetX, offsetY));
-            const auto tileIndex = font - FontVersion0 + 16 + 1;
-            // 16 for number tiles, 1 for the backdrop color
-            sp->SetTileOffset(tileIndex);
-            offsetX += kerning(font);
-        }
-
-        oamEnable(&oamState);
-    }
+    SpriteManager(void) : sprites{}, spriteCount(0) {}
 
     Sprite<DisplayType> *
     Add(Point position, int priority = 0) {
@@ -179,8 +142,8 @@ class SpriteManager : NonCopyable {
   private:
     using SpriteIndex = ssize_t;
 
-    Sprite<DisplayType> sprites[MaxSprites] = {};
-    SpriteIndex spriteCount = 0;
+    Sprite<DisplayType> sprites[MaxSprites];
+    SpriteIndex spriteCount;
 
     SpriteIndex
     findFreeSlot(void) const {
@@ -194,7 +157,17 @@ class SpriteManager : NonCopyable {
     }
 };
 
-using SubSpriteManager = SpriteManager<SubDisplay>;
-using MainSpriteManager = SpriteManager<MainDisplay>;
+class MainDisplay;
+class SubDisplay;
+
+class MainSpriteManager : public SpriteManager<MainDisplay> {
+  public:
+    MainSpriteManager(void);
+};
+
+class SubSpriteManager : public SpriteManager<SubDisplay> {
+  public:
+    SubSpriteManager(void);
+};
 
 }; // namespace HexCalc

@@ -13,6 +13,7 @@
 #include "traits.h"
 
 namespace HexCalc {
+
 template <class Derived, typename DisplayType, int BorderWidth,
           int BorderHeight, int TextCount, int TextGlyphCount>
 class DrawerManager {
@@ -240,7 +241,10 @@ class Display : private NonCopyable {
     }
 
   protected:
-    SpriteManager<DisplayType> sm;
+    using SpriteManagerType =
+        std::conditional_t<std::is_same_v<DisplayType, MainDisplay>,
+                           MainSpriteManager, SubSpriteManager>;
+    SpriteManagerType sm;
 };
 
 /**
