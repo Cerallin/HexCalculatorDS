@@ -14,6 +14,22 @@ set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Wno-unused-variable -O2 -s -w -flto -ffas
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-DNDEBUG -g -O2 -flto -ffast-math")
 
 # ----------------------------------------
+# Options
+# ----------------------------------------
+set(THEME "light" CACHE STRING "Color theme (default: light)")
+
+# Valid themes: light, dark
+if (THEME STREQUAL "light")
+    set(THEME_DEFINITION THEME_LIGHT)
+elseif (THEME STREQUAL "dark")
+    set(THEME_DEFINITION THEME_DARK)
+else()
+    message(FATAL_ERROR "Invalid theme: ${THEME}. Valid themes are: light, dark")
+endif()
+
+message(STATUS "Current theme: ${THEME}")
+
+# ----------------------------------------
 # Environments
 # ----------------------------------------
 
@@ -102,6 +118,7 @@ add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
     COMMAND ${PYTHON}
         ${CMAKE_CURRENT_SOURCE_DIR}/subscreen_maker/run.py
+        ${THEME}
         ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-sub.png
         ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-sub.png

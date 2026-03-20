@@ -9,7 +9,7 @@ import os
 import sys
 from image import Palette, IndexedImage, Bmp8Writer, ImagePreprocessor
 from contour import ContourAnalyzer, ContourRecord, hex_to_bgr, rgb_to_16bit
-from color_theme import LightTheme, DarkTheme
+from color_theme import ColorTheme, LightTheme, DarkTheme
 
 DEBUG = False
 
@@ -17,9 +17,6 @@ lightTheme = LightTheme()
 darkTheme = DarkTheme()
 
 defaultTheme = lightTheme
-
-theme = lightTheme
-
 
 class HexCalculatorExporter:
 
@@ -141,7 +138,7 @@ class HexCalculatorExporter:
 
         return records
 
-    def build_image(self, records: list[ContourRecord], width, height):
+    def build_image(self, records: list[ContourRecord], theme: ColorTheme, width, height):
 
         palette = Palette()
 
@@ -173,7 +170,7 @@ class HexCalculatorExporter:
 
         return img, palette
 
-    def build_c_header(self, records, output_dir, prefix):
+    def build_c_header(self, records, theme, output_dir, prefix):
         output_area_file = os.path.join(output_dir, f"{prefix}.h")
         output_color_file = os.path.join(output_dir, f"{prefix}Colors.h")
 
@@ -220,7 +217,7 @@ class HexCalculatorExporter:
 
             f.write("\n#endif // SUBSCREEN_COLOR_H\n")
 
-    def export(self, output_file):
+    def export(self, output_file, theme):
         self.preprocess()
         records = self.analyze()
         if DEBUG:
@@ -234,22 +231,27 @@ class HexCalculatorExporter:
 
         output_dir = os.path.dirname(output_file)
         prefix = os.path.splitext(os.path.basename(output_file))[0]
-        self.build_c_header(records, output_dir, prefix)
+        self.build_c_header(records, theme, output_dir, prefix)
 
         h, w, _ = self.image.shape
-        image, palette = self.build_image(records, w, h)
+        image, palette = self.build_image(records, theme, w, h)
 
         Bmp8Writer.save(output_file, image.get_array(), palette.get())
 
 
 if __name__ == "__main__":
-
-    if len(sys.argv) != 3:
-        print("Usage: python script.py input output")
+    if len(sys.argv) != 4:
+        print("Usage: python script.py theme input output_file")
         sys.exit(1)
 
-    input_image = sys.argv[1]
-    output_file = sys.argv[2]
+    theme_name  = sys.argv[1]
+    input_image = sys.argv[2]
+    output_file = sys.argv[3]
+
+    theme_map = {
+        "light": LightTheme(),
+        "dark": DarkTheme(),
+    }
 
     img = ImagePreprocessor.read_image(input_image)
     if img is None:
@@ -257,4 +259,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     exporter = HexCalculatorExporter(img)
-    exporter.export(output_file)
+    exporter.export(output_file, theme_map[theme_name])

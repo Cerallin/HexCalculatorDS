@@ -6,11 +6,11 @@
  */
 #include "display.h"
 #include "common.h"
+#include "theme.h"
 
 // assets
 #include "mainFont.h"
 #include "subFont.h"
-#include "subscreenAreaColors.h"
 #include "subscreenImage.h"
 
 using namespace HexCalc;
@@ -19,28 +19,6 @@ static constexpr int VRAM_C_SIZE = 128 * 1024;    // 128 Kb
 static constexpr int bmpBaseBankSize = 16 * 1024; // 16 Kb
 static constexpr int mapBaseBankSize = 2048;      // 2 Kb
 static constexpr int byteSize = 8;
-
-constexpr int16_t mainPal[] = {
-    0x0000,
-    COLOR_COMMON_BG,
-    COLOR_COMMON_BORDER,
-    COLOR_COMMON_TEXT,
-    COLOR_COMMON_SHADOW,
-    COLOR_DISABLED_BG,
-    COLOR_DISABLED_SHADOW,
-    COLOR_DISABLED_BORDER,
-};
-
-constexpr int16_t subPal[] = {
-    0x0000,
-    COLOR_COMMON_BG,
-    COLOR_COMMON_BORDER,
-    COLOR_COMMON_TEXT,
-    COLOR_COMMON_SHADOW,
-    COLOR_DISABLED_BG,
-    COLOR_DISABLED_SHADOW,
-    COLOR_DISABLED_BORDER,
-};
 
 static constexpr auto
 align64(int x) {

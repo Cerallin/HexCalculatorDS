@@ -1,5 +1,7 @@
 #!/bin/bash
 
+THEME=${THEME:-light}
+
 print_help() {
     cat <<EOF
 Usage: $0 [options]
@@ -49,5 +51,8 @@ else
 fi
 
 mkdir -p build
-cmake -S . -B build -DCMAKE_BUILD_TYPE=$build_type -DCMAKE_TOOLCHAIN_FILE=cmake/devkitarm-toolchain.cmake
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=$build_type \
+    -DCMAKE_TOOLCHAIN_FILE=cmake/devkitarm-toolchain.cmake \
+    -DTHEME=$THEME
 cmake --build build --config $build_type -j $(nproc)
