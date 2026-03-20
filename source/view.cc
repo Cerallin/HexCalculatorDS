@@ -375,26 +375,40 @@ FormulaView::ForceUpdate(void) {
     debugf("FormulaView refreshed\n");
     Area6x8 area(viewArea);
 
+    // Clear all glyphs
     clear();
-    // TODO pagination
-    bake();
 
-    const auto &glyphs = vm.GetFormulaGlyphs();
+    const auto &paginator = vm.GetFormulaPaginator();
+    const auto &glyphs = paginator.Glyphs();
 
+    // Draw current page of formula glyphs, aligned to the right
     auto skipGlyphs = area.w - glyphs.Size();
     Point start(viewArea.x + skipGlyphs * glyphs.CharWidth, viewArea.y);
     display.PrintLine(glyphs, start);
+    // Draw pagination indicators
+    // <- indicates there are more glyphs on the left (next page)
+    // 2 is offset
+    auto nextX = viewArea.x + 2;
+    auto nextY = viewArea.y;
+    if (paginator.HasNextPage()) {
+        display.PrintGlyph(nextX, nextY, Glyph(Font6x8LArrow));
+    } else {
+        display.PrintGlyph(nextX, nextY, Glyph(FontEmpty));
+    }
+    // -> indicates there are more glyphs on the right (previous page)
+    auto prevX = viewArea.x + (area.w * glyphs.CharWidth);
+    auto prevY = viewArea.y;
+    if (paginator.HasPreviousPage()) {
+        display.PrintGlyph(prevX, prevY, Glyph(Font6x8RArrow));
+    } else {
+        display.PrintGlyph(prevX, prevY, Glyph(FontEmpty));
+    }
 }
 
 void
 FormulaView::clear(void) {
     Point start(viewArea.x, viewArea.y);
     display.ClearLine(start, CharWidth);
-}
-
-void
-FormulaView::bake(void) {
-    // TODO bake formulaTree to glyphs
 }
 
 EventResult

@@ -60,11 +60,43 @@ class ValueManager {
     FormulaModel &formulaModel;
 };
 
+template <size_t MaxFormulaGlyphs, size_t MaxPageGlyphs>
+class PaginatedGlyphArray {
+  public:
+    PaginatedGlyphArray(const GlyphArray6x8<MaxFormulaGlyphs> &formulaGlyphs,
+                        int page, size_t totalSize)
+        : glyphs(formulaGlyphs,
+                 std::max(0, static_cast<ssize_t>(formulaGlyphs.Size()) -
+                                 static_cast<ssize_t>(page * MaxPageGlyphs)),
+                 MaxPageGlyphs),
+          page(page), totalSize(totalSize) {}
+
+    const auto &
+    Glyphs() const {
+        return glyphs;
+    }
+
+    bool
+    HasNextPage() const {
+        return (page * MaxPageGlyphs) < totalSize;
+    }
+
+    bool
+    HasPreviousPage() const {
+        return page > 1;
+    }
+
+  private:
+    GlyphArray6x8<MaxPageGlyphs> glyphs;
+    int page;
+    size_t totalSize;
+};
+
 class FormulaManager {
   public:
     FormulaManager(EventBus &eventBus, ValueManager &vm)
         : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaState(Evaluated),
-          currentNumber(NumberZero), leftBracketCount(0),
+          currentNumber(NumberZero), leftBracketCount(0), currentPage(1),
           collectingNumber(false) {}
 
     EventResult HandleEvent(const Event &e);
@@ -85,21 +117,15 @@ class FormulaManager {
         (SCREEN_WIDTH / GlyphArray6x8<0>::CharWidth) - 2 * padding;
 
     /**
-     * @brief Get the Formula Glyphs object for the current page of the formula
+     * @brief Get the glyphs to be displayed for the current page of the formula
      *
-     * @param page The page number starting from 1, from right to left
-     * @return const GlyphArray6x8<MaxPageGlyphs> The glyphs for the specified
-     * page of the formula
+     * @return const GlyphArray6x8<MaxPageGlyphs> The glyphs to be displayed for
+     * the current page of the formula
      */
-    const GlyphArray6x8<MaxPageGlyphs>
-    GetFormulaGlyphs(int page = 1) const {
-        auto size = formulaGlyphs.Size();
-        size_t offset =
-            std::max(0, static_cast<ssize_t>(size) -
-                            static_cast<ssize_t>(page * MaxPageGlyphs));
-        GlyphArray6x8<MaxPageGlyphs> pageGlyphs(formulaGlyphs, offset,
-                                                MaxPageGlyphs);
-        return pageGlyphs;
+    const auto
+    GetFormulaPaginator() const {
+        return PaginatedGlyphArray<MaxFormulaGlyphs, MaxPageGlyphs>(
+            formulaGlyphs, currentPage, formulaGlyphs.Size());
     }
 
     size_t
@@ -114,7 +140,6 @@ class FormulaManager {
 
   private:
     EventBus &eventBus;
-
     ValueManager &vm;
 
     /**
@@ -122,12 +147,6 @@ class FormulaManager {
      *
      */
     GlyphArray6x8<MaxFormulaGlyphs> formulaGlyphs;
-
-    static constexpr size_t MaxFormulaQueueSize = 32;
-
-    static_assert(
-        MaxFormulaQueueSize > (Number::MaxHexDigits + 4),
-        "MaxFormulaQueueSize must be greater than MaxDisplayDigits + 4");
 
     enum {
         Evaluated,
@@ -143,6 +162,8 @@ class FormulaManager {
      *
      */
     int leftBracketCount;
+
+    int currentPage;
 
     bool collectingNumber;
 
@@ -207,8 +228,8 @@ class ViewModel : private NonCopyable {
     }
 
     const auto
-    GetFormulaGlyphs() const {
-        return formulaManager.GetFormulaGlyphs();
+    GetFormulaPaginator() const {
+        return formulaManager.GetFormulaPaginator();
     }
 
     auto

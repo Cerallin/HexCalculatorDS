@@ -174,17 +174,10 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     int page;
 
     /**
-     * @brief Clear the glyphs in the formula view.
+     * @brief Clear the formula glyphs and pagination indicators.
      *
      */
     void clear(void);
-
-    /**
-     * @brief Bake the formula glyphs from the formula model to the view's glyph
-     * array.
-     *
-     */
-    void bake(void);
 };
 
 class ValueView : public MainView<ValueView, AlignRight> {
