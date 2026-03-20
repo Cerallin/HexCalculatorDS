@@ -182,12 +182,6 @@ InputView::HandleEvent(const Event &e) {
 
         handler.Handle(touchPoint);
 
-        // FIXME wait for a while to avoid handling the same touch event
-        // multiple times
-        for (int i = 0; i < 4; i++) {
-            swiWaitForVBlank();
-        }
-
         // To update selected button state after handling touch input
         BasicView::markDirty();
 

@@ -17,8 +17,12 @@ namespace HexCalc {
 enum EventType {
     UnknownEvent = 0,
     // hardware events
-    KeyInputEvent,    // when the user presses or releases a key
-    TouchScreenEvent, // when the user touches or releases the touchscreen
+    KeyInputEvent,     // reserved key input event
+    TouchScreenEvent,  // reserved touch input event
+    KeyPressDownEvent, // logical key down event
+    KeyPressUpEvent,   // logical key up event
+    TouchDownEvent,    // logical touch down event
+    TouchUpEvent,      // logical touch up event
     // logical events
     InputEvent,             // when the user inputs a number or an operator
     PreviousTouchEvent,     // when the user inputs the previous touch position

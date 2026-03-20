@@ -123,13 +123,28 @@ class InputHandler {
 
     void Update(void);
 
+    EventResult HandleEvent(const Event &e);
+
+    enum class KeyAction : uint8_t {
+        PressDown = 1,
+        PressUp = 2,
+    };
+
+    enum class TouchAction : uint8_t {
+        TouchDown = 1,
+        TouchUp = 2,
+    };
+
   private:
+    struct KeyRepeatState {
+        int counter = 0;
+    };
+
     EventBus &eventBus;
     Commands &commands;
 
     uint32_t heldKeys = 0;
-    uint32_t currentKeys = 0;
-    uint32_t previousKeys = 0;
+    uint32_t previousHeldKeys = 0;
 
     int repeatDelay = 20;
     int repeatRate = 4;
@@ -145,14 +160,15 @@ class InputHandler {
     static constexpr int PRESS_TH = 2;
     static constexpr int RELEASE_TH = 3;
 
-    void updateKeys(void);
-    void updateTouch(void);
+    KeyRepeatState keyStates[32];
 
-    void handleKeyInput(void);
-    void handleTouchInput(void);
+    void updateKeys(uint32_t newHeldKeys);
+    void updateTouch(bool rawPressed, const Point &rawPoint);
 
-    void notifyTouch(const Point &pos);
-    void notifyPreviousTouch();
+    void postKeyEvent(KeyAction action, uint32_t keyMask);
+    void postTouchEvent(TouchAction action, const Point &pos);
+
+    void dispatchKeyPressDown(uint32_t keyMask);
 };
 
 enum ButtonType : uint8_t {

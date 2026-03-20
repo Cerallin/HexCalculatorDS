@@ -11,12 +11,20 @@
 
 using namespace HexCalc;
 
-struct KeyRepeatState {
-    int counter = 0;
-    bool repeating = false;
+struct HardwareInputSnapshot {
+    uint32_t heldKeys = 0;
+    touchPosition touch{};
 };
 
-static KeyRepeatState keyStates[32];
+static HardwareInputSnapshot
+ReadHardwareInput() {
+    scanKeys();
+
+    HardwareInputSnapshot input;
+    input.heldKeys = keysHeld();
+    touchRead(&input.touch);
+    return input;
+}
 
 void
 TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
@@ -128,102 +136,18 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     }
 }
 
-struct KeyInput {
-    uint32_t keys;
-
-    bool
-    Active(void) const {
-        return keys != 0;
-    }
-
-    bool
-    PressedUp(void) const {
-        return keys & KEY_UP;
-    }
-
-    bool
-    PressedDown(void) const {
-        return keys & KEY_DOWN;
-    }
-
-    bool
-    PressedLeft(void) const {
-        return keys & KEY_LEFT;
-    }
-
-    bool
-    PressedRight(void) const {
-        return keys & KEY_RIGHT;
-    }
-
-    bool
-    PressedA(void) const {
-        return keys & KEY_A;
-    }
-
-    bool
-    PressedB(void) const {
-        return keys & KEY_B;
-    }
-
-    bool
-    PressedSelect(void) const {
-        return keys & KEY_SELECT;
-    }
-
-    bool
-    PressedX(void) const {
-        return keys & KEY_X;
-    }
-
-    bool
-    PressedY(void) const {
-        return keys & KEY_Y;
-    }
-
-    bool
-    PressedL(void) const {
-        return keys & KEY_L;
-    }
-
-    bool
-    PressedR(void) const {
-        return keys & KEY_R;
-    }
-
-    bool
-    PressedStart(void) const {
-        return keys & KEY_START;
-    }
-
-    bool
-    Touched(void) const {
-        return keys & KEY_TOUCH;
-    }
-};
-
-struct TouchInput {
-    Point point;
-    bool pressed;
-
-    bool
-    Active(void) const {
-        return pressed;
-    }
-};
-
 InputHandler::InputHandler(EventBus &eventBus, Commands &commands)
-    : eventBus(eventBus), commands(commands) {}
+    : eventBus(eventBus), commands(commands) {
+    eventBus.Subscribe(*this);
+}
 
 void
 InputHandler::Update(void) {
-    scanKeys();
+    auto input = ReadHardwareInput();
+    bool touched = (input.heldKeys & KEY_TOUCH) != 0;
 
-    updateKeys();
-    updateTouch();
-
-    handleKeyInput();
-    handleTouchInput();
+    updateKeys(input.heldKeys);
+    updateTouch(touched, Point(input.touch.px, input.touch.py));
 }
 
 void
@@ -233,30 +157,29 @@ InputHandler::SetRepeat(int delay, int rate) {
 }
 
 void
-InputHandler::updateKeys() {
-    heldKeys = keysHeld();
-
-    previousKeys = currentKeys;
-    currentKeys = 0;
+InputHandler::updateKeys(uint32_t newHeldKeys) {
+    previousHeldKeys = heldKeys;
+    heldKeys = newHeldKeys;
 
     for (int i = 0; i < 32; ++i) {
-
         uint32_t mask = (1u << i);
 
         if (!(heldKeys & mask)) {
+            if (previousHeldKeys & mask) {
+                postKeyEvent(KeyAction::PressUp, mask);
+            }
             keyStates[i].counter = 0;
-            keyStates[i].repeating = false;
             continue;
         }
 
         auto &s = keyStates[i];
 
         if (s.counter == 0) {
-            currentKeys |= mask; // first press
+            postKeyEvent(KeyAction::PressDown, mask);
         } else if (s.counter > repeatDelay) {
-
-            if ((s.counter - repeatDelay) % repeatRate == 0) {
-                currentKeys |= mask;
+            if (repeatRate > 0 &&
+                ((s.counter - repeatDelay) % repeatRate == 0)) {
+                postKeyEvent(KeyAction::PressDown, mask);
             }
         }
 
@@ -265,13 +188,8 @@ InputHandler::updateKeys() {
 }
 
 void
-InputHandler::updateTouch(void) {
+InputHandler::updateTouch(bool rawPressed, const Point &rawPoint) {
     previousTouch = stablePressed;
-
-    touchPosition pos{};
-    touchRead(&pos);
-
-    bool rawPressed = heldKeys & KEY_TOUCH;
 
     // debounce
     if (rawPressed) {
@@ -292,68 +210,86 @@ InputHandler::updateTouch(void) {
     if (stablePressed) {
         if (!previousTouch) {
             // use raw position for the first frame to avoid lag
-            smoothPos.x = pos.px;
-            smoothPos.y = pos.py;
+            smoothPos = rawPoint;
         } else {
             // smooth the position to reduce jitter
-            smoothPos.x = (smoothPos.x + pos.px) / 2;
-            smoothPos.y = (smoothPos.y + pos.py) / 2;
+            smoothPos.x = (smoothPos.x + rawPoint.x) / 2;
+            smoothPos.y = (smoothPos.y + rawPoint.y) / 2;
         }
+    }
+
+    if (!previousTouch && stablePressed) {
+        postTouchEvent(TouchAction::TouchDown, smoothPos);
+    } else if (previousTouch && !stablePressed) {
+        postTouchEvent(TouchAction::TouchUp, smoothPos);
     }
 }
 
 void
-InputHandler::handleKeyInput(void) {
-    auto keys = KeyInput{currentKeys};
+InputHandler::postKeyEvent(KeyAction action, uint32_t keyMask) {
+    eventBus.Post(Event{
+        .data = static_cast<EventDataType>(keyMask),
+        .type = action == KeyAction::PressDown ? EventType::KeyPressDownEvent
+                                               : EventType::KeyPressUpEvent,
+    });
+}
 
-    if (keys.PressedUp()) { // ↑
+void
+InputHandler::postTouchEvent(TouchAction action, const Point &pos) {
+    eventBus.Post(Event{
+        .data = pos.ToInt(),
+        .type = action == TouchAction::TouchDown ? EventType::TouchDownEvent
+                                                 : EventType::TouchUpEvent,
+    });
+}
+
+void
+InputHandler::dispatchKeyPressDown(uint32_t keyMask) {
+    if (keyMask & KEY_UP) { // ↑
         commands.MoveFocusUp();
-    } else if (keys.PressedDown()) { // ↓
+    } else if (keyMask & KEY_DOWN) { // ↓
         commands.MoveFocusDown();
-    } else if (keys.PressedLeft()) { // ←
+    } else if (keyMask & KEY_LEFT) { // ←
         commands.MoveFocusLeft();
-    } else if (keys.PressedRight()) { // →
+    } else if (keyMask & KEY_RIGHT) { // →
         commands.MoveFocusRight();
-    } else if (keys.PressedA()) { // A
-        notifyPreviousTouch();
-    } else if (keys.PressedB()) { // B
+    } else if (keyMask & KEY_A) { // A
+        eventBus.Post(Event{.data = 0, .type = PreviousTouchEvent});
+    } else if (keyMask & KEY_B) { // B
         commands.InputOperatorBackspace();
-    } else if (keys.PressedX()) { // X
+    } else if (keyMask & KEY_X) { // X
         commands.Clear();
-    } else if (keys.PressedY()) { // Y
+    } else if (keyMask & KEY_Y) { // Y
         commands.SwitchWidthUpper();
-    } else if (keys.PressedSelect()) { // Select
+    } else if (keyMask & KEY_SELECT) { // Select
         commands.SwitchBaseLower();
-    } else if (keys.PressedStart()) { // Start
+    } else if (keyMask & KEY_START) { // Start
         commands.Evaluate();
-    } else if (keys.PressedL()) { // L
+    } else if (keyMask & KEY_L) { // L
         commands.SwitchFormulaPageLeft();
-    } else if (keys.PressedR()) { // R
+    } else if (keyMask & KEY_R) { // R
         commands.SwitchFormulaPageRight();
     }
 }
 
-void
-InputHandler::handleTouchInput(void) {
-    auto keys = KeyInput{heldKeys};
-
-    if (keys.Touched() && stablePressed) {
-        notifyTouch(smoothPos);
+EventResult
+InputHandler::HandleEvent(const Event &e) {
+    if (e.type == KeyPressDownEvent) {
+        dispatchKeyPressDown(static_cast<uint32_t>(e.data));
+        return Consumed;
     }
-}
 
-void
-InputHandler::notifyTouch(const Point &pos) {
-    eventBus.Post(Event{
-        .data = pos.ToInt(),
-        .type = TouchScreenEvent,
-    });
-}
+    if (e.type == TouchDownEvent) {
+        eventBus.Post(Event{
+            .data = e.data,
+            .type = TouchScreenEvent,
+        });
+        return Emitted;
+    }
 
-void
-HexCalc::InputHandler::notifyPreviousTouch() {
-    eventBus.Post(Event{
-        .data = 0,
-        .type = PreviousTouchEvent,
-    });
+    if (e.type == TouchUpEvent) {
+        return Consumed;
+    }
+
+    return Skipped;
 }

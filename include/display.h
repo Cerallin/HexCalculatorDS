@@ -350,7 +350,6 @@ class SubDisplay : public Display<SubDisplay> {
 
     Sprite<SubDisplay> *AddSprite(Point position, int priority = 0);
 
-    // FIXME sprites
     static constexpr auto VideoMode =
         MODE_3_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D_LAYOUT;
     static constexpr int TileBGNum = 3;
