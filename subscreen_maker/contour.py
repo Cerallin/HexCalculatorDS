@@ -30,9 +30,16 @@ def hex_to_rgb(hex_color: str):
     b = int(hex_color[4:6], 16)
     return (r, g, b)
 
+def rgb_to_16bit(r, g, b):
+    """
+    Convert 24-bit RGB color to 16-bit (NDS) format.
+    """
+    r5 = (r * 31) // 255
+    g5 = (g * 31) // 255
+    b5 = (b * 31) // 255
+    return (r5) | (g5 << 5) | (b5 << 10)
 
-
-def contour_shape_key(contour, tolorence = 0.1) -> bytes:
+def contour_shape_key(contour, tolorence=0.1) -> bytes:
     """
     Generate a shape key for a contour, invariant to translation and point order.
 
@@ -57,14 +64,7 @@ def contour_shape_key(contour, tolorence = 0.1) -> bytes:
     return pts.tobytes()
 
 
-
 class ContourAnalyzer:
-
-    BORDER_COLORS = ["82163d", "676666"]
-    SHADOW_COLORS = ["ddbfca", "cecccc"]
-    TEXT_COLORS = ["000000", "676666"]
-    BG_COLORS = ["f8f8f3", "f0eeee"]
-
     @staticmethod
     def build_mask(image, hex_colors):
         mask = np.zeros(image.shape[:2], dtype=np.uint8)

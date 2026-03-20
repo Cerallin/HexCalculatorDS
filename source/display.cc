@@ -10,6 +10,7 @@
 // assets
 #include "mainFont.h"
 #include "subFont.h"
+#include "subscreenAreaColors.h"
 #include "subscreenImage.h"
 
 using namespace HexCalc;
@@ -18,6 +19,28 @@ static constexpr int VRAM_C_SIZE = 128 * 1024;    // 128 Kb
 static constexpr int bmpBaseBankSize = 16 * 1024; // 16 Kb
 static constexpr int mapBaseBankSize = 2048;      // 2 Kb
 static constexpr int byteSize = 8;
+
+constexpr int16_t mainPal[] = {
+    0x0000,
+    COLOR_COMMON_BG,
+    COLOR_COMMON_BORDER,
+    COLOR_COMMON_TEXT,
+    COLOR_COMMON_SHADOW,
+    COLOR_DISABLED_BG,
+    COLOR_DISABLED_SHADOW,
+    COLOR_DISABLED_BORDER,
+};
+
+constexpr int16_t subPal[] = {
+    0x0000,
+    COLOR_COMMON_BG,
+    COLOR_COMMON_BORDER,
+    COLOR_COMMON_TEXT,
+    COLOR_COMMON_SHADOW,
+    COLOR_DISABLED_BG,
+    COLOR_DISABLED_SHADOW,
+    COLOR_DISABLED_BORDER,
+};
 
 static constexpr auto
 align64(int x) {
@@ -47,9 +70,8 @@ MainDisplay::MainDisplay(void)
     }
 
     // copy font palette
-    // TODO more themes
-    dmaCopy(mainFontPal, BG_PALETTE, mainFontPalLen);
-    SetBackdrop(31, 31, 30);
+    dmaCopy(mainPal, BG_PALETTE, sizeof(mainPal));
+    SetBackdrop(COLOR_COMMON_BG);
 
     // cope font tiles
     decompress(mainFontTiles, bgGetGfxPtr(this->layers[0].GetBg()), LZ77Vram);
@@ -126,9 +148,11 @@ SubDisplay::SubDisplay(void)
     // copy image palette
     dmaCopy(subscreenImagePal, BG_PALETTE_SUB, subscreenImagePalLen);
     // copy font palette
-    dmaCopy(subFontPal, BG_PALETTE_SUB, BIT(Bpp) * sizeof(uint16_t));
+    static_assert((sizeof(subPal) / sizeof(subPal[0])) <= BIT(Bpp),
+                  "sub palette has too many colors");
+    dmaCopy(subPal, BG_PALETTE_SUB, sizeof(subPal));
     // Set backdrop color
-    SetBackdrop(31, 31, 30);
+    SetBackdrop(COLOR_COMMON_BG);
 
     // set up palettes for button states
     enabledPalette = &BG_PALETTE_SUB[MaxColorCount - (3 * ColorCount)];

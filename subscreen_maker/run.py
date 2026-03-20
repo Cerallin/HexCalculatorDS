@@ -5,12 +5,20 @@ Copyright (C) 2026  Cerallin
 SPDX-License-Identifier: GPL-2.0-or-later
 """
 
+import os
 import sys
 from image import Palette, IndexedImage, Bmp8Writer, ImagePreprocessor
-from contour import ContourAnalyzer, ContourRecord
-from contour import hex_to_bgr, hex_to_rgb
+from contour import ContourAnalyzer, ContourRecord, hex_to_bgr, rgb_to_16bit
+from color_theme import LightTheme, DarkTheme
 
 DEBUG = False
+
+lightTheme = LightTheme()
+darkTheme = DarkTheme()
+
+defaultTheme = lightTheme
+
+theme = lightTheme
 
 
 class HexCalculatorExporter:
@@ -19,7 +27,7 @@ class HexCalculatorExporter:
         self.image = image
 
     def preprocess(self):
-        bg = hex_to_bgr(ContourAnalyzer.BG_COLORS[0])
+        bg = hex_to_bgr(defaultTheme.BG_COLORS[0])
 
         # numbers
         ImagePreprocessor.fill_rect(self.image, (0, 0), (75, 12), bg)
@@ -34,7 +42,7 @@ class HexCalculatorExporter:
     def analyze(self):
 
         mask = ContourAnalyzer.build_mask(
-            self.image, ContourAnalyzer.BORDER_COLORS)
+            self.image, defaultTheme.BORDER_COLORS)
 
         contours = ContourAnalyzer.find_contours(mask)
 
@@ -44,26 +52,26 @@ class HexCalculatorExporter:
             rec = ContourRecord(c)
 
             rec.shadow_points = ContourAnalyzer.collect_outer_ring(
-                self.image, c, ContourAnalyzer.SHADOW_COLORS)
+                self.image, c, defaultTheme.SHADOW_COLORS)
 
             inner = ContourAnalyzer.collect_inner_colors(self.image, c)
 
             button_activated: bool = any(
-                k in ContourAnalyzer.BG_COLORS[0] for k in inner.keys())
+                k in defaultTheme.BG_COLORS[0] for k in inner.keys())
 
             if button_activated:
                 colors_to_check = {
-                    "text": ContourAnalyzer.TEXT_COLORS[0],
-                    "bg": ContourAnalyzer.BG_COLORS[0],
-                    "shadow": ContourAnalyzer.SHADOW_COLORS[0],
-                    "sign": ContourAnalyzer.BORDER_COLORS[0],
+                    "text": defaultTheme.TEXT_COLORS[0],
+                    "bg": defaultTheme.BG_COLORS[0],
+                    "shadow": defaultTheme.SHADOW_COLORS[0],
+                    "sign": defaultTheme.BORDER_COLORS[0],
                 }
             else:
                 colors_to_check = {
-                    "text": ContourAnalyzer.TEXT_COLORS[1],
-                    "bg": ContourAnalyzer.BG_COLORS[1],
-                    "shadow": ContourAnalyzer.SHADOW_COLORS[1],
-                    "sign": ContourAnalyzer.BORDER_COLORS[1],
+                    "text": defaultTheme.TEXT_COLORS[1],
+                    "bg": defaultTheme.BG_COLORS[1],
+                    "shadow": defaultTheme.SHADOW_COLORS[1],
+                    "sign": defaultTheme.BORDER_COLORS[1],
                 }
 
             for k, pts in inner.items():
@@ -119,9 +127,9 @@ class HexCalculatorExporter:
             self.image, copyright_record.contour)
 
         for k, pts in copyright_inner.items():
-            if k == ContourAnalyzer.BG_COLORS[0]:
+            if k == defaultTheme.BG_COLORS[0]:
                 copyright_record.bg_points = pts
-            elif k == ContourAnalyzer.BORDER_COLORS[0]:
+            elif k == defaultTheme.BORDER_COLORS[0]:
                 copyright_record.contour_points = pts
             else:
                 pass
@@ -139,27 +147,9 @@ class HexCalculatorExporter:
 
         # palette for demo view
         palette.generate_demo(
-            common := [
-                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # contour
-                hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[0]),   # shadow
-                hex_to_rgb(ContourAnalyzer.TEXT_COLORS[0]),     # text
-                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # bg
-                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # sign (hidden)
-            ],
-            disabled := [
-                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[1]),   # contour
-                hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[1]),   # shadow
-                hex_to_rgb(ContourAnalyzer.TEXT_COLORS[1]),     # text
-                hex_to_rgb(ContourAnalyzer.BG_COLORS[1]),       # bg
-                hex_to_rgb(ContourAnalyzer.BG_COLORS[1]),       # sign (hidden)
-            ],
-            selected := [
-                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # contour
-                hex_to_rgb(ContourAnalyzer.SHADOW_COLORS[0]),   # shadow
-                hex_to_rgb(ContourAnalyzer.TEXT_COLORS[0]),     # text
-                hex_to_rgb(ContourAnalyzer.BG_COLORS[0]),       # bg
-                hex_to_rgb(ContourAnalyzer.BORDER_COLORS[0]),   # sign
-            ],
+            theme.common(),
+            theme.disabled(),
+            theme.selected(),
             len(records),
             offset=16,  # remain for text layer (4bpp) colors
         )
@@ -183,8 +173,11 @@ class HexCalculatorExporter:
 
         return img, palette
 
-    def build_c_header(self, records, output_file):
-        with open(output_file, "w") as f:
+    def build_c_header(self, records, output_dir, prefix):
+        output_area_file = os.path.join(output_dir, f"{prefix}.h")
+        output_color_file = os.path.join(output_dir, f"{prefix}Colors.h")
+
+        with open(output_area_file, "w") as f:
             f.write("#ifndef SUBSCREEN_AREA_H\n")
             f.write("#define SUBSCREEN_AREA_H\n\n")
             for idx, rec in enumerate(records):
@@ -196,6 +189,36 @@ class HexCalculatorExporter:
                 f.write("\n")
             f.write("\n")
             f.write("#endif // SUBSCREEN_AREA_H\n")
+
+        with open(output_color_file, "w") as f:
+            f.write("#ifndef SUBSCREEN_COLOR_H\n")
+            f.write("#define SUBSCREEN_COLOR_H\n\n")
+
+            colors = theme.common()
+            f.write("// Common colors\n")
+            f.write(f"#define COLOR_COMMON_BORDER {rgb_to_16bit(*colors[0]):#06x}\n")
+            f.write(f"#define COLOR_COMMON_SHADOW {rgb_to_16bit(*colors[1]):#06x}\n")
+            f.write(f"#define COLOR_COMMON_TEXT   {rgb_to_16bit(*colors[2]):#06x}\n")
+            f.write(f"#define COLOR_COMMON_BG     {rgb_to_16bit(*colors[3]):#06x}\n")
+            f.write(f"#define COLOR_COMMON_SIGN   {rgb_to_16bit(*colors[4]):#06x}\n")
+
+            colors = theme.disabled()
+            f.write("// Disabled colors\n")
+            f.write(f"#define COLOR_DISABLED_BORDER {rgb_to_16bit(*colors[0]):#06x}\n")
+            f.write(f"#define COLOR_DISABLED_SHADOW {rgb_to_16bit(*colors[1]):#06x}\n")
+            f.write(f"#define COLOR_DISABLED_TEXT   {rgb_to_16bit(*colors[2]):#06x}\n")
+            f.write(f"#define COLOR_DISABLED_BG     {rgb_to_16bit(*colors[3]):#06x}\n")
+            f.write(f"#define COLOR_DISABLED_SIGN   {rgb_to_16bit(*colors[4]):#06x}\n")
+
+            colors = theme.selected()
+            f.write("// Selected colors\n")
+            f.write(f"#define COLOR_SELECTED_BORDER {rgb_to_16bit(*colors[0]):#06x}\n")
+            f.write(f"#define COLOR_SELECTED_SHADOW {rgb_to_16bit(*colors[1]):#06x}\n")
+            f.write(f"#define COLOR_SELECTED_TEXT   {rgb_to_16bit(*colors[2]):#06x}\n")
+            f.write(f"#define COLOR_SELECTED_BG     {rgb_to_16bit(*colors[3]):#06x}\n")
+            f.write(f"#define COLOR_SELECTED_SIGN   {rgb_to_16bit(*colors[4]):#06x}\n")
+
+            f.write("\n#endif // SUBSCREEN_COLOR_H\n")
 
     def export(self, output_file):
         self.preprocess()
@@ -209,7 +232,9 @@ class HexCalculatorExporter:
                       f"{len(rec.bg_points):3} bg,\t"
                       f"{len(rec.sign_points):2} sign")
 
-        self.build_c_header(records, output_file.replace(".bmp", ".h"))
+        output_dir = os.path.dirname(output_file)
+        prefix = os.path.splitext(os.path.basename(output_file))[0]
+        self.build_c_header(records, output_dir, prefix)
 
         h, w, _ = self.image.shape
         image, palette = self.build_image(records, w, h)

@@ -5,15 +5,28 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "sprite.h"
+#include "display.h"
 #include "font.h"
 #include "project.h"
 
 #include "subNumber.h"
 #include "subVersion.h"
+#include "subscreenAreaColors.h"
 
 #define _(str) versionStrFont(str)
 
 using namespace HexCalc;
+
+constexpr int16_t subSpritePal[] = {
+    0x0000,
+    COLOR_COMMON_BG,
+    COLOR_COMMON_BORDER,
+    COLOR_COMMON_TEXT,
+    COLOR_COMMON_SHADOW,
+    COLOR_DISABLED_BG,
+    COLOR_DISABLED_SHADOW,
+    COLOR_DISABLED_BORDER,
+};
 
 MainSpriteManager::MainSpriteManager(void) : SpriteManager<MainDisplay>() {
     // not implemented yet
@@ -25,7 +38,10 @@ SubSpriteManager::SubSpriteManager(void) : SpriteManager<SubDisplay>() {
     oamInit(&oamState, SpriteMapping_1D_256, false);
     // Load shared graphics for numbers
     decompress(subNumberTiles, SpriteGfx(), LZ77Vram);
-    dmaCopy(subNumberPal, SPRITE_PALETTE_SUB, 16 * sizeof(uint16_t));
+    static_assert((sizeof(subSpritePal) / sizeof(uint16_t)) <=
+                      BIT(SubDisplay::Bpp),
+                  "Palette size exceeds color format limit");
+    dmaCopy(subSpritePal, SPRITE_PALETTE_SUB, sizeof(subSpritePal));
 
     // Load shared graphics for version numbers
     decompress(subVersionTiles, SpriteGfx() + 16 * TileBytes / sizeof(uint16_t),
