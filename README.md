@@ -64,7 +64,7 @@ selected button, which is equivalent to touching the button on the sub screen.
 - [x] Scroll the formula
 - [x] Add color themes
 - [x] Modify the font shadows
-- [ ] Add warnings, e.g. divide by zero
+- [x] Add error message, i.e. divide by zero
 
 ### v1.3.0
 
