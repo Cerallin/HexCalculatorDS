@@ -55,7 +55,9 @@ TEST(FormulaTree, TestInputSingleOperator) {
     CHECK_FALSE(formula->Input(op));
 }
 
-TEST(FormulaTree, TestEvaluateEmpty) { CHECK_FALSE(formula->Evaluate()); }
+TEST(FormulaTree, TestEvaluateEmpty) {
+    CHECK_EQUAL(InvalidExpression, formula->Evaluate());
+}
 
 TEST(FormulaTree, TestSimpleAdd) {
     // 1 + 2 = 3
@@ -67,7 +69,7 @@ TEST(FormulaTree, TestSimpleAdd) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(3, formula->Result());
 }
 
@@ -82,7 +84,7 @@ TEST(FormulaTree, TestNegativeResult) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(static_cast<uint64_t>(-1), formula->Result());
 }
 
@@ -97,7 +99,7 @@ TEST(FormulaTree, TestNegativeResultWord) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(static_cast<uint16_t>(-1), formula->Result());
 }
 
@@ -111,7 +113,7 @@ TEST(FormulaTree, TestSimpleMultiply) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(10, formula->Result());
 }
 
@@ -125,7 +127,7 @@ TEST(FormulaTree, TestSimpleLeftShift) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(64, formula->Result());
 }
 
@@ -139,7 +141,7 @@ TEST(FormulaTree, TestSimpleRightShiftToZero) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(0, formula->Result());
 }
 
@@ -155,7 +157,7 @@ TEST(FormulaTree, TestByteOverflow) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(0xA9, formula->Result());
 }
 
@@ -169,7 +171,7 @@ TEST(FormulaTree, TestSimpleModulo) {
     CHECK(formula->Input(op));
     CHECK(formula->Input(n2));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(1, formula->Result());
 }
 
@@ -181,7 +183,20 @@ TEST(FormulaTree, TestIncompleteExpression) {
     CHECK(formula->Input(n1));
     CHECK(formula->Input(op));
 
-    CHECK_EQUAL(false, formula->Evaluate());
+    CHECK_EQUAL(InvalidExpression, formula->Evaluate());
+}
+
+TEST(FormulaTree, TestDivideByZero) {
+    // 1 / 0 = error
+    HexCalc::FormulaData n1(1);
+    HexCalc::FormulaData n2(0);
+    HexCalc::FormulaData op(HexCalc::OperatorType::Divide);
+
+    CHECK(formula->Input(n1));
+    CHECK(formula->Input(op));
+    CHECK(formula->Input(n2));
+
+    CHECK_EQUAL(DivideByZero, formula->Evaluate());
 }
 
 TEST(FormulaTree, TestOperatorPrecedence) {
@@ -194,7 +209,7 @@ TEST(FormulaTree, TestOperatorPrecedence) {
     CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
     CHECK(formula->Input(HexCalc::FormulaData(6)));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(13, formula->Result());
 }
 
@@ -208,7 +223,7 @@ TEST(FormulaTree, TestOperatorPrecedence2) {
     CHECK(formula->Input(HexCalc::FormulaData(Plus)));
     CHECK(formula->Input(HexCalc::FormulaData(99)));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(105, formula->Result());
 }
 
@@ -224,7 +239,7 @@ TEST(FormulaTree, TestSimpleBrackets) {
     CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
     CHECK(formula->Input(HexCalc::FormulaData(6)));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(18, formula->Result());
 }
 
@@ -248,7 +263,7 @@ TEST(FormulaTree, TestIncompleteBrackets) {
     CHECK(formula->Input(HexCalc::FormulaData(6)));
 
     // Incomplete brackets will be treated as complete.
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(13, formula->Result());
 }
 
@@ -268,7 +283,7 @@ TEST(FormulaTree, TestMoreBrackets) {
     CHECK(formula->Input(HexCalc::FormulaData(6)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(33, formula->Result());
 }
 
@@ -292,7 +307,7 @@ TEST(FormulaTree, TestNestedBrackets) {
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(10, formula->Result());
 }
 
@@ -324,13 +339,13 @@ TEST(FormulaTree, TestComplexFormula) {
     CHECK(formula->Input(HexCalc::FormulaData(4)));
     CHECK(formula->Input(HexCalc::FormulaData(RightBracket)));
 
-    CHECK(formula->Evaluate());
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
     CHECK_EQUAL(24, formula->Result());
 }
 
 TEST(FormulaTree, TestEvaluatePartialEmpty) {
     CHECK(formula->Input(HexCalc::FormulaData(2)));
-    CHECK(formula->EvaluatePartial());
+    CHECK_TRUE(formula->EvaluatePartial());
     CHECK_EQUAL(2, formula->Result());
 }
 
@@ -343,7 +358,7 @@ TEST(FormulaTree, TestEvaluatePartial) {
     CHECK(formula->Input(HexCalc::FormulaData(LeftBracket)));
     CHECK(formula->Input(HexCalc::FormulaData(2)));
 
-    CHECK(formula->EvaluatePartial());
+    CHECK_TRUE(formula->EvaluatePartial());
     CHECK_EQUAL(2, formula->Result());
 }
 
@@ -358,7 +373,7 @@ TEST(FormulaTree, TestEvaluatePartial2) {
     CHECK(formula->Input(HexCalc::FormulaData(Multiply)));
     CHECK(formula->Input(HexCalc::FormulaData(3)));
 
-    CHECK(formula->EvaluatePartial());
+    CHECK_TRUE(formula->EvaluatePartial());
     CHECK_EQUAL(6, formula->Result());
 }
 
