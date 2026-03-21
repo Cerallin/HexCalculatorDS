@@ -39,11 +39,12 @@ FormulaModel::HandleEvent(const Event &e) {
         valueChanged = true;
     } else if (e.type == EvaluateEvent) {
         debugf("input number: %llu\n", currentNumber);
+        // 1. insert current number into formula tree
         bool inserted = formulaTree.Input(FormulaData(currentNumber));
         if (inserted) {
             notifyAcceptNumber(currentNumber);
         }
-        // TODO get error message if insertion failed
+        // 2. evaluate the formula tree
         FormulaEvaluateResult evalRes = formulaTree.Evaluate();
         bool evaluateOK = (evalRes == EvalSuccess);
         debugf("Evaluation result: %s\n", evaluateOK ? "OK" : "Error");
@@ -58,6 +59,9 @@ FormulaModel::HandleEvent(const Event &e) {
             valueChanged = false;
         }
 
+        // 3. clear the formula tree and reset input state, no matter whether
+        // evaluation is successful or not, so that the user can start a new
+        // calculation immediately after pressing the evaluate button.
         formulaTree.Clear();
         inputState = PlaceHolder;
         leftBracketCount = 0;
