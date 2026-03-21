@@ -405,37 +405,36 @@ FormulaView::clear(void) {
     display.ClearLine(start, CharWidth);
 }
 
+template <size_t MaxGlyphs, size_t N>
+static constexpr void
+appendErrorText(GlyphArray8x8<MaxGlyphs> &glyphs, const char (&text)[N]) {
+    constexpr size_t textLength = N - 1; // Exclude null terminator
+    for (size_t i = 0; i < textLength; i++) {
+        glyphs.Insert(Glyph(errorFontChar(text[i])));
+    }
+}
+
+template <size_t MaxGlyphs>
 static constexpr auto
 makeErrorGlyphs(FormulaEvaluateResult err) {
     assert(err != EvalSuccess);
 
-    // FIXME magic number
-    GlyphArray8x8<28> glyphs;
+    constexpr char divideByZeroText[] = "divide by zero";
+    constexpr char errorText[] = "error";
+
+    static_assert(MaxGlyphs >= strlen(divideByZeroText),
+                  "maxGlyphs is too small for divideByZeroText");
+    static_assert(MaxGlyphs >= strlen(errorText),
+                  "maxGlyphs is too small for errorText");
+
+    GlyphArray8x8<MaxGlyphs> glyphs;
 
     switch (err) {
     case DivideByZero:
-        // divide by zero
-        glyphs.Insert(Glyph(FontErrorD));
-        glyphs.Insert(Glyph(FontErrorI));
-        glyphs.Insert(Glyph(FontErrorV));
-        glyphs.Insert(Glyph(FontErrorI));
-        glyphs.Insert(Glyph(FontErrorD));
-        glyphs.Insert(Glyph(FontErrorE));
-        glyphs.Insert(Glyph(FontEmpty));
-        glyphs.Insert(Glyph(FontErrorB));
-        glyphs.Insert(Glyph(FontErrorY));
-        glyphs.Insert(Glyph(FontEmpty));
-        glyphs.Insert(Glyph(FontErrorZ));
-        glyphs.Insert(Glyph(FontErrorE));
-        glyphs.Insert(Glyph(FontErrorR));
-        glyphs.Insert(Glyph(FontErrorO));
+        appendErrorText(glyphs, divideByZeroText);
         break;
     default:
-        glyphs.Insert(Glyph(FontErrorE));
-        glyphs.Insert(Glyph(FontErrorR));
-        glyphs.Insert(Glyph(FontErrorR));
-        glyphs.Insert(Glyph(FontErrorO));
-        glyphs.Insert(Glyph(FontErrorR));
+        appendErrorText(glyphs, errorText);
         break;
     }
 
@@ -477,10 +476,11 @@ ValueView::ForceUpdate(void) {
     if (lastEvaluateResult == EvalSuccess) {
         auto base = vm.GetNumberBase();
         auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
-        PrintFormattedGlyphs<8, 8>(base, digits, true);
+        PrintFormattedGlyphs<CharWidth, CharHeight>(base, digits, true);
     } else {
-        auto glyphs = makeErrorGlyphs(DivideByZero);
-        PrintFormattedGlyphs<8, 8>(glyphs, true);
+        // FIXME magic number
+        auto glyphs = makeErrorGlyphs<MaxDisplayGlyphs>(lastEvaluateResult);
+        PrintFormattedGlyphs<CharWidth, CharHeight>(glyphs, true);
     }
 }
 

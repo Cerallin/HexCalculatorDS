@@ -207,6 +207,7 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr int16_t height = 3;
     static constexpr int16_t line = 2 + FormulaView::height;
     static constexpr int16_t lineWidth = 30;
+    static constexpr size_t MaxDisplayGlyphs = 28;
 
     /**
      * @brief 6x8 font.

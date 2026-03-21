@@ -554,4 +554,32 @@ versionStrFont(const char (&str)[N]) {
     return versionStrFontImpl(str, std::make_index_sequence<N - 1>{});
 }
 
+constexpr auto
+errorFontChar(char c) {
+    switch (c) {
+    case 'd':
+        return FontErrorD;
+    case 'i':
+        return FontErrorI;
+    case 'v':
+        return FontErrorV;
+    case 'e':
+        return FontErrorE;
+    case 'b':
+        return FontErrorB;
+    case 'y':
+        return FontErrorY;
+    case 'z':
+        return FontErrorZ;
+    case 'r':
+        return FontErrorR;
+    case 'o':
+        return FontErrorO;
+    case ' ':
+        return FontEmpty;
+    default:
+        return FontEmpty;
+    }
+}
+
 }; // namespace HexCalc
