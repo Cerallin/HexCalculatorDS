@@ -72,25 +72,32 @@ class MainView : public BasicView<Derived, MainDisplay> {
     PrintFormattedGlyphs(NumberBase base, DigitArray<N> digits,
                          bool underline = false) const {
         Point start(viewArea.x, viewArea.y);
-        constexpr bool reverse = (Derived::viewAlign == AlignLeft);
+        constexpr bool alignLeft = (Derived::viewAlign == AlignLeft);
         VisitFormattedGlyphArray<W, H>(
-            base, digits, reverse,
+            base, digits, alignLeft,
             [this, start, underline](const auto &formattedGlyphs) {
-                if constexpr (reverse) {
-                    this->display.ClearLine(start, formattedGlyphs.CharWidth,
-                                            underline);
-                    this->display.PrintLine(formattedGlyphs, start);
-                } else {
-                    Area8x8 area(viewArea);
-                    auto skipGlyphs = area.w - formattedGlyphs.Size();
-                    Point glyphStart(
-                        viewArea.x + (skipGlyphs * formattedGlyphs.CharWidth),
-                        viewArea.y);
-                    this->display.ClearLine(start, formattedGlyphs.CharWidth,
-                                            underline);
-                    this->display.PrintLine(formattedGlyphs, glyphStart);
-                }
+                return this->PrintFormattedGlyphs<W, H>(formattedGlyphs,
+                                                        underline);
             });
+    }
+
+    template <int W, int H, size_t N>
+    void
+    PrintFormattedGlyphs(GlyphArray8x8<N> glyphs,
+                         bool underline = false) const {
+        Point start(viewArea.x, viewArea.y);
+        constexpr bool alignLeft = (Derived::viewAlign == AlignLeft);
+        if constexpr (alignLeft) {
+            this->display.ClearLine(start, glyphs.CharWidth, underline);
+            this->display.PrintLine(glyphs, start);
+        } else {
+            Area8x8 area(viewArea);
+            auto skipGlyphs = area.w - glyphs.Size();
+            Point glyphStart(viewArea.x + (skipGlyphs * glyphs.CharWidth),
+                             viewArea.y);
+            this->display.ClearLine(start, glyphs.CharWidth, underline);
+            this->display.PrintLine(glyphs, glyphStart);
+        }
     }
 
   protected:
@@ -189,7 +196,7 @@ class ValueView : public MainView<ValueView, AlignRight> {
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
                    display),
-          vm(vm) {}
+          vm(vm), lastEvaluateResult(EvalSuccess) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -215,6 +222,8 @@ class ValueView : public MainView<ValueView, AlignRight> {
 
   private:
     ViewModel &vm;
+
+    FormulaEvaluateResult lastEvaluateResult;
 };
 
 template <NumberBase base>

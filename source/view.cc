@@ -405,6 +405,43 @@ FormulaView::clear(void) {
     display.ClearLine(start, CharWidth);
 }
 
+static constexpr auto
+makeErrorGlyphs(FormulaEvaluateResult err) {
+    assert(err != EvalSuccess);
+
+    // FIXME magic number
+    GlyphArray8x8<28> glyphs;
+
+    switch (err) {
+    case DivideByZero:
+        // divide by zero
+        glyphs.Insert(Glyph(FontErrorD));
+        glyphs.Insert(Glyph(FontErrorI));
+        glyphs.Insert(Glyph(FontErrorV));
+        glyphs.Insert(Glyph(FontErrorI));
+        glyphs.Insert(Glyph(FontErrorD));
+        glyphs.Insert(Glyph(FontErrorE));
+        glyphs.Insert(Glyph(FontEmpty));
+        glyphs.Insert(Glyph(FontErrorB));
+        glyphs.Insert(Glyph(FontErrorY));
+        glyphs.Insert(Glyph(FontEmpty));
+        glyphs.Insert(Glyph(FontErrorZ));
+        glyphs.Insert(Glyph(FontErrorE));
+        glyphs.Insert(Glyph(FontErrorR));
+        glyphs.Insert(Glyph(FontErrorO));
+        break;
+    default:
+        glyphs.Insert(Glyph(FontErrorE));
+        glyphs.Insert(Glyph(FontErrorR));
+        glyphs.Insert(Glyph(FontErrorR));
+        glyphs.Insert(Glyph(FontErrorO));
+        glyphs.Insert(Glyph(FontErrorR));
+        break;
+    }
+
+    return glyphs;
+}
+
 EventResult
 ValueView::HandleEvent(const Event &e) {
     if (e.type == EventType::ValueChangedEvent) {
@@ -415,6 +452,19 @@ ValueView::HandleEvent(const Event &e) {
         BasicView::markDirty();
         debugf("ValueView base changed\n");
         return Consumed;
+    } else if (e.type == EventType::EvaluateErrorEvent) {
+        BasicView::markDirty();
+        debugf("ValueView evaluation error: %d\n", e.data);
+        lastEvaluateResult = static_cast<FormulaEvaluateResult>(e.data);
+        return Consumed;
+    } else if (e.type == EventType::ClearEvent) {
+        if (lastEvaluateResult != EvalSuccess) {
+            BasicView::markDirty();
+            debugf("ValueView cleared\n");
+            lastEvaluateResult = EvalSuccess;
+            return Consumed;
+        }
+        return Skipped;
     } else {
         return Skipped;
     }
@@ -424,9 +474,14 @@ void
 ValueView::ForceUpdate(void) {
     debugf("ValueView refreshed\n");
 
-    auto base = vm.GetNumberBase();
-    auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
-    PrintFormattedGlyphs<8, 8>(base, digits, true);
+    if (lastEvaluateResult == EvalSuccess) {
+        auto base = vm.GetNumberBase();
+        auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
+        PrintFormattedGlyphs<8, 8>(base, digits, true);
+    } else {
+        auto glyphs = makeErrorGlyphs(DivideByZero);
+        PrintFormattedGlyphs<8, 8>(glyphs, true);
+    }
 }
 
 EventResult

@@ -45,10 +45,8 @@ _doOp(OperatorType op, T a, T b) {
     case OperatorType::Multiply:
         return static_cast<uint64_t>(a * b);
     case OperatorType::Divide:
-        // TODO generate error event
         return static_cast<uint64_t>(b == 0 ? 0 : (a / b));
     case OperatorType::Modulo:
-        // TODO generate error event
         return static_cast<uint64_t>(b == 0 ? 0 : (a % b));
     case OperatorType::BitwiseAnd:
         return static_cast<uint64_t>(a & b);

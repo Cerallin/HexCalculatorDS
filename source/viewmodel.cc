@@ -55,7 +55,7 @@ FormulaManager::notifyFormulaUpdate(void) {
 }
 
 static constexpr Glyph
-OpGlyph(OperatorType op) {
+opGlyph(OperatorType op) {
     switch (op) {
     case OperatorType::Equal: // =
         return Glyph(Font6x8Equal);
@@ -87,7 +87,7 @@ OpGlyph(OperatorType op) {
 }
 
 static constexpr Glyph
-DigitGlyph(Digit digit) {
+digitGlyph(Digit digit) {
     switch (digit) {
     case Digit0:
         return Glyph(Font6x8Zero);
@@ -134,7 +134,6 @@ FormulaManager::formulaInsertOp(OperatorType op) {
         if (op == OperatorType::LeftBracket) {
             // Insert a multiplication operator if the user inputs '(' after a
             // digit, e.g. '2' + '(' -> '2 x ('
-            // TODO this is not implemented yet
             if (formulaState == InputDigit) {
                 formulaInsertOp(OperatorType::Multiply);
             }
@@ -159,7 +158,7 @@ FormulaManager::formulaInsertOp(OperatorType op) {
         formulaGlyphs.Insert(Glyph(Font6x8O));
         formulaGlyphs.Insert(Glyph(Font6x8D));
     } else {
-        formulaGlyphs.Insert(OpGlyph(op));
+        formulaGlyphs.Insert(opGlyph(op));
     }
     // Set formula state
     if (op == OperatorType::LeftBracket) {
@@ -201,7 +200,7 @@ FormulaManager::formulaInsertDigits() {
     }
     // reverse insert digits into the queue
     for (size_t i = digits.size; i > 0; i--) {
-        formulaGlyphs.Insert(DigitGlyph(digits[i - 1]));
+        formulaGlyphs.Insert(digitGlyph(digits[i - 1]));
     }
     formulaState = InputDigit;
 }

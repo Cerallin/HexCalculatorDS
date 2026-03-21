@@ -73,6 +73,7 @@ class FormulaModel {
 
     void notifyFormulaUpdate(void);
     void notifyValueChange(void);
+    void notifyEvaluateError(FormulaEvaluateResult evalRes);
     void notifyWidthChange(NumberWidth width);
     void notifyAcceptOperator(OperatorType op);
     void notifyAcceptNumber(NumberDataType number);

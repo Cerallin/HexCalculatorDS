@@ -136,6 +136,13 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
     FormulaTreeNode *findUnpairedLBrac();
 };
 
+enum FormulaEvaluateResult {
+    EvalSuccess,
+    DivideByZero,
+    InvalidExpression,
+    UnknownOperator,
+};
+
 class FormulaTree : private NonCopyable {
   public:
     explicit FormulaTree(void);
@@ -159,10 +166,10 @@ class FormulaTree : private NonCopyable {
     /**
      * @brief Evaluate the formula tree and get the result.
      *
-     * @return true if the evaluation is successful, false if there is an
-     * error during evaluation (e.g. missing operand, division by zero)
+     * @return FormulaEvaluateResult result of the evaluation, which can be
+     * Success, DivideByZero, InvalidExpression, or UnknownOperator
      */
-    bool Evaluate(void);
+    FormulaEvaluateResult Evaluate(void);
 
     /**
      * @brief Evaluate the current expression without fully evaluating the

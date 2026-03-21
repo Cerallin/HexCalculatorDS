@@ -46,6 +46,11 @@ FormulaTreeNode::Evaluate(void) {
                 value.SetNumber(Operator::RightShift(lvalue, rvalue));
                 break;
             case Modulo:
+                if (rvalue == 0) {
+                    // Divide by zero
+                    flag.divideByZeroFlag = true;
+                    return flag;
+                }
                 value.SetNumber(Operator::Modulo(lvalue, rvalue));
                 break;
             case BitwiseAnd:
@@ -72,7 +77,6 @@ FormulaTreeNode::Evaluate(void) {
                 value.SetNumber(Operator::Minus(lvalue, rvalue));
                 break;
             default:
-                // TODO generate error event
                 flag.unknownOperatorFlag = true;
                 return flag;
             }
@@ -280,30 +284,39 @@ FormulaTree::Clear(void) {
     size = 0;
 }
 
-bool
+FormulaEvaluateResult
 FormulaTree::Evaluate(void) {
+    FormulaEvaluateResult res = EvalSuccess;
     // maximum depth of the tree
     constexpr size_t stackSize = MaxSize / 2;
 
     bool evaluateError = false;
 
-    root.PostOrderTraversal<stackSize>([&evaluateError](FormulaTreeNode &node) {
-        if (evaluateError) {
-            return;
-        }
+    root.PostOrderTraversal<stackSize>(
+        [&res, &evaluateError](FormulaTreeNode &node) {
+            if (evaluateError) {
+                return;
+            }
 
-        auto flags = node.Evaluate();
-        if (!flags.AllClear()) {
-            evaluateError = true;
-        }
-    });
+            auto flags = node.Evaluate();
+            if (!flags.AllClear()) {
+                evaluateError = true;
+                if (flags.divideByZeroFlag) {
+                    res = DivideByZero;
+                } else if (flags.invalidExpressionFlag) {
+                    res = InvalidExpression;
+                } else if (flags.unknownOperatorFlag) {
+                    res = UnknownOperator;
+                }
+            }
+        });
 
     if (!evaluateError) {
         evaluated = true;
         fullEvaluationFlag = true;
     }
 
-    return (evaluateError != true);
+    return res;
 }
 
 bool

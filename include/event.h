@@ -30,6 +30,7 @@ enum EventType {
     ClearEvent,             // when the user clears the formula
     SwitchFormulaPageEvent, // when the user switches formula page
     EvaluateEvent,          // when the user evaluates the formula
+    EvaluateErrorEvent,     // when there is an error during evaluation
     // sync formula and value views
     NumberAcceptEvent,   // when number is accepted into formula tree
     OperatorAcceptEvent, // when operator is accepted into formula tree

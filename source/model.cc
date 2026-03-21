@@ -43,20 +43,24 @@ FormulaModel::HandleEvent(const Event &e) {
             notifyAcceptNumber(currentNumber);
         }
         // TODO get error message if insertion failed
-        bool evaluated = formulaTree.Evaluate();
-        debugf("Evaluation result: %s\n", evaluated ? "OK" : "Error");
-        if (evaluated) {
+        FormulaEvaluateResult evalRes = formulaTree.Evaluate();
+        bool evaluateOK = (evalRes == EvalSuccess);
+        debugf("Evaluation result: %s\n", evaluateOK ? "OK" : "Error");
+        if (evaluateOK) {
             currentNumber = formulaTree.Result();
             notifyAcceptOperator(OperatorType::Equal);
+            valueChanged = true;
         } else {
             currentNumber = NumberZero;
+            notifyEvaluateError(evalRes);
+            // do not update the formula view if evaluation failed
+            valueChanged = false;
         }
 
         formulaTree.Clear();
         inputState = PlaceHolder;
 
         formulaChanged = true;
-        valueChanged = true;
     } else if (e.type == UpdateBaseEvent) {
         handleBaseChange(e);
     } else if (e.type == UpdateWidthEvent) {
@@ -99,6 +103,12 @@ FormulaModel::notifyWidthChange(NumberWidth width) {
 void
 FormulaModel::notifyAcceptOperator(OperatorType op) {
     bus.Post(Event{op, OperatorAcceptEvent});
+}
+
+// EvaluateErrorEvent
+void
+FormulaModel::notifyEvaluateError(FormulaEvaluateResult evalRes) {
+    bus.Post(Event{static_cast<EventDataType>(evalRes), EvaluateErrorEvent});
 }
 
 void
