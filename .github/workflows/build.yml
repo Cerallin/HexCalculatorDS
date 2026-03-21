@@ -1,6 +1,12 @@
 name: build
 on:
   push:
+    tags: []
+    branches:
+      - 'master'
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.yml'
 
 jobs:
   prepare:
