@@ -187,11 +187,9 @@ class FormulaTree : private NonCopyable {
 
     NumberDataType Result(void) const;
 
-    static constexpr size_t MaxSize = 64;
+    static constexpr size_t MaxSize = 256;
 
   private:
-    // TODO Number of brackets also needs to be limited.
-
     /**
      * @brief The array of pre-allocated tree nodes.
      */

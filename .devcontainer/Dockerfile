@@ -3,7 +3,6 @@
 # Based on devkitPro's toolchain-base image
 # Version: 20241104 libnds=1.8.0
 # Description: Docker image for developing homebrew applications for the Nintendo DS
-# TODO switch to blocksds
 
 FROM devkitpro/devkitarm:20241104
 

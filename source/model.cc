@@ -35,6 +35,7 @@ FormulaModel::HandleEvent(const Event &e) {
         }
         inputState = PlaceHolder;
         currentNumber = NumberZero;
+        leftBracketCount = 0;
         valueChanged = true;
     } else if (e.type == EvaluateEvent) {
         debugf("input number: %llu\n", currentNumber);
@@ -59,6 +60,7 @@ FormulaModel::HandleEvent(const Event &e) {
 
         formulaTree.Clear();
         inputState = PlaceHolder;
+        leftBracketCount = 0;
 
         formulaChanged = true;
     } else if (e.type == UpdateBaseEvent) {
@@ -145,14 +147,18 @@ FormulaModel::handleInput(const Event &e) {
             inputState = InputNumber;
             valueChanged = true;
         } else if (op == LeftBracket) {
-            if (inputState == PlaceHolder) {
-                bool inserted = formulaTree.Input(FormulaData(op));
+            bool inserted = true;
+            if (leftBracketCount >= MaxLBracCount) {
+                // reject if there are already too many unpaired left brackets
+                inserted = false;
+            } else if (inputState == PlaceHolder) {
+                inserted = formulaTree.Input(FormulaData(op));
                 if (inserted) {
                     notifyAcceptOperator(op);
                     formulaChanged = true;
                 }
             } else {
-                bool inserted = true;
+                inserted = true;
                 // 1. insert current number into formula tree
                 debugf("input number: %llu\n", currentNumber);
                 inserted &= formulaTree.Input(FormulaData(currentNumber));
@@ -177,6 +183,10 @@ FormulaModel::handleInput(const Event &e) {
                 currentNumber = NumberZero;
                 inputState = PlaceHolder;
                 valueChanged = true;
+            }
+
+            if (inserted) {
+                leftBracketCount++;
             }
         } else {
             // continue to handle other operators
@@ -218,6 +228,9 @@ FormulaModel::handleInput(const Event &e) {
             if (inserted) {
                 notifyAcceptOperator(op);
                 formulaChanged = true;
+                if (op == RightBracket) {
+                    leftBracketCount--;
+                }
             }
             // 4. Mark the current number as placeholder, so that the
             // next digit input will start a new number instead of

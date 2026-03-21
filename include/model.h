@@ -46,7 +46,7 @@ class FormulaModel {
   public:
     explicit FormulaModel(EventBus &eventBus)
         : bus(eventBus), formulaTree(), inputState(PlaceHolder),
-          currentNumber(NumberZero) {}
+          currentNumber(NumberZero), leftBracketCount(0) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -60,6 +60,8 @@ class FormulaModel {
         return currentNumber;
     }
 
+    static constexpr int MaxLBracCount = 99;
+
   private:
     EventBus &bus;
     FormulaTree formulaTree;
@@ -70,6 +72,8 @@ class FormulaModel {
     } inputState;
 
     NumberDataType currentNumber;
+
+    int leftBracketCount;
 
     void notifyFormulaUpdate(void);
     void notifyValueChange(void);
