@@ -444,6 +444,7 @@ makeErrorGlyphs(FormulaEvaluateResult err) {
 EventResult
 ValueView::HandleEvent(const Event &e) {
     if (e.type == EventType::ValueChangedEvent) {
+        lastEvaluateResult = EvalSuccess;
         BasicView::markDirty();
         debugf("ValueView updated\n");
         return Consumed;

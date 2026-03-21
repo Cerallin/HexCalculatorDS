@@ -224,6 +224,13 @@ FormulaManager::switchPage(Direction dir) {
     return false;
 }
 
+void
+FormulaManager::resetFormulaState(void) {
+    formulaState = Evaluated;
+    leftBracketCount = 0;
+    currentPage = 1;
+}
+
 EventResult
 FormulaManager::HandleEvent(const Event &e) {
     if (e.type == NumberAcceptEvent) {
@@ -262,13 +269,15 @@ FormulaManager::HandleEvent(const Event &e) {
         // user may want to see the result
         currentPage = 1;
         notifyFormulaUpdate();
+    } else if (e.type == EvaluateErrorEvent) {
+        // Reset formula state to allow user to input new formula
+        resetFormulaState();
+        notifyFormulaUpdate();
+
+        return Consumed;
     } else if (e.type == ClearEvent) {
         formulaGlyphs.Clear();
-        formulaState = Evaluated;
-
-        leftBracketCount = 0;
-        currentPage = 1;
-
+        resetFormulaState();
         notifyFormulaUpdate();
 
         return Consumed;

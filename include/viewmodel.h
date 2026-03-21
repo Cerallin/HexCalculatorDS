@@ -183,6 +183,8 @@ class FormulaManager {
      * page to switch to
      */
     bool switchPage(Direction dir);
+
+    void resetFormulaState(void);
 };
 
 /**
