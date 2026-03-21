@@ -371,9 +371,11 @@ class InputView : public SubView<InputView> {
     void ForceUpdate(void);
 
   private:
+    static constexpr size_t colNum = 5;
+    static constexpr size_t rowNum = 7;
+
     ViewModel &vm;
-    // FIXME magic numbers
-    TouchScreenHandler<5, 7> handler;
+    TouchScreenHandler<colNum, rowNum> handler;
     TouchButton *numberButtons[16];
     TouchButton *rightBracketButton;
 

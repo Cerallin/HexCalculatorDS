@@ -479,7 +479,6 @@ ValueView::ForceUpdate(void) {
         auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
         PrintFormattedGlyphs<CharWidth, CharHeight>(base, digits, true);
     } else {
-        // FIXME magic number
         auto glyphs = makeErrorGlyphs<MaxDisplayGlyphs>(lastEvaluateResult);
         PrintFormattedGlyphs<CharWidth, CharHeight>(glyphs, true);
     }
