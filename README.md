@@ -63,8 +63,8 @@ selected button, which is equivalent to touching the button on the sub screen.
 
 - [x] Scroll the formula
 - [x] Add color themes
-- [ ] Add background color to the `UINT32`
 - [x] Modify the font shadows
+- [ ] Add warnings, e.g. divide by zero
 
 ### v1.3.0
 

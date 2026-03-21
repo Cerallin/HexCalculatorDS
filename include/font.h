@@ -108,7 +108,7 @@ enum FontChar : FontType {
     FontColoredEight,
     FontColoredBarrier,
 
-    FontVersion0 = 160,
+    FontVersion0 = 161,
     FontVersion1,
     FontVersion2,
     FontVersion3,
@@ -121,6 +121,17 @@ enum FontChar : FontType {
     FontVersionV,
     FontVersionDot,
     FontVersionBarrier,
+
+    FontErrorD = 193,
+    FontErrorI,
+    FontErrorV,
+    FontErrorE,
+    FontErrorB,
+    FontErrorY,
+    FontErrorZ,
+    FontErrorR,
+    FontErrorO,
+    FontErrorBarrier,
 
     FontEnd = 0xFF,
 };
@@ -363,7 +374,7 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(0, 42);
         break;
     case Font8x8D:
-        *this = Glyph(122, 121);
+        *this = Glyph(121, 120);
         break;
     case Font8x8E:
         *this = Glyph(0, 43);
@@ -387,7 +398,7 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(53, 54);
         break;
     case Font8x8Five:
-        *this = Glyph(118, 56);
+        *this = Glyph(117, 56);
         break;
     case Font8x8Six:
         *this = Glyph(119, 57);
@@ -396,13 +407,13 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(55, 58);
         break;
     case Font8x8Eight:
-        *this = Glyph(120, 59);
+        *this = Glyph(119, 59);
         break;
     case Font8x8Nine:
-        *this = Glyph(120, 60);
+        *this = Glyph(119, 60);
         break;
     case Font8x8Zero:
-        *this = Glyph(120, 61);
+        *this = Glyph(119, 61);
         break;
     case Font8x8Minus:
         *this = Glyph(0, 101);
@@ -475,6 +486,33 @@ constexpr Glyph::Glyph(FontType font)
         break;
     case Font6x8RArrow:
         *this = Glyph(0, 103);
+        break;
+    case FontErrorD:
+        *this = Glyph(104, 105);
+        break;
+    case FontErrorI:
+        *this = Glyph(106, 107);
+        break;
+    case FontErrorV:
+        *this = Glyph(0, 108);
+        break;
+    case FontErrorE:
+        *this = Glyph(0, 109);
+        break;
+    case FontErrorB:
+        *this = Glyph(115, 116);
+        break;
+    case FontErrorY:
+        *this = Glyph(110, 111, false, false, false, false, true);
+        break;
+    case FontErrorZ:
+        *this = Glyph(0, 112);
+        break;
+    case FontErrorR:
+        *this = Glyph(0, 113);
+        break;
+    case FontErrorO:
+        *this = Glyph(0, 114);
         break;
     default:
         *this = InvalidGlyph;
