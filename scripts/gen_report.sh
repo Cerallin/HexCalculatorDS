@@ -17,18 +17,10 @@ if [[ ! -f "${PY_SCRIPT}" ]]; then
     exit 2
 fi
 
-if [[ ! -f "${ELF_PATH}" ]]; then
-    cat >&2 <<EOF
-error: ELF not found: ${ELF_PATH}
-hint: build first, e.g.
-  cmake -S ${ROOT_DIR} -B ${ROOT_DIR}/build-relwithdebinfo \
+cmake -S ${ROOT_DIR} -B ${ROOT_DIR}/build-relwithdebinfo \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DCMAKE_TOOLCHAIN_FILE=${ROOT_DIR}/cmake/devkitarm-toolchain.cmake
-  cmake --build ${ROOT_DIR}/build-relwithdebinfo -j \
-        "$(nproc)"
-EOF
-    exit 2
-fi
+cmake --build ${ROOT_DIR}/build-relwithdebinfo -j $(nproc)
 
 python3 "${PY_SCRIPT}" \
     --workspace "${ROOT_DIR}" \
