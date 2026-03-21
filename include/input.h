@@ -34,23 +34,24 @@ struct Point {
         return (static_cast<int>(x) << 16) | static_cast<int>(y);
     }
 
-    constexpr Point
-    NextPosition(Direction dir) {
+    template <int16_t colNum, int16_t rowNum>
+    HEXCALC_ARM_CODE constexpr Point
+    NextPosition(Direction dir) const {
         auto nextX = this->x;
         auto nextY = this->y;
 
         switch (dir) {
         case Direction::DirUp:
-            nextY -= 1;
+            nextY = (nextY - 1 + rowNum) % rowNum;
             break;
         case Direction::DirDown:
-            nextY += 1;
+            nextY = (nextY + 1) % rowNum;
             break;
         case Direction::DirLeft:
-            nextX -= 1;
+            nextX = (nextX - 1 + colNum) % colNum;
             break;
         case Direction::DirRight:
-            nextX += 1;
+            nextX = (nextX + 1) % colNum;
             break;
         default:
             // should never reach here
@@ -352,6 +353,7 @@ class TouchScreenHandler {
         return buttons[index];
     }
 
+    HEXCALC_ARM_CODE
     TouchButton *
     GetMatrix(Point position) {
         auto m = (position.x + M) % M;
@@ -403,23 +405,24 @@ class TouchScreenHandler {
         previouslySelected = button;
     }
 
+    template <int16_t colNum, int16_t rowNum>
     Point
     NavigateFocus(Point position, Direction dir) {
-        Point nextPos = position.NextPosition(dir);
+        Point nextPos = position.NextPosition<colNum, rowNum>(dir);
 
         auto *button = GetMatrix(nextPos);
 
         // this must be under '+'
         if (button == nullptr) {
-            nextPos = nextPos.NextPosition(DirUp);
+            nextPos = nextPos.NextPosition<colNum, rowNum>(DirUp);
         }
         // skip width and sign drawers
         if (((nextPos.x == 3) || (nextPos.x == 4)) && (nextPos.y == 0)) {
-            nextPos = nextPos.NextPosition(DirDown);
+            nextPos = nextPos.NextPosition<colNum, rowNum>(DirDown);
         }
         // skip evaluate button
         if (nextPos.x == 4 && nextPos.y == 6) {
-            nextPos = nextPos.NextPosition(dir);
+            nextPos = nextPos.NextPosition<colNum, rowNum>(dir);
         }
 
         return nextPos;

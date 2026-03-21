@@ -280,7 +280,7 @@ InputView::updateLBrackCount(int count) {
 
 TouchButton &
 InputView::getFocus(Point position, Direction dir) {
-    Point nextPos = handler.NavigateFocus(position, dir);
+    Point nextPos = handler.NavigateFocus<colNum, rowNum>(position, dir);
 
     auto buttonPtr = handler.GetMatrix(nextPos);
     assert(buttonPtr != nullptr);
