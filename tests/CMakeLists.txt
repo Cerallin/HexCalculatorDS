@@ -68,3 +68,24 @@ target_link_libraries(test_number_transcoding PRIVATE
 )
 
 add_test(NAME test_number_transcoding COMMAND test_number_transcoding)
+
+# ===========================================
+# test format
+# ===========================================
+
+add_executable(test_format
+    test_format.cc
+)
+
+target_include_directories(test_format PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../source
+)
+
+target_link_libraries(test_format PRIVATE
+    CppUTest
+    CppUTestExt
+)
+
+add_test(NAME test_format COMMAND test_format)
