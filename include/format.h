@@ -173,6 +173,16 @@ GlyphFormatSize(size_t digitCount, int groupSize, bool signable = false) {
     return digitCount + separatorCount + (signable ? 1 : 0);
 }
 
+constexpr size_t
+GlyphPaddedDigitCount(size_t digitCount, int paddingGroupSize) {
+    if (paddingGroupSize <= 0) {
+        return digitCount;
+    }
+
+    return digitCount + ((paddingGroupSize - (digitCount % paddingGroupSize)) %
+                         paddingGroupSize);
+}
+
 /**
  * @brief Glyph array for formatted numbers, with separators and optional sign.
  *
@@ -189,9 +199,15 @@ GlyphFormatSize(size_t digitCount, int groupSize, bool signable = false) {
 template <FontType Separator, int GroupSize, int PaddingGroupSize,
           bool Signable, int W, int H, size_t N>
 class GlyphFormatArray
-    : public GlyphArray<W, H, GlyphFormatSize(N, GroupSize, Signable)> {
+    : public GlyphArray<W, H,
+                        GlyphFormatSize(
+                            GlyphPaddedDigitCount(N, PaddingGroupSize),
+                            GroupSize, Signable)> {
   private:
-    using Base = GlyphArray<W, H, GlyphFormatSize(N, GroupSize, Signable)>;
+    using Base =
+        GlyphArray<W, H,
+                   GlyphFormatSize(GlyphPaddedDigitCount(N, PaddingGroupSize),
+                                   GroupSize, Signable)>;
 
     constexpr void
     InsertDigit(const Glyph &glyph, size_t index, size_t digitCount) {
@@ -378,14 +394,17 @@ max(size_t a, size_t b, size_t c, size_t d) {
 template <NumberBase Base>
 constexpr size_t
 GlyphFormatSize(size_t digitCount) {
-    if constexpr (Base == Binary) {
-        return GlyphFormatSize(digitCount, 4, false);
-    } else if constexpr (Base == Octal) {
-        return GlyphFormatSize(digitCount, 3, false);
-    } else if constexpr (Base == Decimal) {
-        return GlyphFormatSize(digitCount, 3, true);
-    } else if constexpr (Base == Hexadecimal) {
-        return GlyphFormatSize(digitCount, 4, false);
+    if constexpr (Base == Binary || Base == Octal || Base == Decimal ||
+                  Base == Hexadecimal) {
+        constexpr int W = 6;
+        constexpr int H = 8;
+        constexpr int groupSize = GlyphFormatTraits<Base, W, H>::GroupSize;
+        constexpr int paddingGroupSize =
+            GlyphFormatTraits<Base, W, H>::PaddingGroupSize;
+        constexpr bool signable = GlyphFormatTraits<Base, W, H>::Signable;
+        return GlyphFormatSize(
+            GlyphPaddedDigitCount(digitCount, paddingGroupSize), groupSize,
+            signable);
     } else {
         static_assert(Base == Binary || Base == Octal || Base == Decimal ||
                           Base == Hexadecimal,
