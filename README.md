@@ -64,7 +64,7 @@ selected button, which is equivalent to touching the button on the sub screen.
 - [x] Scroll the formula
 - [x] Add color themes
 - [ ] Add background color to the `UINT32`
-- [ ] Modify the font shadows
+- [x] Modify the font shadows
 
 ### v1.3.0
 

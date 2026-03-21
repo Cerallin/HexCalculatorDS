@@ -130,7 +130,7 @@ enum FontChar : FontType {
  *
  */
 constexpr size_t BarTileCount = 3;
-constexpr FontType BarTiles[BarTileCount] = {83, 84, 85};
+constexpr FontType BarTiles[BarTileCount] = {82, 83, 84};
 
 class GlyphOO;
 class GlyphOX;
@@ -363,7 +363,7 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(0, 42);
         break;
     case Font8x8D:
-        *this = GlyphXX(40, 41);
+        *this = Glyph(122, 121);
         break;
     case Font8x8E:
         *this = Glyph(0, 43);
@@ -387,94 +387,94 @@ constexpr Glyph::Glyph(FontType font)
         *this = Glyph(53, 54);
         break;
     case Font8x8Five:
-        *this = Glyph(55, 56);
+        *this = Glyph(118, 56);
         break;
     case Font8x8Six:
-        *this = GlyphXO(48, 57);
+        *this = Glyph(119, 57);
         break;
     case Font8x8Seven:
-        *this = GlyphXO(55, 58);
+        *this = Glyph(55, 58);
         break;
     case Font8x8Eight:
-        *this = Glyph(59, 60);
+        *this = Glyph(120, 59);
         break;
     case Font8x8Nine:
-        *this = Glyph(59, 61);
+        *this = Glyph(120, 60);
         break;
     case Font8x8Zero:
-        *this = Glyph(59, 62);
+        *this = Glyph(120, 61);
         break;
     case Font8x8Minus:
-        *this = Glyph(0, 102);
-        break;
-    case Font6x8Comma:
-        *this = Glyph(0, 63);
-        break;
-    case FontColoredU:
-        *this = Glyph(64, 65);
-        break;
-    case FontColoredI:
-        *this = Glyph(66, 67);
-        break;
-    case FontColoredN:
-        *this = Glyph(68, 69);
-        break;
-    case FontColoredT:
-        *this = Glyph(66, 70);
-        break;
-    case FontColoredEight:
-        *this = Glyph(73, 72);
-        break;
-    case FontColoredOne:
-        *this = Glyph(74, 75);
-        break;
-    case FontColoredSix:
-        *this = Glyph(76, 78);
-        break;
-    case FontColoredThree:
-        *this = GlyphXO(76, 79);
-        break;
-    case FontColoredTwo:
-        *this = GlyphXO(76, 80);
-        break;
-    case FontColoredFour:
-        *this = Glyph(81, 82);
-        break;
-    case Font6x8LBrac:
-        *this = Glyph(86, 87);
-        break;
-    case Font6x8RBrac:
-        *this = Glyph(88, 89);
-        break;
-    case Font6x8LShift:
-        *this = Glyph(0, 100);
-        break;
-    case Font6x8RShift:
         *this = Glyph(0, 101);
         break;
-    case Font6x8O:
-        *this = Glyph(0, 98);
+    case Font6x8Comma:
+        *this = Glyph(0, 62);
         break;
-    case Font6x8M:
+    case FontColoredU:
+        *this = Glyph(63, 64);
+        break;
+    case FontColoredI:
+        *this = Glyph(65, 66);
+        break;
+    case FontColoredN:
+        *this = Glyph(67, 68);
+        break;
+    case FontColoredT:
+        *this = Glyph(65, 69);
+        break;
+    case FontColoredEight:
+        *this = Glyph(72, 71);
+        break;
+    case FontColoredOne:
+        *this = Glyph(73, 74);
+        break;
+    case FontColoredSix:
+        *this = Glyph(75, 77);
+        break;
+    case FontColoredThree:
+        *this = GlyphXO(75, 78);
+        break;
+    case FontColoredTwo:
+        *this = GlyphXO(75, 79);
+        break;
+    case FontColoredFour:
+        *this = Glyph(80, 81);
+        break;
+    case Font6x8LBrac:
+        *this = Glyph(85, 86);
+        break;
+    case Font6x8RBrac:
+        *this = Glyph(87, 88);
+        break;
+    case Font6x8LShift:
         *this = Glyph(0, 99);
         break;
+    case Font6x8RShift:
+        *this = Glyph(0, 100);
+        break;
+    case Font6x8O:
+        *this = Glyph(0, 97);
+        break;
+    case Font6x8M:
+        *this = Glyph(0, 98);
+        break;
     case Font6x8And:
-        *this = Glyph(90, 91);
+        *this = Glyph(89, 90);
         break;
     case Font6x8Or:
-        *this = Glyph(92, 93);
+        *this = Glyph(91, 92);
         break;
     case Font6x8Multiply:
-        *this = Glyph(0, 94);
+        *this = Glyph(0, 93);
         break;
     case Font6x8Divide:
-        *this = Glyph(0, 95);
+        *this = Glyph(0, 94);
         break;
     case Font6x8LArrow:
-        *this = Glyph(0, 103);
+        *this = Glyph(0, 102);
         break;
     case Font6x8RArrow:
-        *this = Glyph(0, 104);
+        *this = Glyph(0, 103);
         break;
     default:
         *this = InvalidGlyph;
