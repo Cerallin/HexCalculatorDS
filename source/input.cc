@@ -162,7 +162,7 @@ InputHandler::updateKeys(uint32_t newHeldKeys) {
     heldKeys = newHeldKeys;
 
     for (int i = 0; i < 32; ++i) {
-        uint32_t mask = (1u << i);
+        uint32_t mask = BIT(i);
 
         if (!(heldKeys & mask)) {
             if (previousHeldKeys & mask) {
@@ -178,7 +178,7 @@ InputHandler::updateKeys(uint32_t newHeldKeys) {
             postKeyEvent(KeyAction::PressDown, mask);
         } else if (s.counter > repeatDelay) {
             if (repeatRate > 0 &&
-                ((s.counter - repeatDelay) % repeatRate == 0)) {
+                (((s.counter - repeatDelay) % repeatRate) == 0)) {
                 postKeyEvent(KeyAction::PressDown, mask);
             }
         }
@@ -254,7 +254,7 @@ InputHandler::dispatchKeyPressDown(uint32_t keyMask) {
     } else if (keyMask & KEY_RIGHT) { // →
         commands.MoveFocusRight();
     } else if (keyMask & KEY_A) { // A
-        eventBus.Post(Event{.data = 0, .type = PreviousTouchEvent});
+        commands.InputPrevious();
     } else if (keyMask & KEY_B) { // B
         commands.InputOperatorBackspace();
     } else if (keyMask & KEY_X) { // X

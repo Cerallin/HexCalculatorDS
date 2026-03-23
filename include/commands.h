@@ -42,9 +42,11 @@ class Commands {
     void InputOperatorBackspace(void);
     void InputOperatorNegate(void);
     void InputOperatorNot(void);
-    void Evaluate(void);
     void InputOperatorLBrac(void);
     void InputOperatorRBrac(void);
+    void InputPrevious(void);
+
+    void Evaluate(void);
 
     void SwitchBaseUpper(void);
     void SwitchBaseLower(void);
