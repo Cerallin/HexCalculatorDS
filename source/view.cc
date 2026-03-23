@@ -604,34 +604,35 @@ TranscodeView<Binary>::printNumber(void) const {
     }
 }
 
-template <>
+template <NumberBase Base>
+EventResult
+TranscodeView<Base>::HandleEvent(const Event &e) {
+    // Only for decimal view, changing sign may cause the number of digits to
+    // change. e.g. 255 (0xFF) becomes -1 in decimal when sign is changed from
+    // unsigned to signed.
+    if constexpr (Base == Decimal) {
+        if (e.type == EventType::UpdateSignEvent) {
+            BasicView<TranscodeView<Base>, MainDisplay>::markDirty();
+            debugf("TranscodeView(%d) refreshed\n", static_cast<int>(Base));
+            return Consumed;
+        }
+    }
+
+    // For all views, when the value changes, the view should be updated to
+    // reflect the new value.
+    if (e.type == EventType::ValueChangedEvent) {
+        BasicView<TranscodeView<Base>, MainDisplay>::markDirty();
+        debugf("TranscodeView(%d) refreshed\n", static_cast<int>(Base));
+        return Consumed;
+    }
+
+    return Skipped;
+}
+
+template <NumberBase Base>
 void
-TranscodeView<Hexadecimal>::ForceUpdate(void) {
+TranscodeView<Base>::ForceUpdate(void) {
     debugf("HexView refreshed\n");
-    printHeader();
-    printNumber();
-}
-
-template <>
-void
-TranscodeView<Decimal>::ForceUpdate(void) {
-    debugf("DecView refreshed\n");
-    printHeader();
-    printNumber();
-}
-
-template <>
-void
-TranscodeView<Octal>::ForceUpdate(void) {
-    debugf("OctView refreshed\n");
-    printHeader();
-    printNumber();
-}
-
-template <>
-void
-TranscodeView<Binary>::ForceUpdate(void) {
-    debugf("BinView refreshed\n");
     printHeader();
     printNumber();
 }

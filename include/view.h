@@ -241,17 +241,7 @@ class TranscodeView : public MainView<TranscodeView<Base>, AlignLeft> {
               display),
           vm(vm), selected(false) {}
 
-    EventResult
-    HandleEvent(const Event &e) {
-        if (e.type == EventType::ValueChangedEvent) {
-            BasicView<TranscodeView<Base>, MainDisplay>::markDirty();
-            debugf("TranscodeView(%d) refreshed\n", static_cast<int>(Base));
-            printNumber();
-            return Consumed;
-        }
-
-        return Skipped;
-    }
+    EventResult HandleEvent(const Event &e);
 
     void ForceUpdate(void);
 
