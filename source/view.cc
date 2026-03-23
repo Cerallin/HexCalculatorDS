@@ -452,6 +452,10 @@ ValueView::HandleEvent(const Event &e) {
         BasicView::markDirty();
         debugf("ValueView base changed\n");
         return Consumed;
+    } else if (e.type == EventType::UpdateSignEvent) {
+        BasicView::markDirty();
+        debugf("ValueView sign changed\n");
+        return Consumed;
     } else if (e.type == EventType::EvaluateErrorEvent) {
         BasicView::markDirty();
         debugf("ValueView evaluation error: %d\n", e.data);
