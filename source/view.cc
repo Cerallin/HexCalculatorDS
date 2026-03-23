@@ -565,7 +565,7 @@ IndicatorView::getIndicatorY(NumberBase base) const {
 
 template <NumberBase Base>
 void
-HexCalc::TranscodeView<Base>::printHeader(void) const {
+TranscodeView<Base>::printHeader(void) const {
     auto &viewArea = this->viewArea;
     Area6x8 area(viewArea);
     auto middleH = (area.y + area.h / 2) * CharHeight;

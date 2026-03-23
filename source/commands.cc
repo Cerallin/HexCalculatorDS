@@ -292,7 +292,7 @@ Commands::InputOperatorRBrac(void) {
 }
 
 void
-HexCalc::Commands::InputPrevious(void) {
+Commands::InputPrevious(void) {
     debugf("Key Previous pressed\n");
     bus.Post(Event{
         0,
