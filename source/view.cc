@@ -563,24 +563,24 @@ IndicatorView::getIndicatorY(NumberBase base) const {
     return middleY;
 }
 
-template <NumberBase base>
+template <NumberBase Base>
 void
-HexCalc::TranscodeView<base>::printHeader(void) const {
+HexCalc::TranscodeView<Base>::printHeader(void) const {
     auto &viewArea = this->viewArea;
     Area6x8 area(viewArea);
     auto middleH = (area.y + area.h / 2) * CharHeight;
-    if constexpr (base == Binary) {
+    if constexpr (Base == Binary) {
         middleH += CharHeight;
     }
     Point start(viewArea.x + headerSkip * GlyphArray6x8<0>::CharWidth, middleH);
     this->display.template PrintLine(header, start);
 }
 
-template <NumberBase base>
+template <NumberBase Base>
 void
-TranscodeView<base>::printNumber(void) const {
-    auto digits = vm.GetValueDigits<MaxDigitsForType<base>()>(base);
-    auto glyphs = MakeFormattedGlyphArray<base, 6, 8>(digits, false);
+TranscodeView<Base>::printNumber(void) const {
+    auto digits = vm.GetValueDigits<MaxDigitsForType<Base>()>(Base);
+    auto glyphs = MakeFormattedGlyphArray<Base, 6, 8>(digits, false);
 
     Point start(this->viewArea.x +
                     (headerSkip + header.Size() + numberGap) * CharWidth,

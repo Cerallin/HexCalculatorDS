@@ -110,17 +110,17 @@ struct DigitArray {
     bool negative;
 };
 
-template <NumberBase base>
+template <NumberBase Base>
 static constexpr size_t
 MaxDigitsForType(void) {
-    static_assert(base == Binary || base == Octal || base == Decimal ||
-                      base == Hexadecimal,
+    static_assert(Base == Binary || Base == Octal || Base == Decimal ||
+                      Base == Hexadecimal,
                   "Invalid base");
     NumberDataType v = std::numeric_limits<NumberDataType>::max();
     size_t count = 0;
     do {
         ++count;
-        v /= static_cast<NumberDataType>(base);
+        v /= static_cast<NumberDataType>(Base);
     } while (v != 0);
     return count;
 }

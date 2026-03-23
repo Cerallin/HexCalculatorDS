@@ -227,14 +227,14 @@ class ValueView : public MainView<ValueView, AlignRight> {
     FormulaEvaluateResult lastEvaluateResult;
 };
 
-template <NumberBase base>
-class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
+template <NumberBase Base>
+class TranscodeView : public MainView<TranscodeView<Base>, AlignLeft> {
   public:
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
     TranscodeView(MainDisplay &display, ViewModel &vm)
-        : MainView<TranscodeView<base>, AlignLeft>(
+        : MainView<TranscodeView<Base>, AlignLeft>(
               //
               Area(0, line * TileHeight, lineWidth * TileWidth,
                    height * TileHeight),
@@ -244,8 +244,8 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     EventResult
     HandleEvent(const Event &e) {
         if (e.type == EventType::ValueChangedEvent) {
-            BasicView<TranscodeView<base>, MainDisplay>::markDirty();
-            debugf("TranscodeView(%d) refreshed\n", static_cast<int>(base));
+            BasicView<TranscodeView<Base>, MainDisplay>::markDirty();
+            debugf("TranscodeView(%d) refreshed\n", static_cast<int>(Base));
             printNumber();
             return Consumed;
         }
@@ -256,19 +256,19 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
     void ForceUpdate(void);
 
     // hex: 2, dec: 2, oct: 3, bin: 8
-    static constexpr int16_t height = (base == Hexadecimal) ? 2
-                                      : (base == Decimal)   ? 2
-                                      : (base == Octal)     ? 3
-                                      : (base == Binary)    ? 8
+    static constexpr int16_t height = (Base == Hexadecimal) ? 2
+                                      : (Base == Decimal)   ? 2
+                                      : (Base == Octal)     ? 3
+                                      : (Base == Binary)    ? 8
                                                             : /* default */ 2;
     static constexpr int16_t columnGap = 2;
     static constexpr int16_t lineGap = 1;
     static constexpr int16_t line = lineGap + ValueView::line +
                                     ValueView::height +
-                                    ((base == Hexadecimal) ? 0
-                                     : (base == Decimal)   ? 2
-                                     : (base == Octal)     ? 4
-                                     : (base == Binary)    ? 7
+                                    ((Base == Hexadecimal) ? 0
+                                     : (Base == Decimal)   ? 2
+                                     : (Base == Octal)     ? 4
+                                     : (Base == Binary)    ? 7
                                                            : 0);
     static constexpr int16_t lineWidth = 30;
     static constexpr int16_t lineHeight = 2;
@@ -300,13 +300,13 @@ class TranscodeView : public MainView<TranscodeView<base>, AlignLeft> {
   private:
     static constexpr HeaderGlyphArray6x8
     MakeHeader(void) {
-        if constexpr (base == Hexadecimal) {
+        if constexpr (Base == Hexadecimal) {
             return HeaderGlyphArray6x8(Glyph(Font6x8HH), Glyph(Font6x8EH),
                                        Glyph(Font6x8XH));
-        } else if constexpr (base == Decimal) {
+        } else if constexpr (Base == Decimal) {
             return HeaderGlyphArray6x8(Glyph(Font6x8DH), Glyph(Font6x8EH),
                                        Glyph(Font6x8CH));
-        } else if constexpr (base == Octal) {
+        } else if constexpr (Base == Octal) {
             return HeaderGlyphArray6x8(Glyph(Font6x8OH), Glyph(Font6x8CH),
                                        Glyph(Font6x8TH));
         } else {
