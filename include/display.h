@@ -349,6 +349,7 @@ class SubDisplay : public Display<SubDisplay> {
     void UpdateSignDrawer(NumberSign sign);
 
     Sprite<SubDisplay> *AddSprite(Point position, int priority = 0);
+    void ResetSprites(void);
 
     static constexpr auto VideoMode =
         MODE_3_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D_LAYOUT;

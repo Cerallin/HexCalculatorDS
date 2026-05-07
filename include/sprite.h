@@ -29,11 +29,6 @@ class Sprite {
         : position(position), tile(tile), priority(priority), dirty(true) {}
     constexpr Sprite(void) : Sprite(Point(0, 0), nullptr, -1) {}
 
-    void
-    FreeGfx(void) {
-        oamFreeGfx(&oamState, tile);
-    }
-
     bool
     Valid(void) const {
         return (priority >= 0);
@@ -50,6 +45,12 @@ class Sprite {
     void
     SetTileOffset(int tileIndex) {
         SetTile(oamGetGfxPtr(&oamState, tileIndex));
+    }
+
+    void
+    SetPriority(int newPriority) {
+        priority = newPriority;
+        dirty = true;
     }
 
     bool
@@ -123,6 +124,16 @@ class SpriteManager : NonCopyable {
     }
 
     void
+    Reset(void) {
+        // hide all sprites
+        for (int i = 0; i < MaxSprites; i++) {
+            sprites[i].SetPriority(-1);
+        }
+        // reset sprite count
+        spriteCount = 0;
+    }
+
+    void
     Update(void) {
         for (int i = 0; i < MaxSprites; i++) {
             auto &sprite = sprites[i];
@@ -168,6 +179,8 @@ class MainSpriteManager : public SpriteManager<MainDisplay> {
 class SubSpriteManager : public SpriteManager<SubDisplay> {
   public:
     SubSpriteManager(void);
+
+    void PrintVersionString(void);
 };
 
 }; // namespace HexCalc
