@@ -180,7 +180,7 @@ class SubSpriteManager : public SpriteManager<SubDisplay> {
   public:
     SubSpriteManager(void);
 
-    void PrintVersionString(void);
+    void RegisterVerStr(void);
 };
 
 }; // namespace HexCalc

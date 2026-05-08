@@ -11,6 +11,9 @@ using namespace HexCalc;
 
 InputView::InputView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), handler(vm.Cmds()), leftBracketCount(0) {
+    // Print version string
+    display.ShowVerStr();
+
     // Ordered by button position, left to right then top to bottom
     HEXCALC_GCC_UNUSED auto buttonAnd =
         handler.RegisterButton(Area(AREA_0_X, AREA_0_Y, AREA_0_W, AREA_0_H),

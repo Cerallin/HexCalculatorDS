@@ -36,16 +36,23 @@ SubSpriteManager::SubSpriteManager(void) : SpriteManager<SubDisplay>() {
                LZ77Vram);
     // Use the same palette for version
 
+    oamEnable(&oamState);
+}
+
+static constexpr int16_t
+kerning(FontChar font) {
+    if (font == FontVersionDot) {
+        return 3;
+    } else {
+        return 5;
+    }
+};
+
+void
+SubSpriteManager::RegisterVerStr(void) {
     // Initialize the version string
     constexpr auto versionArr = _("v" HEXCALCDS_PROJECT_VERSION);
 
-    constexpr auto kerning = [](FontChar font) {
-        if (font == FontVersionDot) {
-            return 3;
-        } else {
-            return 5;
-        }
-    };
     int16_t offsetX = 0;
     int16_t offsetY = 1;
     for (const auto &font : versionArr) {
@@ -55,6 +62,4 @@ SubSpriteManager::SubSpriteManager(void) : SpriteManager<SubDisplay>() {
         sp->SetTileOffset(tileIndex);
         offsetX += kerning(font);
     }
-
-    oamEnable(&oamState);
 }

@@ -184,3 +184,13 @@ Sprite<SubDisplay> *
 SubDisplay::AddSprite(Point position, int priority) {
     return sm.Add(position, priority);
 }
+
+void
+SubDisplay::ResetSprites(void) {
+    sm.Reset();
+}
+
+void
+SubDisplay::ShowVerStr(void) {
+    sm.RegisterVerStr();
+}
