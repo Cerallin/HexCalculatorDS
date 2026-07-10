@@ -29,6 +29,7 @@ while getopts "cdgh" opt; do
             ;;
         h)
             print_help
+            exit 1
             ;;
         *)
             print_help
