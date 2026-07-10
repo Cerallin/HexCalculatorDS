@@ -161,7 +161,8 @@ class InputHandler {
     static constexpr int PRESS_TH = 2;
     static constexpr int RELEASE_TH = 3;
 
-    KeyRepeatState keyStates[32];
+    static constexpr int KEY_COUNT = 32;
+    KeyRepeatState keyStates[KEY_COUNT];
 
     void updateKeys(uint32_t newHeldKeys);
     void updateTouch(bool rawPressed, const Point &rawPoint);

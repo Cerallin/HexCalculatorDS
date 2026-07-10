@@ -17,12 +17,13 @@ struct HardwareInputSnapshot {
 };
 
 static HardwareInputSnapshot
-ReadHardwareInput() {
-    scanKeys();
-
+readHardwareInput() {
     HardwareInputSnapshot input;
+
+    scanKeys();
     input.heldKeys = keysHeld();
     touchRead(&input.touch);
+
     return input;
 }
 
@@ -143,11 +144,12 @@ InputHandler::InputHandler(EventBus &eventBus, Commands &commands)
 
 void
 InputHandler::Update(void) {
-    auto input = ReadHardwareInput();
-    bool touched = (input.heldKeys & KEY_TOUCH) != 0;
+    auto input = readHardwareInput();
+    bool touched = ((input.heldKeys & KEY_TOUCH) != 0);
 
     updateKeys(input.heldKeys);
-    updateTouch(touched, Point(input.touch.px, input.touch.py));
+    Point touchPoint(input.touch.px, input.touch.py);
+    updateTouch(touched, touchPoint);
 }
 
 void
@@ -161,28 +163,37 @@ InputHandler::updateKeys(uint32_t newHeldKeys) {
     previousHeldKeys = heldKeys;
     heldKeys = newHeldKeys;
 
-    for (int i = 0; i < 32; ++i) {
+    for (int i = 0; i < KEY_COUNT; i++) {
         uint32_t mask = BIT(i);
 
-        if (!(heldKeys & mask)) {
-            if (previousHeldKeys & mask) {
+        bool pressed = ((heldKeys & mask) != 0);
+        bool prevPressed = ((previousHeldKeys & mask) != 0);
+        if (!pressed) {
+            if (prevPressed) {
+                // key released
                 postKeyEvent(KeyAction::PressUp, mask);
             }
+            // reset counter for next press
             keyStates[i].counter = 0;
+            // skip to next key
             continue;
         }
 
         auto &s = keyStates[i];
 
         if (s.counter == 0) {
+            // first press
             postKeyEvent(KeyAction::PressDown, mask);
         } else if (s.counter > repeatDelay) {
-            if (repeatRate > 0 &&
-                (((s.counter - repeatDelay) % repeatRate) == 0)) {
+            assert(repeatRate > 0);
+            bool shouldRepeat = (((s.counter - repeatDelay) % repeatRate) == 0);
+            if (shouldRepeat) {
+                // repeat press
                 postKeyEvent(KeyAction::PressDown, mask);
             }
         }
 
+        // increment counter for next frame
         s.counter++;
     }
 }
@@ -218,28 +229,43 @@ InputHandler::updateTouch(bool rawPressed, const Point &rawPoint) {
         }
     }
 
+    // post events
     if (!previousTouch && stablePressed) {
         postTouchEvent(TouchAction::TouchDown, smoothPos);
     } else if (previousTouch && !stablePressed) {
         postTouchEvent(TouchAction::TouchUp, smoothPos);
+    } else {
+        // no change, do nothing
     }
 }
 
 void
 InputHandler::postKeyEvent(KeyAction action, uint32_t keyMask) {
+    EventType actionType = EventType::UnknownEvent;
+    if (action == KeyAction::PressDown) {
+        actionType = EventType::KeyPressDownEvent;
+    } else if (action == KeyAction::PressUp) {
+        actionType = EventType::KeyPressUpEvent;
+    }
+
     eventBus.Post(Event{
         .data = static_cast<EventDataType>(keyMask),
-        .type = action == KeyAction::PressDown ? EventType::KeyPressDownEvent
-                                               : EventType::KeyPressUpEvent,
+        .type = actionType,
     });
 }
 
 void
 InputHandler::postTouchEvent(TouchAction action, const Point &pos) {
+    EventType actionType = EventType::UnknownEvent;
+    if (action == TouchAction::TouchDown) {
+        actionType = EventType::TouchDownEvent;
+    } else if (action == TouchAction::TouchUp) {
+        actionType = EventType::TouchUpEvent;
+    }
+
     eventBus.Post(Event{
         .data = pos.ToInt(),
-        .type = action == TouchAction::TouchDown ? EventType::TouchDownEvent
-                                                 : EventType::TouchUpEvent,
+        .type = actionType,
     });
 }
 
