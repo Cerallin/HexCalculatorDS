@@ -77,7 +77,8 @@ FormulaTreeNode::Evaluate(void) {
                 value.SetNumber(Operator::Minus(lvalue, rvalue));
                 break;
             default:
-                flag.unknownOperatorFlag = true;
+                // Unknown operator is a programming error, should not happen
+                assert(false && "unknown binary operator in Evaluate");
                 return flag;
             }
 
@@ -305,8 +306,6 @@ FormulaTree::Evaluate(void) {
                     res = DivideByZero;
                 } else if (flags.invalidExpressionFlag) {
                     res = InvalidExpression;
-                } else if (flags.unknownOperatorFlag) {
-                    res = UnknownOperator;
                 }
             }
         });

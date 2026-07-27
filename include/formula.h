@@ -84,16 +84,13 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
     struct EvaluateFlag {
         bool divideByZeroFlag : 1;
         bool invalidExpressionFlag : 1;
-        bool unknownOperatorFlag : 1;
 
         constexpr EvaluateFlag(void)
-            : divideByZeroFlag(false), invalidExpressionFlag(false),
-              unknownOperatorFlag(false) {}
+            : divideByZeroFlag(false), invalidExpressionFlag(false) {}
 
         constexpr bool
         AllClear(void) const {
-            return !(divideByZeroFlag || invalidExpressionFlag ||
-                     unknownOperatorFlag);
+            return !(divideByZeroFlag || invalidExpressionFlag);
         }
     };
 
@@ -140,7 +137,6 @@ enum FormulaEvaluateResult {
     EvalSuccess,
     DivideByZero,
     InvalidExpression,
-    UnknownOperator,
 };
 
 class FormulaTree : private NonCopyable {
@@ -167,7 +163,7 @@ class FormulaTree : private NonCopyable {
      * @brief Evaluate the formula tree and get the result.
      *
      * @return FormulaEvaluateResult result of the evaluation, which can be
-     * Success, DivideByZero, InvalidExpression, or UnknownOperator
+     * Success, DivideByZero, or InvalidExpression
      */
     FormulaEvaluateResult Evaluate(void);
 
