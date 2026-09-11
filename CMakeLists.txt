@@ -121,8 +121,10 @@ add_custom_command(
         ${THEME}
         ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-sub.png
         ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-sub.png
-    COMMENT "Generating font tilemap"
+    DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-sub.png
+        ${CMAKE_CURRENT_SOURCE_DIR}/subscreen_maker/run.py
+    COMMENT "Generating subscreen area BMP"
 )
 
 add_custom_command(
@@ -137,7 +139,39 @@ add_custom_command(
         -m
         -o subscreenImage
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subscreenArea.bmp
-    COMMENT "Generating font tilemap"
+    COMMENT "Generating subscreen image"
+)
+
+# ----------------------------------------
+# Subscreen Binary Image
+# ----------------------------------------
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenBinaryArea.bmp
+    COMMAND ${PYTHON}
+        ${CMAKE_CURRENT_SOURCE_DIR}/subscreen_maker/run_binary.py
+        ${THEME}
+        ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-binary.png
+        ${CMAKE_CURRENT_BINARY_DIR}/subscreenBinaryArea.bmp
+    DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/design/HexCalculatorDS-binary.png
+        ${CMAKE_CURRENT_SOURCE_DIR}/subscreen_maker/run_binary.py
+    COMMENT "Generating subscreen binary area BMP"
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subscreenBinaryImage.c
+    COMMAND ${GRIT}
+        ${CMAKE_CURRENT_BINARY_DIR}/subscreenBinaryArea.bmp
+        -ftc
+        -gB8
+        -gb
+        -gzl
+        -gTFF00FF
+        -m
+        -o subscreenBinaryImage
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subscreenBinaryArea.bmp
+    COMMENT "Generating subscreen binary image"
 )
 
 # ----------------------------------------
@@ -156,6 +190,7 @@ add_executable(${PROJECT_NAME}.elf
     ${CMAKE_CURRENT_BINARY_DIR}/subNumber.c
     ${CMAKE_CURRENT_BINARY_DIR}/subVersion.c
     ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c
+    ${CMAKE_CURRENT_BINARY_DIR}/subscreenBinaryImage.c
 )
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
