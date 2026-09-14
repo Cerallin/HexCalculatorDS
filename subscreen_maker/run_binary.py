@@ -137,8 +137,13 @@ class BinaryCalculatorExporter:
         text_hex = set(defaultTheme.TEXT_COLORS)
         bg_hex = set(defaultTheme.BG_COLORS)
 
-        # Contour outline from the shadow pill path; arrows collected as text.
+        # Contour outline from the shadow pill path.
         rec.contour_points = [(px, py) for [[px, py]] in contour]
+
+        # Label (incl. anti-aliased light-shadow ink) is drawn at runtime;
+        # fill the whole pill interior with bg. Flanking ◀ / ▶ stay as text.
+        filled = np.zeros((h_img, w_img), np.uint8)
+        cv2.drawContours(filled, [contour], -1, 255, -1)
 
         for py in range(ry0, ry1):
             for px in range(rx0, rx1):
@@ -146,31 +151,20 @@ class BinaryCalculatorExporter:
                 key = f"{r:02x}{g:02x}{b:02x}"
                 if key in bg_hex:
                     continue
-                if key in text_hex or key in border_hex:
+                if filled[py, px]:
+                    # Interior: body + former label ink → uniform bg
+                    if (key in shadow_hex or key in text_hex or key in border_hex):
+                        if (px, py) not in rec.contour_points:
+                            rec.bg_points.append((px, py))
+                elif key in text_hex or key in border_hex:
                     rec.text_points.append((px, py))
-                elif key == defaultTheme.SHADOW_COLORS[1]:
-                    rec.bg_points.append((px, py))
-                elif key == defaultTheme.SHADOW_COLORS[0]:
-                    if (px, py) not in rec.contour_points:
-                        rec.shadow_points.append((px, py))
-
-        # Fill remaining shadow interior
-        inner = ContourAnalyzer.collect_inner_colors(self.image, contour)
-        for k, pts in inner.items():
-            if k in shadow_hex:
-                if k == defaultTheme.SHADOW_COLORS[0]:
-                    rec.shadow_points += pts
-                else:
-                    rec.bg_points += pts
-            elif k in border_hex or k in text_hex:
-                rec.text_points += pts
+                elif key in shadow_hex:
+                    # Soft shadow around the flanking ◀ / ▶ glyphs
+                    rec.shadow_points.append((px, py))
 
         rec.shadow_points = list(dict.fromkeys(rec.shadow_points))
         rec.bg_points = list(dict.fromkeys(rec.bg_points))
         rec.text_points = list(dict.fromkeys(rec.text_points))
-        text_set = set(rec.text_points)
-        rec.bg_points = [p for p in rec.bg_points if p not in text_set]
-        rec.shadow_points = [p for p in rec.shadow_points if p not in text_set]
 
         return rec
 
