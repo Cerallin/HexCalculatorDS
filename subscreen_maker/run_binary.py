@@ -9,11 +9,8 @@ import os
 import sys
 from typing import Optional
 
-import cv2
-import numpy as np
-
 from image import Palette, IndexedImage, Bmp8Writer, ImagePreprocessor
-from contour import ContourAnalyzer, ContourRecord, hex_to_bgr, rgb_to_16bit
+from contour import ContourAnalyzer, ContourRecord, hex_to_bgr, hex_to_rgb, rgb_to_16bit
 from color_theme import ColorTheme, LightTheme, DarkTheme
 
 DEBUG = False
@@ -42,6 +39,9 @@ _CARRY_LABEL_BANDS = [
 # Clear binary digits left of equals / copyright; covers all four rows.
 _BINARY_FIELD = ((0, 57), (228, 125))
 
+# Circular pill body uses a fixed palette slot (runtime / text-layer reserved range).
+_CIRCULAR_BG_PALETTE_INDEX = 6
+
 
 class HitArea:
     """Axis-aligned hit box written to the AREA_* header (may not be drawn)."""
@@ -66,24 +66,13 @@ class BinaryCalculatorExporter:
 
     def _collect_carry_label_points(self):
         """Subscript digits + their drop shadows under each binary row."""
-        black = ContourAnalyzer.build_mask(
-            self.image, [defaultTheme.TEXT_COLORS[0]])
-        shadow = ContourAnalyzer.build_mask(
-            self.image, defaultTheme.SHADOW_COLORS)
-        h, w = black.shape
-        x_limit = _BINARY_FIELD[1][0]  # keep clear of equals / copyright
-        text_pts = []
-        shadow_pts = []
-        for y0, y1 in _CARRY_LABEL_BANDS:
-            # +1 below catches the 1px drop shadow under the glyphs
-            y_lo = max(0, y0)
-            y_hi = min(h, y1 + 1)
-            for y in range(y_lo, y_hi):
-                for x in np.where(black[y, :x_limit] > 0)[0]:
-                    text_pts.append((int(x), int(y)))
-                for x in np.where(shadow[y, :x_limit] > 0)[0]:
-                    shadow_pts.append((int(x), int(y)))
-        # Shadow under ink only; drop any shadow that coincides with text
+        x_limit = _BINARY_FIELD[1][0]
+        # +1 below each band catches the 1px drop shadow under the glyphs
+        bands = [(y0, y1 + 1) for y0, y1 in _CARRY_LABEL_BANDS]
+        text_pts = ContourAnalyzer.collect_points_in_bands(
+            self.image, [defaultTheme.TEXT_COLORS[0]], bands, x_limit)
+        shadow_pts = ContourAnalyzer.collect_points_in_bands(
+            self.image, defaultTheme.SHADOW_COLORS, bands, x_limit)
         text_set = set(text_pts)
         shadow_pts = [p for p in shadow_pts if p not in text_set]
         return text_pts, shadow_pts
@@ -153,104 +142,48 @@ class BinaryCalculatorExporter:
         return rec
 
     def _find_circular(self) -> Optional[ContourRecord]:
-        """Circular mode pill uses shadow colors as its body, not border ink."""
+        """Circular mode pill: uniform bg fill (no border); arrows outside kept."""
         y0, y1, x0, x1 = _CIRCULAR_BAND
         mask = ContourAnalyzer.build_mask(self.image, defaultTheme.SHADOW_COLORS)
-        region = np.zeros_like(mask)
-        region[y0:y1, x0:x1] = mask[y0:y1, x0:x1]
-
-        contours, _ = cv2.findContours(
-            region, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        if not contours:
-            return None
-
-        contour = max(contours, key=cv2.contourArea)
-        if cv2.contourArea(contour) < 200:
+        contour = ContourAnalyzer.largest_contour_in_region(
+            mask, y0, y1, x0, x1, min_area=200)
+        if contour is None:
             return None
 
         rec = ContourRecord(contour)
-        x, y, w, h = rec.position()
+        # No border on the Circular rectangle — only background fill.
+        rec.contour_points = []
+        rec.bg_palette_index = _CIRCULAR_BG_PALETTE_INDEX
 
-        # Expand slightly so flanking arrow glyphs are included.
-        pad = 12
-        h_img, w_img, _ = self.image.shape
-        rx0 = max(0, x - pad)
-        ry0 = max(0, y - 2)
-        rx1 = min(w_img, x + w + pad)
-        ry1 = min(h_img, y + h + 2)
-
-        border_hex = set(defaultTheme.BORDER_COLORS)
-        shadow_hex = set(defaultTheme.SHADOW_COLORS)
-        text_hex = set(defaultTheme.TEXT_COLORS)
-        bg_hex = set(defaultTheme.BG_COLORS)
-
-        # Contour outline from the shadow pill path.
-        rec.contour_points = [(px, py) for [[px, py]] in contour]
-
-        # Label (incl. anti-aliased light-shadow ink) is drawn at runtime;
-        # fill the whole pill interior with bg. Flanking ◀ / ▶ stay as text.
-        filled = np.zeros((h_img, w_img), np.uint8)
-        cv2.drawContours(filled, [contour], -1, 255, -1)
-
-        for py in range(ry0, ry1):
-            for px in range(rx0, rx1):
-                b, g, r = self.image[py, px]
-                key = f"{r:02x}{g:02x}{b:02x}"
-                if key in bg_hex:
-                    continue
-                if filled[py, px]:
-                    # Interior: body + former label ink → uniform bg
-                    if (key in shadow_hex or key in text_hex or key in border_hex):
-                        if (px, py) not in rec.contour_points:
-                            rec.bg_points.append((px, py))
-                elif key in text_hex or key in border_hex:
-                    rec.text_points.append((px, py))
-                elif key in shadow_hex:
-                    # Soft shadow around the flanking ◀ / ▶ glyphs
-                    rec.shadow_points.append((px, py))
-
-        rec.shadow_points = list(dict.fromkeys(rec.shadow_points))
-        rec.bg_points = list(dict.fromkeys(rec.bg_points))
-        rec.text_points = list(dict.fromkeys(rec.text_points))
-
+        bg_pts, text_pts, shadow_pts = ContourAnalyzer.classify_pill_pixels(
+            self.image,
+            contour,
+            expand_pad=12,
+            border_hex=set(defaultTheme.BORDER_COLORS),
+            shadow_hex=set(defaultTheme.SHADOW_COLORS),
+            text_hex=set(defaultTheme.TEXT_COLORS),
+            bg_hex=set(defaultTheme.BG_COLORS),
+        )
+        rec.bg_points = bg_pts
+        rec.text_points = text_pts
+        rec.shadow_points = shadow_pts
         return rec
 
     def _find_circular_arrows(self, pill_box):
         """Bounding boxes of the ◀ / ▶ glyphs flanking the Circular pill."""
         px, py, pw, ph = pill_box
-        h_img, w_img, _ = self.image.shape
-
         ink = ContourAnalyzer.build_mask(
             self.image,
             list(defaultTheme.TEXT_COLORS) + [defaultTheme.BORDER_COLORS[0]],
         )
 
-        def bbox_in_strip(x0, x1):
-            x0 = max(0, x0)
-            x1 = min(w_img, x1)
-            if x1 <= x0:
-                return None
-            strip = ink[py:py + ph, x0:x1]
-            ys, xs = np.where(strip > 0)
-            if len(xs) == 0:
-                return None
-            ax = int(xs.min()) + x0
-            ay = int(ys.min()) + py
-            aw = int(xs.max() - xs.min()) + 1
-            ah = int(ys.max() - ys.min()) + 1
-            pad = _ARROW_HIT_PAD
-            ax = max(0, ax - pad)
-            ay = max(0, ay - pad)
-            aw = min(w_img - ax, aw + 2 * pad)
-            ah = min(h_img - ay, ah + 2 * pad)
-            return HitArea(ax, ay, aw, ah)
+        left_box = ContourAnalyzer.bbox_of_mask_strip(
+            ink, py, py + ph, px - 16, px, pad=_ARROW_HIT_PAD)
+        right_box = ContourAnalyzer.bbox_of_mask_strip(
+            ink, py, py + ph, px + pw, px + pw + 16, pad=_ARROW_HIT_PAD)
 
-        left = bbox_in_strip(px - 16, px)
-        right = bbox_in_strip(px + pw, px + pw + 16)
-        if left is not None:
-            left.alias = "SHIFT_MODE_PREV"
-        if right is not None:
-            right.alias = "SHIFT_MODE_NEXT"
+        left = HitArea(*left_box, alias="SHIFT_MODE_PREV") if left_box else None
+        right = HitArea(*right_box, alias="SHIFT_MODE_NEXT") if right_box else None
         return left, right
 
     def analyze(self):
@@ -268,7 +201,6 @@ class BinaryCalculatorExporter:
             if circular_box is None:
                 return False
             cx, cy, cw, ch = circular_box
-            # Contour center inside circular pill → label fragment, drop it
             mx, my = x + w // 2, y + h // 2
             return (cx <= mx < cx + cw) and (cy <= my < cy + ch)
 
@@ -277,8 +209,8 @@ class BinaryCalculatorExporter:
         equal_record = None
 
         for c in contours:
-            x, y, w, h = cv2.boundingRect(c)
-            area = cv2.contourArea(c)
+            x, y, w, h = ContourAnalyzer.contour_bbox(c)
+            area = ContourAnalyzer.contour_area(c)
 
             # Right-edge copyright strip (full-height tab)
             if h > 100:
@@ -329,12 +261,14 @@ class BinaryCalculatorExporter:
             records.append(equal_record)
 
         if copyright_record is not None:
-            # Same as run.py: only pixels inside the closed tab contour
+            # Inner cream → bg; black © text → text; keep outline as contour.
             copyright_inner = ContourAnalyzer.collect_inner_colors(
                 self.image, copyright_record.contour)
             for k, pts in copyright_inner.items():
                 if k == defaultTheme.BG_COLORS[0]:
                     copyright_record.bg_points = pts
+                elif k == defaultTheme.TEXT_COLORS[0]:
+                    copyright_record.text_points = pts
                 elif k == defaultTheme.BORDER_COLORS[0]:
                     copyright_record.contour_points = pts
                 else:
@@ -363,7 +297,6 @@ class BinaryCalculatorExporter:
         hit_areas.sort(key=lambda a: sort_key_pos(a.position()))
 
         self.image = ImagePreprocessor.crop(self.image, 0, 0, 0, 1)
-        # Drop any label pixels clipped by the final right-edge crop
         w = self.image.shape[1]
         self.carry_label_text_points = [
             (x, y) for x, y in self.carry_label_text_points if x < w
@@ -383,6 +316,9 @@ class BinaryCalculatorExporter:
             len(records),
             offset=16,
         )
+        # Circular body gray lives at a fixed slot for runtime palette writes
+        palette.set_color(_CIRCULAR_BG_PALETTE_INDEX,
+                          *hex_to_rgb(defaultTheme.SHADOW_COLORS[1]))
 
         img = IndexedImage(width, height)
         pal_idx = 16
@@ -398,9 +334,10 @@ class BinaryCalculatorExporter:
             record.draw(img, palette_map)
             pal_idx += 5
 
-        # Static carry / bit-weight subscripts (runtime does not redraw these)
-        label_shadow_idx = 1
-        label_text_idx = 2
+        # Static carry / bit-weight subscripts (common text / shadow slots)
+        # common bank starts at 256 - 15 = 241: border, shadow, text, bg, sign
+        label_shadow_idx = 242
+        label_text_idx = 243
         img.fill_points(self.carry_label_shadow_points, label_shadow_idx)
         img.fill_points(self.carry_label_text_points, label_text_idx)
 
@@ -415,16 +352,16 @@ class BinaryCalculatorExporter:
             f.write("#define SUBSCREEN_BINARY_AREA_H\n\n")
             for idx, area in enumerate(hit_areas):
                 x, y, w, h = area.position()
-                f.write(f"#define AREA_{idx}_X {x}\n")
-                f.write(f"#define AREA_{idx}_Y {y}\n")
-                f.write(f"#define AREA_{idx}_W {w}\n")
-                f.write(f"#define AREA_{idx}_H {h}\n")
+                f.write(f"#define AREA_BIN_{idx}_X {x}\n")
+                f.write(f"#define AREA_BIN_{idx}_Y {y}\n")
+                f.write(f"#define AREA_BIN_{idx}_W {w}\n")
+                f.write(f"#define AREA_BIN_{idx}_H {h}\n")
                 if area.alias:
                     f.write("\n")
-                    f.write(f"#define AREA_{area.alias}_X AREA_{idx}_X\n")
-                    f.write(f"#define AREA_{area.alias}_Y AREA_{idx}_Y\n")
-                    f.write(f"#define AREA_{area.alias}_W AREA_{idx}_W\n")
-                    f.write(f"#define AREA_{area.alias}_H AREA_{idx}_H\n")
+                    f.write(f"#define AREA_BIN_{area.alias}_X AREA_BIN_{idx}_X\n")
+                    f.write(f"#define AREA_BIN_{area.alias}_Y AREA_BIN_{idx}_Y\n")
+                    f.write(f"#define AREA_BIN_{area.alias}_W AREA_BIN_{idx}_W\n")
+                    f.write(f"#define AREA_BIN_{area.alias}_H AREA_BIN_{idx}_H\n")
                 f.write("\n")
             f.write("\n")
             f.write("#endif // SUBSCREEN_BINARY_AREA_H\n")
@@ -473,7 +410,8 @@ class BinaryCalculatorExporter:
                       f"{len(rec.shadow_points):2} shadow,\t"
                       f"{len(rec.text_points):2} text,\t"
                       f"{len(rec.bg_points):3} bg,\t"
-                      f"{len(rec.sign_points):2} sign")
+                      f"{len(rec.sign_points):2} sign,\t"
+                      f"bg_idx={rec.bg_palette_index}")
 
         output_dir = os.path.dirname(output_file) or "."
         prefix = os.path.splitext(os.path.basename(output_file))[0]

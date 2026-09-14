@@ -19,6 +19,11 @@ class Palette:
         self.colors.append((r, g, b))
         return len(self.colors) - 1
 
+    def set_color(self, index, r, g, b):
+        while len(self.colors) <= index:
+            self.add_color(0, 0, 0)
+        self.colors[index] = (r, g, b)
+
     def generate_rainbow(self):
         # index 0: reserved for transparent
         self.colors = [(0xFF, 0x00, 0xFF)]
