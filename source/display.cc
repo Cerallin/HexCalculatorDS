@@ -98,14 +98,11 @@ MainDisplay::ClearLine(const Point &start, int charWidth,
 SubDisplay::SubDisplay(void)
     : Display(), bmpLayer(0, 0),
       tileLayers{
-          TileLayer<SubDisplay>(0, 0),     // unused
-          TileLayer<SubDisplay>(-152, 0),  // border layer
-          TileLayer<SubDisplay>(-164, -8), // text layer
+          TileLayer<SubDisplay>(offsetX - (0 * OffsetPerBG), offsetY + 0),
+          TileLayer<SubDisplay>(offsetX - (1 * OffsetPerBG), offsetY + 0),
       },
-      widthManager(tileLayers[1], tileLayers[2], {0, 0},
-                   {0, 0}), // number width manager
-      signManager(tileLayers[1], tileLayers[2], {64, 0},
-                  {64, 0}) // number sign manager
+      widthManager(tileLayers, {152, 0}, {164, 8}), // number width manager
+      signManager(tileLayers, {216, 0}, {228, 8})   // number sign manager
 {
     // button style & animation will be handled by modifing palette
     videoSetModeSub(VideoMode);

@@ -18,29 +18,23 @@ template <class Derived, typename DisplayType, int BorderWidth,
           int BorderHeight, int TextCount, int TextGlyphCount>
 class DrawerManager {
   public:
-    constexpr DrawerManager(TileLayer<DisplayType> &borderLayer,
-                            TileLayer<DisplayType> &textLayer,
-                            Point borderOffset, Point textOffset)
-        : borderLayer(borderLayer), textLayer(textLayer),
-          borderOffset(borderOffset), textOffset(textOffset) {}
-
     static constexpr int TileWidth = 8;
     static constexpr int TileHeight = 8;
 
+    constexpr DrawerManager(TileLayer<DisplayType> *layers, Point borderOffset,
+                            Point textOffset)
+        : layers(layers), borderOffset(borderOffset), textOffset(textOffset) {}
+
     void
     DrawBorders(int x, int y) {
-        assert(x % TileWidth == 0);
+        assert(x % DisplayType::OffsetPerBG == 0);
         assert(y % TileHeight == 0);
-
-        auto offsetX = borderOffset.x;
-        auto offsetY = borderOffset.y;
 
         for (int i = 0; i < BorderHeight; i++) {
             for (int j = 0; j < BorderWidth; j++) {
-                auto _x = (x + offsetX) / TileWidth + j;
-                auto _y = (y + offsetY) / TileHeight + i;
-
-                borderLayer.Put(_x, _y, Derived::border[i][j]);
+                auto pixelX = x + borderOffset.x + (j * TileWidth);
+                auto pixelY = y + borderOffset.y + (i * TileHeight);
+                PutTile(pixelX, pixelY, Derived::border[i][j]);
             }
         }
     }
@@ -48,23 +42,34 @@ class DrawerManager {
     void
     DrawText(int textIndex, int x, int y) {
         assert(textIndex < TextCount);
-        assert(x % TileWidth == 0);
+        assert(x % DisplayType::OffsetPerBG == 0);
         assert(y % TileHeight == 0);
 
-        auto offsetX = textOffset.x;
-        auto offsetY = textOffset.y;
-
-        auto _x = (x + offsetX) / TileWidth;
-        auto _y = (y + offsetY) / TileHeight;
-
+        auto pixelY = y + textOffset.y;
         for (int i = 0; i < TextGlyphCount; i++) {
-            textLayer.PutGlyph(_x + i, _y, Derived::text[textIndex][i]);
+            auto pixelX = x + textOffset.x + (i * TileWidth);
+            PutGlyph(pixelX, pixelY, Derived::text[textIndex][i]);
         }
     }
 
   protected:
-    TileLayer<DisplayType> &borderLayer;
-    TileLayer<DisplayType> &textLayer;
+    void
+    PutTile(int16_t x, int16_t y, FontType tile) const {
+        assert(x % DisplayType::OffsetPerBG == 0);
+        assert(y % TileHeight == 0);
+        auto _idx = (x / DisplayType::OffsetPerBG) % DisplayType::TileBGNum;
+        layers[_idx].Put(x / TileWidth, y / TileHeight, tile);
+    }
+
+    void
+    PutGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
+        assert(x % DisplayType::OffsetPerBG == 0);
+        assert(y % TileHeight == 0);
+        auto _idx = (x / DisplayType::OffsetPerBG) % DisplayType::TileBGNum;
+        layers[_idx].PutGlyph(x / TileWidth, y / TileHeight, glyph);
+    }
+
+    TileLayer<DisplayType> *layers;
 
     Point borderOffset;
     Point textOffset;
@@ -99,10 +104,9 @@ class NumberSignManager
         DrawerManager<NumberSignManager, SubDisplay, SignBorderWidth,
                       SignBorderHeight, SignTextCount, SignTextGlyphCount>;
 
-    NumberSignManager(TileLayer<SubDisplay> &borderLayer,
-                      TileLayer<SubDisplay> &textLayer, Point borderOffset,
+    NumberSignManager(TileLayer<SubDisplay> *layers, Point borderOffset,
                       Point textOffset)
-        : Base(borderLayer, textLayer, borderOffset, textOffset) {}
+        : Base(layers, borderOffset, textOffset) {}
 
     void
     DrawText(NumberSign sign, int x, int y) {
@@ -179,10 +183,9 @@ class NumberWidthManager
         DrawerManager<NumberWidthManager, SubDisplay, WidthBorderWidth,
                       WidthBorderHeight, WidthTextCount, WidthTextGlyphCount>;
 
-    NumberWidthManager(TileLayer<SubDisplay> &borderLayer,
-                       TileLayer<SubDisplay> &textLayer, Point borderOffset,
+    NumberWidthManager(TileLayer<SubDisplay> *layers, Point borderOffset,
                        Point textOffset)
-        : Base(borderLayer, textLayer, borderOffset, textOffset) {}
+        : Base(layers, borderOffset, textOffset) {}
 
     void
     DrawText(NumberWidth width, int x, int y) {
@@ -369,7 +372,7 @@ class SubDisplay : public Display<SubDisplay> {
 
     static constexpr auto VideoMode =
         MODE_3_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D_LAYOUT;
-    static constexpr int TileBGNum = 3;
+    static constexpr int TileBGNum = 2;
     static constexpr int MaxTileNum = 320;
 
     static constexpr int ColorCount = 5;
@@ -379,6 +382,19 @@ class SubDisplay : public Display<SubDisplay> {
     static constexpr int TileWidth = 8;
     static constexpr int TileHeight = 8;
     static constexpr int TileSize = TileWidth * TileHeight;
+    static constexpr int OffsetPerBG = TileWidth / TileBGNum;
+
+    /**
+     * @brief Global scroll offset X for all layers.
+     *
+     */
+    static constexpr uint16_t offsetX = 0;
+
+    /**
+     * @brief Global scroll offset Y for all layers.
+     *
+     */
+    static constexpr uint16_t offsetY = 0;
 
   private:
     BmpLayer<SubDisplay> bmpLayer;
