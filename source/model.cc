@@ -68,7 +68,7 @@ FormulaModel::HandleEvent(const Event &e) {
 
         formulaChanged = true;
     } else if (e.type == UpdateBaseEvent) {
-        handleBaseChange(e);
+        notifyValueChange();
     } else if (e.type == UpdateWidthEvent) {
         auto oldValue = currentNumber;
         currentNumber &= WidthMask(config.Width());
@@ -276,18 +276,4 @@ FormulaModel::handleInput(const Event &e) {
     }
 
     return Consumed;
-}
-
-void
-FormulaModel::handleBaseChange(const Event &e) {
-    constexpr auto maxWidthforBinary =
-        (GlyphFormatSize<Binary>(QWord) < MaxDisplayDigits)   ? QWord
-        : (GlyphFormatSize<Binary>(DWord) < MaxDisplayDigits) ? DWord
-        : (GlyphFormatSize<Binary>(Word) < MaxDisplayDigits)  ? Word
-                                                              : Byte;
-    if ((config.Base() == Binary) && (config.Width() > maxWidthforBinary)) {
-        notifyWidthChange(maxWidthforBinary);
-    } else {
-        notifyValueChange();
-    }
 }

@@ -489,6 +489,10 @@ ValueView::ForceUpdate(void) {
 
     if (lastEvaluateResult == EvalSuccess) {
         auto base = vm.GetNumberBase();
+        // Display binary value in hexadecimal for better readability
+        if (base == Binary) {
+            base = Hexadecimal;
+        }
         auto digits = vm.GetValueDigits<MaxDisplayDigits>(base);
         PrintFormattedGlyphs<CharWidth, CharHeight>(base, digits, true);
     } else {

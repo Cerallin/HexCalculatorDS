@@ -83,7 +83,6 @@ class FormulaModel {
     void notifyAcceptNumber(NumberDataType number);
 
     EventResult handleInput(const Event &e);
-    void handleBaseChange(const Event &e);
 };
 
 }; // namespace HexCalc
