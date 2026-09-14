@@ -82,6 +82,20 @@ add_custom_command(
 )
 
 add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subBinaryFont.c
+    COMMAND ${GRIT}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-binary-tilemap.png
+        -ftc
+        -gB4
+        -gzl
+        -gTFF00FF
+        -m
+        -o subBinaryFont
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-binary-tilemap.png
+    COMMENT "Generating sub binary font tilemap"
+)
+
+add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subNumber.c
     COMMAND ${GRIT}
         ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-numbers.png
@@ -187,6 +201,7 @@ add_executable(${PROJECT_NAME}.elf
     ${SOURCES}
     ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subFont.c
+    ${CMAKE_CURRENT_BINARY_DIR}/subBinaryFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subNumber.c
     ${CMAKE_CURRENT_BINARY_DIR}/subVersion.c
     ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c

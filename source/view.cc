@@ -6,11 +6,16 @@
  */
 #include "view.h"
 #include "subscreenArea.h"
+#include "subscreenBinaryImage.h"
+#include "subscreenImage.h"
 
 using namespace HexCalc;
 
 InputView::InputView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), handler(vm.Cmds()), leftBracketCount(0) {
+    // Setup image
+    display.SetupView(subscreenImageBitmap, subscreenImagePal);
+
     // Print version string
     display.ShowVerStr();
 

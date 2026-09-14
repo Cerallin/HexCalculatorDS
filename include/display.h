@@ -341,6 +341,20 @@ class SubDisplay : public Display<SubDisplay> {
   public:
     SubDisplay(void);
 
+    /**
+     * @brief Copy the font palette and set the backdrop color.
+     *
+     */
+    void InitializePalette(void);
+
+    /**
+     * @brief Setup the view with the given bitmap and palette.
+     *
+     * @param bitmap Compressed bitmap data (LZ77).
+     * @param palette Palette data to be copied.
+     */
+    void SetupView(const void *bitmap, const uint16_t *palette);
+
     void DisableButton(int index);
     void EnableButton(int index);
     void SelectButton(int index);

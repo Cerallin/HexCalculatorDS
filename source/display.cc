@@ -10,8 +10,8 @@
 
 // assets
 #include "mainFont.h"
+#include "subBinaryFont.h"
 #include "subFont.h"
-#include "subscreenImage.h"
 
 using namespace HexCalc;
 
@@ -123,15 +123,6 @@ SubDisplay::SubDisplay(void)
         tileLayers[i].Init(i, mapBase, 0);
     }
 
-    // copy image palette
-    dmaCopy(subscreenImagePal, BG_PALETTE_SUB, subscreenImagePalLen);
-    // copy font palette
-    static_assert((sizeof(subPal) / sizeof(subPal[0])) <= BIT(Bpp),
-                  "sub palette has too many colors");
-    dmaCopy(subPal, BG_PALETTE_SUB, sizeof(subPal));
-    // Set backdrop color
-    SetBackdrop(COLOR_COMMON_BG);
-
     // set up palettes for button states
     enabledPalette = &BG_PALETTE_SUB[MaxColorCount - (3 * ColorCount)];
     disabledPalette = &BG_PALETTE_SUB[MaxColorCount - (2 * ColorCount)];
@@ -141,12 +132,38 @@ SubDisplay::SubDisplay(void)
     widthManager.DrawBorders(0, 0);
     signManager.DrawBorders(0, 0);
 
-    // decompress image bitmap (LZ77) into VRAM
-    decompress(subscreenImageBitmap, bgGetGfxPtr(bmpLayer.GetBg()), LZ77Vram);
-
     // decompress font tiles (LZ77) into VRAM
     decompress(subFontTiles, bgGetGfxPtr(this->tileLayers[0].GetBg()),
                LZ77Vram);
+
+    // decompress binary tiles (LZ77) into VRAM after the font tiles
+    auto gfxPtr = bgGetGfxPtr(this->tileLayers[0].GetBg());
+    constexpr int gfxOffset = subFontMapLen * byteSize;
+    decompress(subBinaryFontTiles, &gfxPtr[gfxOffset], LZ77Vram);
+
+    InitializePalette();
+}
+
+void
+SubDisplay::InitializePalette(void) {
+    // copy font palette
+    static_assert((sizeof(subPal) / sizeof(subPal[0])) <= BIT(Bpp),
+                  "sub palette has too many colors");
+    dmaCopy(subPal, BG_PALETTE_SUB, sizeof(subPal));
+    // Set backdrop color
+    SetBackdrop(COLOR_COMMON_BG);
+}
+
+void
+SubDisplay::SetupView(const void *bitmap, const uint16_t *palette) {
+    constexpr int palLen = 512;
+    constexpr int subPalLen = sizeof(subPal) / sizeof(subPal[0]);
+    // copy image palette
+    dmaCopy(&palette[subPalLen], &BG_PALETTE_SUB[subPalLen],
+            palLen - subPalLen);
+
+    // decompress image bitmap (LZ77) into VRAM
+    decompress(bitmap, bgGetGfxPtr(bmpLayer.GetBg()), LZ77Vram);
 }
 
 void
