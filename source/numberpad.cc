@@ -19,6 +19,7 @@ NumberPad::DrawBits(void) {
     Glyph glyph0(3 + glyphOffset, 2 + glyphOffset);
 
     auto number = vm.GetValueDigits<64>(NumberBase::Binary);
+    // TODO: check assembly code for optimization
     for (size_t i = 0; i < colNum; i++) {
         for (size_t j = 0; j < rowNum; j++) {
             size_t x = offsetX + (i * gapX);
@@ -27,7 +28,7 @@ NumberPad::DrawBits(void) {
 
             size_t y = offsetY + (j * lineHeight);
 
-            auto digit = number[(i * rowNum) + j];
+            auto digit = number[64 - 1 - ((j * colNum) + i)];
 
             if (digit == Digit0) {
                 display.PrintGlyph(x, y, glyph0);
