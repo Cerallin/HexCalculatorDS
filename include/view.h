@@ -359,6 +359,7 @@ class InputView : public SubView<InputView> {
 
     EventResult HandleEvent(const Event &e);
 
+    void Setup(void);
     void ForceUpdate(void);
 
   private:
@@ -385,6 +386,7 @@ class EditorView : public SubView<EditorView> {
 
     EventResult HandleEvent(const Event &e);
 
+    void Setup(void);
     void ForceUpdate(void);
 
   private:

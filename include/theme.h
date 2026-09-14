@@ -11,6 +11,11 @@
 
 #include "subscreenAreaColors.h"
 
+// for a 4bpp palette, the maximum number of colors is 16 (2^4)
+#define MAX_4BPP_PAL_COUNT 16
+// for an 8bpp palette, the maximum number of colors is 256 (2^8)
+#define MAX_8BPP_PAL_COUNT 256
+
 namespace HexCalc {
 
 constexpr int16_t mainPal[] = {

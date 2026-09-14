@@ -34,6 +34,7 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
     EventResult HandleEvent(const Event &e);
 
   private:
+    ViewModel &vm;
     InputView inputView;
     EditorView editorView;
 
@@ -41,6 +42,8 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
         InputState,
         EditorState,
     } state;
+
+    bool shouldSwitchView;
 };
 
 /**

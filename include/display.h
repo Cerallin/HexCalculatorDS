@@ -351,7 +351,7 @@ class SubDisplay : public Display<SubDisplay> {
      * @brief Setup the view with the given bitmap and palette.
      *
      * @param bitmap Compressed bitmap data (LZ77).
-     * @param palette Palette data to be copied.
+     * @param palette 8bpp palette data to be copied.
      */
     void SetupView(const void *bitmap, const uint16_t *palette);
 

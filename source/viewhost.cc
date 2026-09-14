@@ -53,11 +53,23 @@ ViewHost::Update(void) {
 }
 
 InputViewAdapter::InputViewAdapter(SubDisplay &subDisplay, ViewModel &viewModel)
-    : SubView(subDisplay), inputView(subDisplay, viewModel),
-      editorView(subDisplay, viewModel), state(InputState) {}
+    : SubView(subDisplay), vm(viewModel), inputView(subDisplay, viewModel),
+      editorView(subDisplay, viewModel), state(InputState),
+      shouldSwitchView(true) {}
 
 void
 InputViewAdapter::Update(void) {
+    if (shouldSwitchView) {
+        if (state == InputState) {
+            inputView.Setup();
+        } else if (state == EditorState) {
+            editorView.Setup();
+        } else {
+            // should never reach here
+        }
+        shouldSwitchView = false;
+    }
+
     if (state == InputState) {
         inputView.Update();
     } else if (state == EditorState) {
@@ -70,7 +82,17 @@ InputViewAdapter::Update(void) {
 EventResult
 InputViewAdapter::HandleEvent(const Event &e) {
     if (e.type == EventType::InputViewChangedEvent) {
-        // TODO handle view change event
+        if (state == InputState) {
+            state = EditorState;
+        } else if (state == EditorState) {
+            state = InputState;
+        } else {
+            // should never reach here
+        }
+
+        markDirty();
+        shouldSwitchView = true;
+
         return Consumed;
     } else {
         if (state == InputState) {

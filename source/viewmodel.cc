@@ -290,6 +290,8 @@ FormulaManager::HandleEvent(const Event &e) {
         }
 
         return Skipped;
+    } else if (e.type == UpdateBaseEvent) {
+        eventBus.Post(Event{0, EventType::InputViewChangedEvent});
     } else {
         return Skipped;
     }

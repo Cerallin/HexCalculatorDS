@@ -13,9 +13,6 @@ using namespace HexCalc;
 
 InputView::InputView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), handler(vm.Cmds()), leftBracketCount(0) {
-    // Setup image
-    display.SetupView(subscreenImageBitmap, subscreenImagePal);
-
     // Print version string
     display.ShowVerStr();
 
@@ -151,6 +148,12 @@ InputView::InputView(SubDisplay &display, ViewModel &vm)
     rightBracketButton->Disable();
 
     handleBaseChange();
+}
+
+void
+InputView::Setup(void) {
+    // Setup image
+    display.SetupView(subscreenImageBitmap, subscreenImagePal);
 }
 
 EventResult
@@ -654,6 +657,12 @@ EditorView::EditorView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), handler(vm.Cmds()), numberPad(display) {
     // TODO buttons
     // TODO bits
+}
+
+void
+EditorView::Setup(void) {
+    // Setup image
+    display.SetupView(subscreenBinaryImageBitmap, subscreenBinaryImagePal);
 }
 
 EventResult

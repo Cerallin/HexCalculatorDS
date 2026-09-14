@@ -147,7 +147,7 @@ SubDisplay::SubDisplay(void)
 void
 SubDisplay::InitializePalette(void) {
     // copy font palette
-    static_assert((sizeof(subPal) / sizeof(subPal[0])) <= BIT(Bpp),
+    static_assert((sizeof(subPal) / sizeof(subPal[0])) <= MAX_4BPP_PAL_COUNT,
                   "sub palette has too many colors");
     dmaCopy(subPal, BG_PALETTE_SUB, sizeof(subPal));
     // Set backdrop color
@@ -156,11 +156,9 @@ SubDisplay::InitializePalette(void) {
 
 void
 SubDisplay::SetupView(const void *bitmap, const uint16_t *palette) {
-    constexpr int palLen = 512;
-    constexpr int subPalLen = sizeof(subPal) / sizeof(subPal[0]);
     // copy image palette
-    dmaCopy(&palette[subPalLen], &BG_PALETTE_SUB[subPalLen],
-            palLen - subPalLen);
+    dmaCopy(&palette[MAX_4BPP_PAL_COUNT], &BG_PALETTE_SUB[MAX_4BPP_PAL_COUNT],
+            (MAX_8BPP_PAL_COUNT - MAX_4BPP_PAL_COUNT) * sizeof(uint16_t));
 
     // decompress image bitmap (LZ77) into VRAM
     decompress(bitmap, bgGetGfxPtr(bmpLayer.GetBg()), LZ77Vram);
@@ -169,21 +167,21 @@ SubDisplay::SetupView(const void *bitmap, const uint16_t *palette) {
 void
 SubDisplay::DisableButton(int index) {
     // 1 for the backdrop color
-    uint16_t *dest = &BG_PALETTE_SUB[16 + (index * ColorCount)];
+    uint16_t *dest = &BG_PALETTE_SUB[MAX_4BPP_PAL_COUNT + (index * ColorCount)];
     dmaCopy(disabledPalette, dest, ColorCount * sizeof(uint16_t));
 }
 
 void
 SubDisplay::EnableButton(int index) {
     // 1 for the backdrop color
-    uint16_t *dest = &BG_PALETTE_SUB[16 + (index * ColorCount)];
+    uint16_t *dest = &BG_PALETTE_SUB[MAX_4BPP_PAL_COUNT + (index * ColorCount)];
     dmaCopy(enabledPalette, dest, ColorCount * sizeof(uint16_t));
 }
 
 void
 SubDisplay::SelectButton(int index) {
     // 1 for the backdrop color
-    uint16_t *dest = &BG_PALETTE_SUB[16 + (index * ColorCount)];
+    uint16_t *dest = &BG_PALETTE_SUB[MAX_4BPP_PAL_COUNT + (index * ColorCount)];
     dmaCopy(selectedPalette, dest, ColorCount * sizeof(uint16_t));
 }
 
