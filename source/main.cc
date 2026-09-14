@@ -30,7 +30,7 @@ main(void) {
     HexCalc::ViewModel viewModel(eventBus, commands);
     HexCalc::ViewHost viewHost(viewModel);
 
-    constexpr int repeatDelay = 15;
+    constexpr int repeatDelay = 7;
     constexpr int repeatRate = 3;
     inputHandler.SetRepeat(repeatDelay, repeatRate);
 
