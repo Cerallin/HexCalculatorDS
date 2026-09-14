@@ -187,6 +187,18 @@ class FormulaManager {
     void resetFormulaState(void);
 };
 
+class ViewManager {
+  public:
+    ViewManager(EventBus &eventBus, ViewModel &vm);
+
+    EventResult HandleEvent(const Event &e);
+
+  private:
+    EventBus &eventBus;
+    ViewModel &vm;
+    NumberBase previousBase;
+};
+
 /**
  * @brief The ViewModel class manages the state of the application, including
  * the formula and value models, and the views that display them. It also
@@ -281,6 +293,12 @@ class ViewModel : private NonCopyable {
      *
      */
     FormulaManager formulaManager;
+
+    /**
+     * @brief Manager for view updates and synchronization
+     *
+     */
+    ViewManager viewManager;
 };
 
 }; // namespace HexCalc

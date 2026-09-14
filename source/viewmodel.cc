@@ -19,11 +19,13 @@ ViewModel::ViewModel(EventBus &eventBus, Commands &commands)
       // models
       formulaModel(eventBus),
       // managers
-      valueManager(formulaModel), formulaManager(eventBus, valueManager) {
+      valueManager(formulaModel), formulaManager(eventBus, valueManager),
+      viewManager(eventBus, *this) {
     eventBus.Subscribe(config);
-    // must subscribe before subscribing formulaModel
+    // must subscribe formulaManager before subscribing formulaModel
     eventBus.Subscribe(formulaManager);
     eventBus.Subscribe(formulaModel);
+    eventBus.Subscribe(viewManager);
 }
 
 void
@@ -290,8 +292,30 @@ FormulaManager::HandleEvent(const Event &e) {
         }
 
         return Skipped;
-    } else if (e.type == UpdateBaseEvent) {
-        eventBus.Post(Event{0, EventType::InputViewChangedEvent});
+    } else {
+        return Skipped;
+    }
+
+    return Skipped;
+}
+
+ViewManager::ViewManager(EventBus &eventBus, ViewModel &vm)
+    : eventBus(eventBus), vm(vm), previousBase(vm.GetNumberBase()) {}
+
+EventResult
+ViewManager::HandleEvent(const Event &e) {
+    if (e.type == UpdateBaseEvent) {
+        auto newBase = vm.GetNumberBase();
+        // InputViewChangedEvent toggles InputView <-> EditorView. EditorView is
+        // used for Binary, so fire when entering or leaving Binary.
+        bool involveBinary = (previousBase == NumberBase::Binary) ||
+                             (newBase == NumberBase::Binary);
+        previousBase = newBase;
+
+        if (involveBinary) {
+            eventBus.Post(Event{0, EventType::InputViewChangedEvent});
+            return Emitted;
+        }
     } else {
         return Skipped;
     }
