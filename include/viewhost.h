@@ -38,7 +38,7 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
     ViewModel &vm;
     InputView inputView;
     EditorView editorView;
-    BorderView borderView;
+    DrawerView drawerView;
 
     enum {
         InputState,

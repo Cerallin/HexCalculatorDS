@@ -401,9 +401,9 @@ class EditorView : public SubView<EditorView> {
     NumberPad numberPad;
 };
 
-class BorderView : public SubView<BorderView> {
+class DrawerView : public SubView<DrawerView> {
   public:
-    BorderView(SubDisplay &display, ViewModel &vm);
+    DrawerView(SubDisplay &display, ViewModel &vm);
 
     EventResult HandleEvent(const Event &e);
 
@@ -411,7 +411,11 @@ class BorderView : public SubView<BorderView> {
     void ForceUpdate(void);
 
   private:
+    static constexpr size_t colNum = 2;
+    static constexpr size_t rowNum = 1;
+
     ViewModel &vm;
+    TouchScreenHandler<colNum, rowNum> handler;
 };
 
 }; // namespace HexCalc

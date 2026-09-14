@@ -234,11 +234,6 @@ InputView::ForceUpdate(void) {
             display.DisableButton(i);
         }
     }
-    // Update width and sign drawers
-    auto width = vm.GetNumberWidth();
-    display.UpdateWidthDrawer(width);
-    auto sign = vm.GetNumberSign();
-    display.UpdateSignDrawer(sign);
 }
 
 void
@@ -682,5 +677,54 @@ EditorView::ForceUpdate(void) {
     display.UpdateSignDrawer(sign);
 }
 
-BorderView::BorderView(SubDisplay &display, ViewModel &vm)
-    : SubView<BorderView>(display), vm(vm) {}
+DrawerView::DrawerView(SubDisplay &display, ViewModel &vm)
+    : SubView<DrawerView>(display), vm(vm), handler(vm.Cmds()) {
+    HEXCALC_GCC_UNUSED auto buttonWidthDrawer = handler.RegisterButton(
+        Area(160 - 6, 0, 218 - 160, 25), ButtonType::ButtonChangeWidth, 0, 0);
+
+    HEXCALC_GCC_UNUSED auto buttonSignDrawer = handler.RegisterButton(
+        Area(224 - 6, 0, 250 - 224, 25), ButtonType::ButtonToggleSign, 1, 0);
+}
+
+EventResult
+DrawerView::HandleEvent(const Event &e) {
+    if (e.type == EventType::UpdateWidthEvent) {
+        BasicView::markDirty();
+        debugf("DrawerView width updated\n");
+        return Consumed;
+    } else if (e.type == EventType::UpdateSignEvent) {
+        BasicView::markDirty();
+        debugf("DrawerView sign updated\n");
+        return Consumed;
+    } else if (e.type == EventType::TouchScreenEvent) {
+        Point touchPoint(e.data);
+
+        debugf("Touch at (%d, %d)\n", touchPoint.x, touchPoint.y);
+
+        handler.Handle(touchPoint);
+
+        // To update selected button state after handling touch input
+        BasicView::markDirty();
+
+        return Consumed;
+    } else {
+        return Skipped;
+    }
+
+    // Should never reach here
+    return Skipped;
+}
+
+void
+DrawerView::Setup(void) {
+    display.DrawDrawerBorders();
+}
+
+void
+DrawerView::ForceUpdate(void) {
+    // Update width and sign drawers
+    auto width = vm.GetNumberWidth();
+    display.UpdateWidthDrawer(width);
+    auto sign = vm.GetNumberSign();
+    display.UpdateSignDrawer(sign);
+}

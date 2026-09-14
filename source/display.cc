@@ -211,6 +211,12 @@ SubDisplay::UpdateSignDrawer(NumberSign sign) {
     signManager.DrawText(sign, 0, 0);
 }
 
+void
+SubDisplay::DrawDrawerBorders(void) {
+    widthManager.DrawBorders(0, 0);
+    signManager.DrawBorders(0, 0);
+}
+
 Sprite<SubDisplay> *
 SubDisplay::AddSprite(Point position, int priority) {
     return sm.Add(position, priority);

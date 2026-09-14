@@ -56,13 +56,14 @@ ViewHost::Update(void) {
 InputViewAdapter::InputViewAdapter(SubDisplay &subDisplay, ViewModel &viewModel)
     : SubView(subDisplay), display(subDisplay), vm(viewModel),
       inputView(subDisplay, viewModel), editorView(subDisplay, viewModel),
-      borderView(subDisplay, viewModel), state(EditorState),
+      drawerView(subDisplay, viewModel), state(EditorState),
       shouldSwitchView(true) {}
 
 void
 InputViewAdapter::Update(void) {
     if (shouldSwitchView) {
         display.CleanLayers();
+        drawerView.Setup();
 
         if (state == InputState) {
             inputView.Setup();
@@ -73,6 +74,8 @@ InputViewAdapter::Update(void) {
         }
         shouldSwitchView = false;
     }
+
+    drawerView.Update();
 
     if (state == InputState) {
         inputView.Update();
@@ -99,6 +102,8 @@ InputViewAdapter::HandleEvent(const Event &e) {
 
         return Consumed;
     } else {
+        drawerView.HandleEvent(e);
+
         if (state == InputState) {
             return inputView.HandleEvent(e);
         } else if (state == EditorState) {

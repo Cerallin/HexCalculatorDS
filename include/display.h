@@ -384,6 +384,8 @@ class SubDisplay : public Display<SubDisplay> {
     void UpdateWidthDrawer(NumberWidth width);
     void UpdateSignDrawer(NumberSign sign);
 
+    void DrawDrawerBorders(void);
+
     Sprite<SubDisplay> *AddSprite(Point position, int priority = 0);
     void ResetSprites(void);
 
