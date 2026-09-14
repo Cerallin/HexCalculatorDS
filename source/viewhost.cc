@@ -88,6 +88,8 @@ InputViewAdapter::Update(void) {
 
 EventResult
 InputViewAdapter::HandleEvent(const Event &e) {
+    drawerView.HandleEvent(e);
+
     if (e.type == EventType::InputViewChangedEvent) {
         if (state == InputState) {
             state = EditorState;
@@ -102,8 +104,6 @@ InputViewAdapter::HandleEvent(const Event &e) {
 
         return Consumed;
     } else {
-        drawerView.HandleEvent(e);
-
         if (state == InputState) {
             return inputView.HandleEvent(e);
         } else if (state == EditorState) {

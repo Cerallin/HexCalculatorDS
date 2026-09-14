@@ -154,6 +154,8 @@ void
 InputView::Setup(void) {
     // Setup image
     display.SetupView(subscreenImageBitmap, subscreenImagePal);
+    // Setup buttons
+    handleBaseChange();
 }
 
 EventResult
@@ -239,6 +241,7 @@ InputView::ForceUpdate(void) {
 void
 InputView::handleBaseChange(void) {
     auto base = vm.GetNumberBase();
+    debugf("InputView handling base change to %d\n", static_cast<int>(base));
     // Enable number buttons that are valid for the current base, and disable
     // them otherwise. For example, in hexadecimal mode, all number buttons are
     // enabled, while in decimal mode, only 0-9 buttons are enabled.
@@ -670,11 +673,6 @@ EditorView::HandleEvent(const Event &e) {
 void
 EditorView::ForceUpdate(void) {
     // TODO update editor view
-    // Update width and sign drawers
-    auto width = vm.GetNumberWidth();
-    display.UpdateWidthDrawer(width);
-    auto sign = vm.GetNumberSign();
-    display.UpdateSignDrawer(sign);
 }
 
 DrawerView::DrawerView(SubDisplay &display, ViewModel &vm)
@@ -695,6 +693,10 @@ DrawerView::HandleEvent(const Event &e) {
     } else if (e.type == EventType::UpdateSignEvent) {
         BasicView::markDirty();
         debugf("DrawerView sign updated\n");
+        return Consumed;
+    } else if (e.type == EventType::InputViewChangedEvent) {
+        BasicView::markDirty();
+        debugf("DrawerView invalidated by InputViewChangedEvent\n");
         return Consumed;
     } else if (e.type == EventType::TouchScreenEvent) {
         Point touchPoint(e.data);
