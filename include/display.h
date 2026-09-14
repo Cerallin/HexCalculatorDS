@@ -387,6 +387,8 @@ class SubDisplay : public Display<SubDisplay> {
     Sprite<SubDisplay> *AddSprite(Point position, int priority = 0);
     void ResetSprites(void);
 
+    void CleanLayers(void);
+
     void ShowVerStr(void);
 
     static constexpr auto VideoMode =

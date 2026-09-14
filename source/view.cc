@@ -654,7 +654,7 @@ template class TranscodeView<Octal>;
 template class TranscodeView<Binary>;
 
 EditorView::EditorView(SubDisplay &display, ViewModel &vm)
-    : SubView(display), vm(vm), handler(vm.Cmds()), numberPad(display) {
+    : SubView(display), vm(vm), handler(vm.Cmds()), numberPad(display, vm) {
     // TODO buttons
     // TODO bits
 }
@@ -663,6 +663,7 @@ void
 EditorView::Setup(void) {
     // Setup image
     display.SetupView(subscreenBinaryImageBitmap, subscreenBinaryImagePal);
+    numberPad.DrawBits();
 }
 
 EventResult
@@ -674,4 +675,12 @@ EditorView::HandleEvent(const Event &e) {
 void
 EditorView::ForceUpdate(void) {
     // TODO update editor view
+    // Update width and sign drawers
+    auto width = vm.GetNumberWidth();
+    display.UpdateWidthDrawer(width);
+    auto sign = vm.GetNumberSign();
+    display.UpdateSignDrawer(sign);
 }
+
+BorderView::BorderView(SubDisplay &display, ViewModel &vm)
+    : SubView<BorderView>(display), vm(vm) {}

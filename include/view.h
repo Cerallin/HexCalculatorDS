@@ -393,15 +393,25 @@ class EditorView : public SubView<EditorView> {
     /* buttons above the number pad */
     static constexpr size_t buttonColNum = 5;
     static constexpr size_t buttonRowNum = 2;
-    /* number pad */
-    static constexpr size_t numberColNum = 16;
-    static constexpr size_t numberRowNum = 4;
 
     ViewModel &vm;
     TouchScreenHandler<buttonColNum, buttonRowNum> handler;
     TouchButton *buttons[buttonColNum * buttonRowNum];
 
-    NumberPad<numberColNum, numberRowNum> numberPad;
+    NumberPad numberPad;
+};
+
+class BorderView : public SubView<BorderView> {
+  public:
+    BorderView(SubDisplay &display, ViewModel &vm);
+
+    EventResult HandleEvent(const Event &e);
+
+    void Setup(void);
+    void ForceUpdate(void);
+
+  private:
+    ViewModel &vm;
 };
 
 }; // namespace HexCalc

@@ -222,6 +222,13 @@ SubDisplay::ResetSprites(void) {
 }
 
 void
+SubDisplay::CleanLayers(void) {
+    for (int layer = 0; layer < TileBGNum; ++layer) {
+        tileLayers[layer].Clear();
+    }
+}
+
+void
 SubDisplay::ShowVerStr(void) {
     sm.RegisterVerStr();
 }

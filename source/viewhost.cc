@@ -52,14 +52,18 @@ ViewHost::Update(void) {
     subDisplay.UpdateSprites();
 }
 
+// FIXME EditorState for development, should be InputState
 InputViewAdapter::InputViewAdapter(SubDisplay &subDisplay, ViewModel &viewModel)
-    : SubView(subDisplay), vm(viewModel), inputView(subDisplay, viewModel),
-      editorView(subDisplay, viewModel), state(InputState),
+    : SubView(subDisplay), display(subDisplay), vm(viewModel),
+      inputView(subDisplay, viewModel), editorView(subDisplay, viewModel),
+      borderView(subDisplay, viewModel), state(EditorState),
       shouldSwitchView(true) {}
 
 void
 InputViewAdapter::Update(void) {
     if (shouldSwitchView) {
+        display.CleanLayers();
+
         if (state == InputState) {
             inputView.Setup();
         } else if (state == EditorState) {
