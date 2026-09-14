@@ -32,6 +32,16 @@ _TOP_ROWS_MAX_Y = 57
 # Padding added around detected Circular arrow glyphs for touch hit boxes.
 _ARROW_HIT_PAD = 2
 
+# Bit-weight / carry index labels under each binary row (coords after crop 5,6,5,4).
+_CARRY_LABEL_BANDS = [
+    (84, 90),
+    (116, 122),
+    (148, 154),
+    (180, 186),
+]
+# Clear binary digits left of equals / copyright; covers all four rows.
+_BINARY_FIELD = ((0, 57), (228, 125))
+
 
 class HitArea:
     """Axis-aligned hit box written to the AREA_* header (may not be drawn)."""
@@ -51,19 +61,56 @@ class BinaryCalculatorExporter:
 
     def __init__(self, image):
         self.image = image
+        self.carry_label_text_points = []
+        self.carry_label_shadow_points = []
+
+    def _collect_carry_label_points(self):
+        """Subscript digits + their drop shadows under each binary row."""
+        black = ContourAnalyzer.build_mask(
+            self.image, [defaultTheme.TEXT_COLORS[0]])
+        shadow = ContourAnalyzer.build_mask(
+            self.image, defaultTheme.SHADOW_COLORS)
+        h, w = black.shape
+        x_limit = _BINARY_FIELD[1][0]  # keep clear of equals / copyright
+        text_pts = []
+        shadow_pts = []
+        for y0, y1 in _CARRY_LABEL_BANDS:
+            # +1 below catches the 1px drop shadow under the glyphs
+            y_lo = max(0, y0)
+            y_hi = min(h, y1 + 1)
+            for y in range(y_lo, y_hi):
+                for x in np.where(black[y, :x_limit] > 0)[0]:
+                    text_pts.append((int(x), int(y)))
+                for x in np.where(shadow[y, :x_limit] > 0)[0]:
+                    shadow_pts.append((int(x), int(y)))
+        # Shadow under ink only; drop any shadow that coincides with text
+        text_set = set(text_pts)
+        shadow_pts = [p for p in shadow_pts if p not in text_set]
+        return text_pts, shadow_pts
 
     def preprocess(self):
         bg = hex_to_bgr(defaultTheme.BG_COLORS[0])
+        black_bgr = hex_to_bgr(defaultTheme.TEXT_COLORS[0])
+        shadow_bgr = hex_to_bgr(defaultTheme.SHADOW_COLORS[0])
 
         # Version digits (same corner as hex number strip)
         ImagePreprocessor.fill_rect(self.image, (0, 0), (75, 12), bg)
         # Width & sign drawers (WORD / S) — same region as run.py
         ImagePreprocessor.fill_rect(self.image, (159, 4), (94, 28), bg)
-        # Four binary rows + subscripts; stop before copyright tab (left edge ~241)
-        ImagePreprocessor.fill_rect(self.image, (6, 62), (235, 106), bg)
 
         # Match hex exporter crop so copyright strip can close and size matches NDS.
         self.image = ImagePreprocessor.crop(self.image, 5, 6, 5, 4)
+
+        # Keep carry/bit-weight subscripts (+ shadows); wipe binary digits/brackets.
+        text_pts, shadow_pts = self._collect_carry_label_points()
+        self.carry_label_text_points = text_pts
+        self.carry_label_shadow_points = shadow_pts
+        pos, shape = _BINARY_FIELD
+        ImagePreprocessor.fill_rect(self.image, pos, shape, bg)
+        for x, y in shadow_pts:
+            self.image[y, x] = shadow_bgr
+        for x, y in text_pts:
+            self.image[y, x] = black_bgr
 
     def _collect_record(self, contour) -> ContourRecord:
         rec = ContourRecord(contour)
@@ -316,6 +363,14 @@ class BinaryCalculatorExporter:
         hit_areas.sort(key=lambda a: sort_key_pos(a.position()))
 
         self.image = ImagePreprocessor.crop(self.image, 0, 0, 0, 1)
+        # Drop any label pixels clipped by the final right-edge crop
+        w = self.image.shape[1]
+        self.carry_label_text_points = [
+            (x, y) for x, y in self.carry_label_text_points if x < w
+        ]
+        self.carry_label_shadow_points = [
+            (x, y) for x, y in self.carry_label_shadow_points if x < w
+        ]
 
         return records, hit_areas
 
@@ -342,6 +397,12 @@ class BinaryCalculatorExporter:
             }
             record.draw(img, palette_map)
             pal_idx += 5
+
+        # Static carry / bit-weight subscripts (runtime does not redraw these)
+        label_shadow_idx = 1
+        label_text_idx = 2
+        img.fill_points(self.carry_label_shadow_points, label_shadow_idx)
+        img.fill_points(self.carry_label_text_points, label_text_idx)
 
         return img, palette
 
