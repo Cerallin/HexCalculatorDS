@@ -251,13 +251,12 @@ class BinaryCalculatorExporter:
                                      for rx, ry in relative_sign_points]
 
         if equal_record is not None:
-            # Filled '=' : border-colored body may be classified as text when
-            # there is no black glyph; fold body into contour, glyph into text.
+            # Filled '=' : maroon body (sign/text slots) folds into contour;
+            # cream glyph stays as bg so it is not drawn black.
             equal_record.contour_points += equal_record.sign_points
             equal_record.contour_points += equal_record.text_points
             equal_record.sign_points = []
-            equal_record.text_points = equal_record.bg_points
-            equal_record.bg_points = []
+            equal_record.text_points = []
             records.append(equal_record)
 
         if copyright_record is not None:
