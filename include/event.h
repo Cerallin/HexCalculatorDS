@@ -42,6 +42,8 @@ enum EventType {
     UpdateSignEvent,  // when the user changes the number sign
     // move focus
     MoveFocusEvent, // when the user moves focus between buttons
+    // view change
+    InputViewChangedEvent, // when the input view is changed
 };
 
 using EventDataType = int32_t;

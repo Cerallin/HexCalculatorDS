@@ -13,6 +13,37 @@
 namespace HexCalc {
 
 /**
+ * @brief The InputViewAdapter class manages the views on the sub screen.
+ *
+ */
+class InputViewAdapter : private SubView<InputViewAdapter> {
+  public:
+    explicit InputViewAdapter(SubDisplay &subDisplay, ViewModel &viewModel);
+
+    /**
+     * @brief Update the currently active view.
+     *
+     */
+    void Update(void);
+
+    /**
+     * @brief Handle InputViewChangedEvent to switch between InputView and
+     * EditorView, and dispatch other events to the currently active view.
+     *
+     */
+    EventResult HandleEvent(const Event &e);
+
+  private:
+    InputView inputView;
+    EditorView editorView;
+
+    enum {
+        InputState,
+        EditorState,
+    } state;
+};
+
+/**
  * @brief The ViewHost class manages the views on the main and sub screens. It
  * is responsible for updating the views when the models change and handling
  * user inputs by dispatching events to the appropriate views. It also
@@ -37,7 +68,7 @@ class ViewHost : private NonCopyable {
     TranscodeView<Octal> octView;
     TranscodeView<Binary> binView;
     IndicatorView indicatorView;
-    InputView inputView;
+    InputViewAdapter inputViewAdapter;
 
     void registerViews(ViewModel &viewModel);
 };

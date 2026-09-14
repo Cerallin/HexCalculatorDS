@@ -13,7 +13,8 @@ ViewHost::ViewHost(ViewModel &viewModel)
       formulaView(mainDisplay, viewModel), valueView(mainDisplay, viewModel),
       hexView(mainDisplay, viewModel), decView(mainDisplay, viewModel),
       octView(mainDisplay, viewModel), binView(mainDisplay, viewModel),
-      indicatorView(mainDisplay, viewModel), inputView(subDisplay, viewModel) {
+      indicatorView(mainDisplay, viewModel),
+      inputViewAdapter(subDisplay, viewModel) {
     registerViews(viewModel);
 }
 
@@ -29,7 +30,7 @@ ViewHost::registerViews(ViewModel &viewModel) {
     bus.Subscribe(octView);
     bus.Subscribe(binView);
     bus.Subscribe(indicatorView);
-    bus.Subscribe(inputView);
+    bus.Subscribe(inputViewAdapter);
 }
 
 void
@@ -43,10 +44,42 @@ ViewHost::Update(void) {
     octView.Update();
     binView.Update();
     indicatorView.Update();
-    inputView.Update();
+    inputViewAdapter.Update();
 
     // Must be called once per frame --said libnds
     bgUpdate();
 
     subDisplay.UpdateSprites();
+}
+
+InputViewAdapter::InputViewAdapter(SubDisplay &subDisplay, ViewModel &viewModel)
+    : SubView(subDisplay), inputView(subDisplay, viewModel),
+      editorView(subDisplay, viewModel), state(InputState) {}
+
+void
+InputViewAdapter::Update(void) {
+    if (state == InputState) {
+        inputView.Update();
+    } else if (state == EditorState) {
+        editorView.Update();
+    } else {
+        // should never reach here
+    }
+}
+
+EventResult
+InputViewAdapter::HandleEvent(const Event &e) {
+    if (e.type == EventType::InputViewChangedEvent) {
+        // TODO handle view change event
+        return Consumed;
+    } else {
+        if (state == InputState) {
+            return inputView.HandleEvent(e);
+        } else if (state == EditorState) {
+            return editorView.HandleEvent(e);
+        } else {
+            // should never reach here
+            return Failed;
+        }
+    }
 }

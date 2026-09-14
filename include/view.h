@@ -11,6 +11,7 @@
 #include "event.h"
 #include "format.h"
 #include "input.h"
+#include "numberpad.h"
 #include "viewmodel.h"
 
 namespace HexCalc {
@@ -376,6 +377,29 @@ class InputView : public SubView<InputView> {
     void updateLBrackCount(int count);
 
     TouchButton &getFocus(Point position, Direction dir);
+};
+
+class EditorView : public SubView<EditorView> {
+  public:
+    EditorView(SubDisplay &display, ViewModel &vm);
+
+    EventResult HandleEvent(const Event &e);
+
+    void ForceUpdate(void);
+
+  private:
+    /* buttons above the number pad */
+    static constexpr size_t buttonColNum = 5;
+    static constexpr size_t buttonRowNum = 2;
+    /* number pad */
+    static constexpr size_t numberColNum = 16;
+    static constexpr size_t numberRowNum = 4;
+
+    ViewModel &vm;
+    TouchScreenHandler<buttonColNum, buttonRowNum> handler;
+    TouchButton *buttons[buttonColNum * buttonRowNum];
+
+    NumberPad<numberColNum, numberRowNum> numberPad;
 };
 
 }; // namespace HexCalc

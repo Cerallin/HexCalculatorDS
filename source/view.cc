@@ -644,3 +644,20 @@ template class TranscodeView<Hexadecimal>;
 template class TranscodeView<Decimal>;
 template class TranscodeView<Octal>;
 template class TranscodeView<Binary>;
+
+EditorView::EditorView(SubDisplay &display, ViewModel &vm)
+    : SubView(display), vm(vm), handler(vm.Cmds()), numberPad(display) {
+    // TODO buttons
+    // TODO bits
+}
+
+EventResult
+EditorView::HandleEvent(const Event &e) {
+    // TODO handle events
+    return Failed;
+}
+
+void
+EditorView::ForceUpdate(void) {
+    // TODO update editor view
+}
