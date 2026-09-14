@@ -345,6 +345,25 @@ class SubDisplay : public Display<SubDisplay> {
     SubDisplay(void);
 
     /**
+     * @brief Print a glyph at the given position.
+     *
+     * @param x The x-coordinate of the position
+     * @param y The y-coordinate of the position
+     * @param glyph The glyph to print
+     */
+    void PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const;
+
+    /**
+     * @brief Print a tile at the given position.
+     *
+     * @param x The x-coordinate of the position
+     * @param y The y-coordinate of the position
+     * @param tile The tile to print
+     */
+    void PutTile(int16_t x, int16_t y, FontType tile, bool hFlip = false,
+                 bool vFlip = false) const;
+
+    /**
      * @brief Copy the font palette and set the backdrop color.
      *
      */

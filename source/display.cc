@@ -142,6 +142,25 @@ SubDisplay::SubDisplay(void)
 }
 
 void
+SubDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
+    assert(x % OffsetPerBG == 0);
+    assert(y % TileHeight == 0);
+    auto _idx = (x / OffsetPerBG) % TileBGNum;
+    auto &layer = tileLayers[_idx];
+    layer.PutGlyph(x / TileWidth, y / TileHeight, glyph);
+}
+
+void
+SubDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
+                    bool vFlip) const {
+    assert(x % OffsetPerBG == 0);
+    assert(y % TileHeight == 0);
+    auto _idx = (x / OffsetPerBG) % TileBGNum;
+    auto &layer = tileLayers[_idx];
+    layer.Put(x / TileWidth, y / TileHeight, tile, hFlip, vFlip);
+}
+
+void
 SubDisplay::InitializePalette(void) {
     // copy font palette
     static_assert((sizeof(subPal) / sizeof(subPal[0])) <= MAX_4BPP_PAL_COUNT,
