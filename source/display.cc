@@ -142,6 +142,13 @@ SubDisplay::SubDisplay(void)
 }
 
 void
+SubDisplay::ScrollTileLayers(int x, int y) const {
+    for (const auto &layer : tileLayers) {
+        layer.SetScroll(x, y);
+    }
+}
+
+void
 SubDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);

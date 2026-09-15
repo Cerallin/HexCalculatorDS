@@ -132,6 +132,12 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type, int index) {
     case ButtonToggleSign:
         commands.ToggleSign();
         break;
+    case ButtonLShiftMode:
+        commands.SwitchShiftModeLeft();
+        break;
+    case ButtonRShiftMode:
+        commands.SwitchShiftModeRight();
+        break;
     case ButtonFlipBit:
         commands.FlipBit(index);
         break;

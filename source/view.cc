@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "view.h"
+#include "subFont.h"
 #include "subscreenArea.h"
 #include "subscreenBinaryArea.h"
 #include "subscreenBinaryImage.h"
@@ -658,9 +659,26 @@ template class TranscodeView<Decimal>;
 template class TranscodeView<Octal>;
 template class TranscodeView<Binary>;
 
+void
+ShiftModeManager::UpdateTiles(void) {
+    constexpr int offsetX = 60;
+    constexpr int offsetY = 40;
+    constexpr int tileOffset =
+        -1 + (sizeof(subFontMap) / sizeof(subFontMap[0]));
+
+    const auto &tilemap = getTilemap();
+
+    for (int i = 0; i < textWidth; i++) {
+        for (int j = 0; j < textHeight; j++) {
+            const auto &tile = tileOffset + tilemap[j][i];
+            display.PutTile((i * 8) + offsetX, (j * 8) + offsetY, tile);
+        }
+    }
+}
+
 EditorView::EditorView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), buttonHandler(vm.Cmds()),
-      digitPad(display, vm) {
+      shiftModeManager(display), digitPad(display, vm) {
     // buttons
     HEXCALC_GCC_UNUSED auto buttonBitwiseNot = buttonHandler.RegisterButton(
         Area(AREA_BIN_0_X, AREA_BIN_0_Y, AREA_BIN_0_W, AREA_BIN_0_H),
@@ -751,6 +769,29 @@ EditorView::HandleEvent(const Event &e) {
         // ValueChangedEvent
         debugf("EditorView focused bit %d\n", e.data);
         return Consumed;
+    } else if (e.type == EventType::SwitchShiftModeEvent) {
+        using ShiftMode = ShiftModeManager::ShiftMode;
+
+        auto mode = shiftModeManager.GetShiftMode();
+
+        Direction dir = static_cast<Direction>(e.data);
+        if (dir == DirLeft) {
+            mode = static_cast<ShiftMode>(
+                (mode - 1 + ShiftMode::MAX_SHIFT_MODE_COUNT) %
+                ShiftMode::MAX_SHIFT_MODE_COUNT);
+        } else if (dir == DirRight) {
+            mode = static_cast<ShiftMode>((mode + 1) %
+                                          ShiftMode::MAX_SHIFT_MODE_COUNT);
+        } else {
+            // Should never reach here
+            return Failed;
+        }
+
+        shiftModeManager.SetShiftMode(mode);
+
+        BasicView::markDirty();
+
+        return Consumed;
     } else {
         return Skipped;
     }
@@ -775,6 +816,8 @@ EditorView::ForceUpdate(void) {
             display.DisableButton(i);
         }
     }
+
+    shiftModeManager.UpdateTiles();
 }
 
 DrawerView::DrawerView(SubDisplay &display, ViewModel &vm)

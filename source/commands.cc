@@ -192,6 +192,20 @@ Commands::ToggleSign(void) {
 }
 
 void
+Commands::SwitchShiftModeLeft(void) {
+    debugf("Switch shift mode left <- triggered\n");
+
+    bus.Post(Event{DirLeft, EventType::SwitchShiftModeEvent});
+}
+
+void
+Commands::SwitchShiftModeRight(void) {
+    debugf("Switch shift mode right -> triggered\n");
+
+    bus.Post(Event{DirRight, EventType::SwitchShiftModeEvent});
+}
+
+void
 Commands::Clear(void) {
     debugf("Clear triggered\n");
     bus.Post(Event{

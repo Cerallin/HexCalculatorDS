@@ -31,6 +31,9 @@ class Commands {
     void SwitchWidthLower(void);
     void ToggleSign(void);
 
+    void SwitchShiftModeLeft(void);
+    void SwitchShiftModeRight(void);
+
     void Clear(void);
 
     void SwitchFormulaPageLeft(void);

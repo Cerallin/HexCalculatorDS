@@ -380,6 +380,67 @@ class InputView : public SubView<InputView> {
     TouchButton &getFocus(Point position, Direction dir);
 };
 
+class ShiftModeManager {
+  public:
+    ShiftModeManager(SubDisplay &display)
+        : display(display), mode(ArithmeticMode) {}
+
+    enum ShiftMode {
+        ArithmeticMode,
+        CircularMode,
+        LogicalMode,
+        MAX_SHIFT_MODE_COUNT,
+    };
+
+    ShiftMode
+    GetShiftMode(void) const {
+        return mode;
+    }
+
+    void
+    SetShiftMode(ShiftMode newMode) {
+        mode = newMode;
+    }
+
+    void UpdateTiles(void);
+
+  private:
+    static constexpr int textWidth = 9;
+    static constexpr int textHeight = 2;
+
+    static constexpr int logicalTilemap[textHeight][textWidth] = {
+        {0, 0, 24, 27, 29, 21, 33, 31, 0},
+        {0, 0, 25, 26, 28, 22, 30, 32, 0},
+    };
+
+    static constexpr int circularTilemap[textHeight][textWidth] = {
+        {0, 35, 34, 39, 40, 43, 45, 46, 0},
+        {0, 36, 37, 38, 41, 42, 44, 47, 0},
+    };
+
+    static constexpr int arithmeticTilemap[textHeight][textWidth] = {
+        {7, 8, 10, 12, 14, 15, 17, 19, 21},
+        {6, 23, 11, 13, 9, 16, 18, 20, 22},
+    };
+
+    SubDisplay &display;
+    ShiftMode mode;
+
+    constexpr auto &
+    getTilemap(void) const {
+        switch (mode) {
+        case ArithmeticMode:
+            return arithmeticTilemap;
+        case CircularMode:
+            return circularTilemap;
+        case LogicalMode:
+            return logicalTilemap;
+        default:
+            return arithmeticTilemap;
+        }
+    }
+};
+
 class EditorView : public SubView<EditorView> {
   public:
     EditorView(SubDisplay &display, ViewModel &vm);
@@ -397,6 +458,8 @@ class EditorView : public SubView<EditorView> {
     ViewModel &vm;
     TouchScreenHandler<buttonColNum, buttonRowNum> buttonHandler;
     TouchButton *buttons[buttonColNum * buttonRowNum];
+
+    ShiftModeManager shiftModeManager;
 
     DigitPad digitPad;
 };

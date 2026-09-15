@@ -45,6 +45,7 @@ enum EventType {
     MoveFocusEvent, // when the user moves focus between buttons
     // view change
     InputViewChangedEvent, // when the input view is changed
+    SwitchShiftModeEvent,  // when the user changes the switch mode
 };
 
 using EventDataType = int32_t;
