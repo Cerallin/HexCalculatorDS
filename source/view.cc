@@ -687,15 +687,15 @@ EditorView::EditorView(SubDisplay &display, ViewModel &vm)
         ButtonType::ButtonRShiftMode, 2, 1);
 
     HEXCALC_GCC_UNUSED auto buttonLShift = handler.RegisterButton(
-        Area(AREA_BIN_7_X, AREA_BIN_7_Y, AREA_BIN_7_W, AREA_BIN_7_H),
+        Area(AREA_BIN_6_X, AREA_BIN_6_Y, AREA_BIN_6_W, AREA_BIN_6_H),
         ButtonType::ButtonLShiftBin, 3, 1);
 
     HEXCALC_GCC_UNUSED auto buttonRShift = handler.RegisterButton(
-        Area(AREA_BIN_8_X, AREA_BIN_8_Y, AREA_BIN_8_W, AREA_BIN_8_H),
+        Area(AREA_BIN_7_X, AREA_BIN_7_Y, AREA_BIN_7_W, AREA_BIN_7_H),
         ButtonType::ButtonRShiftBin, 4, 1);
 
     HEXCALC_GCC_UNUSED auto buttonEvaluate = handler.RegisterButton(
-        Area(AREA_BIN_9_X, AREA_BIN_9_Y, AREA_BIN_9_W, AREA_BIN_9_H),
+        Area(AREA_BIN_8_X, AREA_BIN_8_Y, AREA_BIN_8_W, AREA_BIN_8_H),
         ButtonType::ButtonEvaluate, 4, 2);
 
     // TODO digits

@@ -63,6 +63,7 @@ class BinaryCalculatorExporter:
         self.image = image
         self.carry_label_text_points = []
         self.carry_label_shadow_points = []
+        self.circular_record = None
 
     def _collect_carry_label_points(self):
         """Subscript digits + their drop shadows under each binary row."""
@@ -233,8 +234,8 @@ class BinaryCalculatorExporter:
 
             records.append(self._collect_record(c))
 
-        if circular is not None:
-            records.append(circular)
+        # Circular pill is drawn with a fixed palette slot; not an AREA / button bank.
+        self.circular_record = circular
 
         # Propagate focus signs to all same-shaped buttons (top rows only)
         signed_records = [r for r in records if len(r.sign_points) > 0]
@@ -288,7 +289,7 @@ class BinaryCalculatorExporter:
 
         records.sort(key=lambda r: sort_key_pos(r.position()))
 
-        # Hit areas for header: drawn buttons + Circular side arrows
+        # Hit areas: buttons + shift-mode arrows only (no Circular rectangle)
         hit_areas = [HitArea(*r.position()) for r in records]
         for arrow in (arrow_left, arrow_right):
             if arrow is not None:
@@ -306,13 +307,16 @@ class BinaryCalculatorExporter:
 
         return records, hit_areas
 
-    def build_image(self, records: list[ContourRecord], theme: ColorTheme, width, height):
+    def build_image(self, records: list[ContourRecord], hit_areas: list[HitArea],
+                    theme: ColorTheme, width, height):
+        # One 5-color bank per AREA (incl. shift-mode arrow placeholders) so
+        # runtime index N maps to palette 16 + N*5.
         palette = Palette()
         palette.generate_demo(
             theme.common(),
             theme.disabled(),
             theme.selected(),
-            len(records),
+            len(hit_areas),
             offset=16,
         )
         # Circular body gray lives at a fixed slot for runtime palette writes
@@ -322,7 +326,8 @@ class BinaryCalculatorExporter:
         img = IndexedImage(width, height)
         pal_idx = 16
 
-        for record in records:
+        pos_to_record = {r.position(): r for r in records}
+        for area in hit_areas:
             palette_map = {
                 "contour": pal_idx,
                 "shadow": pal_idx + 1,
@@ -330,8 +335,21 @@ class BinaryCalculatorExporter:
                 "bg": pal_idx + 3,
                 "sign": pal_idx + 4,
             }
-            record.draw(img, palette_map)
+            rec = pos_to_record.get(area.position())
+            if rec is not None:
+                rec.draw(img, palette_map)
+            # else: SHIFT_MODE arrow — reserve the bank, glyphs drawn below
             pal_idx += 5
+
+        # Circular: fixed bg index; flanking arrows use common text/shadow slots
+        if self.circular_record is not None:
+            self.circular_record.draw(img, {
+                "contour": _CIRCULAR_BG_PALETTE_INDEX,
+                "shadow": 242,
+                "text": 243,
+                "bg": _CIRCULAR_BG_PALETTE_INDEX,
+                "sign": _CIRCULAR_BG_PALETTE_INDEX,
+            })
 
         # Static carry / bit-weight subscripts (common text / shadow slots)
         # common bank starts at 256 - 15 = 241: border, shadow, text, bg, sign
@@ -417,7 +435,7 @@ class BinaryCalculatorExporter:
         self.build_c_header(hit_areas, theme, output_dir, prefix)
 
         h, w, _ = self.image.shape
-        image, palette = self.build_image(records, theme, w, h)
+        image, palette = self.build_image(records, hit_areas, theme, w, h)
 
         Bmp8Writer.save(output_file, image.get_array(), palette.get())
 
