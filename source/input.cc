@@ -244,12 +244,10 @@ InputHandler::updateTouch(bool rawPressed, const Point &rawPoint) {
 
 void
 InputHandler::postKeyEvent(KeyAction action, uint32_t keyMask) {
-    EventType actionType = EventType::UnknownEvent;
-    if (action == KeyAction::PressDown) {
-        actionType = EventType::KeyPressDownEvent;
-    } else if (action == KeyAction::PressUp) {
-        actionType = EventType::KeyPressUpEvent;
-    }
+    EventType actionType =
+        (action == KeyAction::PressDown) ? EventType::KeyPressDownEvent
+        : (action == KeyAction::PressUp) ? EventType::KeyPressUpEvent
+                                         : EventType::UnknownEvent;
 
     eventBus.Post(Event{
         .data = static_cast<EventDataType>(keyMask),
@@ -259,12 +257,10 @@ InputHandler::postKeyEvent(KeyAction action, uint32_t keyMask) {
 
 void
 InputHandler::postTouchEvent(TouchAction action, const Point &pos) {
-    EventType actionType = EventType::UnknownEvent;
-    if (action == TouchAction::TouchDown) {
-        actionType = EventType::TouchDownEvent;
-    } else if (action == TouchAction::TouchUp) {
-        actionType = EventType::TouchUpEvent;
-    }
+    EventType actionType =
+        (action == TouchAction::TouchDown) ? EventType::TouchDownEvent
+        : (action == TouchAction::TouchUp) ? EventType::TouchUpEvent
+                                           : EventType::UnknownEvent;
 
     eventBus.Post(Event{
         .data = pos.ToInt(),

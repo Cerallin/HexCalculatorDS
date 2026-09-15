@@ -292,7 +292,7 @@ TouchButton &
 InputView::getFocus(Point position, Direction dir) {
     Point nextPos = handler.NavigateFocus<colNum, rowNum>(position, dir);
 
-    auto buttonPtr = handler.GetMatrix(nextPos);
+    auto *buttonPtr = handler.GetMatrix(nextPos);
     assert(buttonPtr != nullptr);
 
     if (!buttonPtr->Active()) {
@@ -328,7 +328,7 @@ ConfigView::ForceUpdate(void) {
 }
 
 GlyphArray8x8<ConfigView::maxGlyphs>
-ConfigView::getGlyphs() {
+ConfigView::getGlyphs() const {
     GlyphArray8x8<ConfigView::maxGlyphs> glyphs;
     auto width = vm.GetNumberWidth();
     auto sign = vm.GetNumberSign();
@@ -580,7 +580,7 @@ IndicatorView::getIndicatorY(NumberBase base) const {
 template <NumberBase Base>
 void
 TranscodeView<Base>::printHeader(void) const {
-    auto &viewArea = this->viewArea;
+    const auto &viewArea = this->viewArea;
     Area6x8 area(viewArea);
     auto middleH = (area.y + area.h / 2) * CharHeight;
     if constexpr (Base == Binary) {

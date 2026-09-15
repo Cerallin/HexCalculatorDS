@@ -72,10 +72,10 @@ SubSpriteManager::RegisterVerStr(void) {
     constexpr auto versionArr = _("v" HEXCALCDS_PROJECT_VERSION);
 
     int16_t offsetX = 0;
-    int16_t offsetY = 1;
+    constexpr int16_t offsetY = 1;
     for (const auto &font : versionArr) {
         auto sp = Add(Point(10 + offsetX, offsetY));
-        const int tileIndex = font - FontVersion0 + VersionTileOffset + 1;
+        int tileIndex = font - FontVersion0 + VersionTileOffset + 1;
         // 16 for number tiles, 1 for the backdrop color
         sp->SetTileOffset(tileIndex);
         offsetX += kerning(font);

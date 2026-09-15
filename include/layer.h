@@ -83,7 +83,7 @@ class TileLayer : public BasicLayer<TileLayer<DisplayType>, DisplayType> {
     }
 
     void
-    Clear(void) {
+    Clear(void) const {
         dmaFillHalfWords(0, this->mapPtr, Width * Height * sizeof(uint16_t));
     }
 

@@ -60,7 +60,7 @@ MainDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
     auto _idx = (x / OffsetPerBG) % TileBGNum;
-    auto &layer = layers[_idx];
+    const auto &layer = layers[_idx];
     layer.PutGlyph(x / TileWidth, y / TileHeight, glyph);
 }
 
@@ -70,7 +70,7 @@ MainDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
     auto _idx = (x / OffsetPerBG) % TileBGNum;
-    auto &layer = layers[_idx];
+    const auto &layer = layers[_idx];
     layer.Put(x / TileWidth, y / TileHeight, tile, hFlip, vFlip);
 }
 
@@ -146,7 +146,7 @@ SubDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
     auto _idx = (x / OffsetPerBG) % TileBGNum;
-    auto &layer = tileLayers[_idx];
+    const auto &layer = tileLayers[_idx];
     layer.PutGlyph(x / TileWidth, y / TileHeight, glyph);
 }
 
@@ -156,7 +156,7 @@ SubDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
     auto _idx = (x / OffsetPerBG) % TileBGNum;
-    auto &layer = tileLayers[_idx];
+    const auto &layer = tileLayers[_idx];
     layer.Put(x / TileWidth, y / TileHeight, tile, hFlip, vFlip);
 }
 

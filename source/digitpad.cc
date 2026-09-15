@@ -42,11 +42,11 @@ DigitFocus::Hide(void) {
 
 void
 DigitFocus::SetPosition(Point newPos) {
-    int offsetX = -1;
-    int offsetY = 2;
+    constexpr int offsetX = -1;
+    constexpr int offsetY = 2;
     // Same layout as DigitPad::DrawDigits
-    int x = DigitPad::offsetX + (newPos.x * DigitPad::gapX);
-    x += (newPos.x / DigitPad::columnCount) * DigitPad::columnGap;
+    int x = DigitPad::offsetX + (newPos.x * DigitPad::gapX) +
+            (newPos.x / DigitPad::columnCount) * DigitPad::columnGap;
     int y = DigitPad::offsetY + (newPos.y * DigitPad::lineHeight);
 
     sprites[0]->SetPosition(x + offsetX + 0, y + offsetY + 0);
@@ -68,13 +68,11 @@ DigitPad::DrawDigits(void) {
     // Walk bits MSB-first in row-major order: (i,j) -> bit 63-(j*colNum+i)
     auto value = vm.GetRawValue();
     for (size_t j = 0; j < rowNum; j++) {
-        const size_t y = offsetY + (j * lineHeight);
+        size_t y = offsetY + (j * lineHeight);
         for (size_t i = 0; i < colNum; i++) {
-            size_t x = offsetX + (i * gapX);
-            // Add a gap between every N columns
-            x += (i / columnCount) * columnGap;
+            size_t x = offsetX + (i * gapX) + (i / columnCount) * columnGap;
 
-            const bool bitSet = (value & (NumberDataType(1) << 63)) != 0;
+            bool bitSet = (value & (NumberDataType(1) << 63)) != 0;
             if (bitSet) {
                 display.PrintGlyph(x, y, glyph1);
             } else {
@@ -103,8 +101,8 @@ DigitPad::RegisterDigitButtons(void) {
         for (size_t j = 0; j < rowNum; j++) {
             int16_t x = offsetX + (i * gapX) + ((i / columnCount) * columnGap);
             int16_t y = offsetY + (j * lineHeight);
-            uint8_t width = 8;
-            uint8_t height = 18;
+            constexpr uint8_t width = 8;
+            constexpr uint8_t height = 18;
             Area area(x, y, width, height);
             int bitIndex = 64 - 1 - static_cast<int>((j * colNum) + i);
             HEXCALC_GCC_UNUSED auto button = handler.RegisterButton(

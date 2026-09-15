@@ -96,8 +96,8 @@ FormulaTreeNode::Expression() const {
         return true;
     }
 
-    auto left = Left();
-    auto right = Right();
+    const auto *left = Left();
+    const auto *right = Right();
     if (left == nullptr || right == nullptr) {
         return false;
     }
@@ -127,10 +127,10 @@ FormulaTreeNode::Completed() const {
     return false;
 }
 
-FormulaTreeNode *
-FormulaTreeNode::findUnpairedLBrac() {
-    for (auto node = this; node != nullptr; node = node->Parent()) {
-        auto &nodeRef = *node;
+const FormulaTreeNode *
+FormulaTreeNode::findUnpairedLBrac() const {
+    for (const auto *node = this; node != nullptr; node = node->Parent()) {
+        const auto &nodeRef = *node;
 
         if (!nodeRef.Get().IsOperator() ||
             nodeRef.Get().GetOperator() != OperatorType::LeftBracket) {
@@ -147,6 +147,12 @@ FormulaTreeNode::findUnpairedLBrac() {
     }
 
     return nullptr;
+}
+
+FormulaTreeNode *
+FormulaTreeNode::findUnpairedLBrac() {
+    return const_cast<FormulaTreeNode *>(
+        static_cast<const FormulaTreeNode *>(this)->findUnpairedLBrac());
 }
 
 FormulaTree::FormulaTree(void)
@@ -367,7 +373,9 @@ FormulaTree::Result(void) const {
     if (fullEvaluationFlag) {
         return root.Get().GetNumber();
     } else {
-        const auto *partialRoot = currentNode->findUnpairedLBrac();
+        const FormulaTreeNode *partialRoot =
+            static_cast<const FormulaTreeNode *>(currentNode)
+                ->findUnpairedLBrac();
         if (partialRoot == nullptr) {
             partialRoot = &root;
         }

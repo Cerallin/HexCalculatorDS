@@ -110,17 +110,17 @@ class NumberSignManager
 
     void
     DrawText(NumberSign sign, int x, int y) {
-        int textIndex = 0;
-        switch (sign) {
-        case Signed:
-            textIndex = 0;
-            break;
-        case Unsigned:
-            textIndex = 1;
-            break;
-        default:
-            assert(false && "invalid sign");
-        }
+        int textIndex = [sign]() {
+            switch (sign) {
+            case Signed:
+                return 0;
+            case Unsigned:
+                return 1;
+            default:
+                assert(false && "invalid sign");
+                return 0;
+            }
+        }();
         Base::DrawText(textIndex, x, y);
     }
 };
@@ -189,23 +189,21 @@ class NumberWidthManager
 
     void
     DrawText(NumberWidth width, int x, int y) {
-        int textIndex = 0;
-        switch (width) {
-        case QWord:
-            textIndex = 0;
-            break;
-        case DWord:
-            textIndex = 1;
-            break;
-        case Word:
-            textIndex = 2;
-            break;
-        case Byte:
-            textIndex = 3;
-            break;
-        default:
-            assert(false && "invalid width");
-        }
+        int textIndex = [width]() {
+            switch (width) {
+            case QWord:
+                return 0;
+            case DWord:
+                return 1;
+            case Word:
+                return 2;
+            case Byte:
+                return 3;
+            default:
+                assert(false && "invalid width");
+                return 0;
+            }
+        }();
         Base::DrawText(textIndex, x, y);
     }
 };
@@ -289,7 +287,7 @@ class MainDisplay : public Display<MainDisplay> {
      */
     template <typename GlyphIterable>
     void
-    PrintLine(const GlyphIterable &glyphRange, Point &start) const {
+    PrintLine(const GlyphIterable &glyphRange, const Point &start) const {
         constexpr auto charWidth = GlyphIterable::CharWidth;
         auto x = start.x;
         auto y = start.y;

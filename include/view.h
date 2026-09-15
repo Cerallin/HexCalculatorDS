@@ -141,7 +141,7 @@ class ConfigView : public MainView<ConfigView, AlignLeft> {
 
     ViewModel &vm;
 
-    GlyphArray8x8<maxGlyphs> getGlyphs();
+    GlyphArray8x8<maxGlyphs> getGlyphs() const;
 };
 
 class FormulaView : public MainView<FormulaView, AlignRight> {

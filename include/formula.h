@@ -131,6 +131,7 @@ class FormulaTreeNode : public TreeNode<FormulaTreeNode, FormulaData> {
      * if not found
      */
     FormulaTreeNode *findUnpairedLBrac();
+    const FormulaTreeNode *findUnpairedLBrac() const;
 };
 
 enum FormulaEvaluateResult {

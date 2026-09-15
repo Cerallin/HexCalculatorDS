@@ -202,32 +202,38 @@ class TreeNode {
     }
 
     Derived *
+    Left(void) {
+        return left;
+    }
+
+    const Derived *
     Left(void) const {
         return left;
     }
 
     Derived *
+    Right(void) {
+        return right;
+    }
+
+    const Derived *
     Right(void) const {
         return right;
     }
 
     Derived *
+    Parent(void) {
+        return parent;
+    }
+
+    const Derived *
     Parent(void) const {
         return parent;
     }
 
     int
     ChildCount(void) const {
-        int count = 0;
-
-        if (left != nullptr) {
-            count++;
-        }
-        if (right != nullptr) {
-            count++;
-        }
-
-        return count;
+        return (left != nullptr ? 1 : 0) + (right != nullptr ? 1 : 0);
     }
 
     void

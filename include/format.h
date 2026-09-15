@@ -46,7 +46,8 @@ class GlyphArray {
             this->Insert(other[i]);
         }
     }
-    explicit constexpr GlyphArray(DigitArray<N> digits, bool reverse = false)
+    explicit constexpr GlyphArray(const DigitArray<N> &digits,
+                                  bool reverse = false)
         : glyphs{}, size(0), negative(digits.negative) {
         if (reverse) {
             for (size_t i = 0; i < digits.size; i++) {
@@ -227,7 +228,7 @@ class GlyphFormatArray
   public:
     explicit constexpr GlyphFormatArray(const GlyphArray<W, H, N> &glyphArray)
         : Base() {
-        const size_t digitCount = glyphArray.Size();
+        size_t digitCount = glyphArray.Size();
         size_t paddingCount = 0;
 
         // ---------- padding ----------
@@ -237,7 +238,7 @@ class GlyphFormatArray
                 PaddingGroupSize;
         }
 
-        const size_t totalDigitCount = digitCount + paddingCount;
+        size_t totalDigitCount = digitCount + paddingCount;
 
         // ---------- sign ----------
         if constexpr (Signable) {
@@ -320,15 +321,15 @@ using NumberGlyphArray8x8 = NumberGlyphArray<Base, 8, 8, N>;
 
 template <NumberBase Base, int W, int H, size_t N>
 constexpr auto
-MakeFormattedGlyphArray(DigitArray<N> digits, bool reverse = false) {
+MakeFormattedGlyphArray(const DigitArray<N> &digits, bool reverse = false) {
     GlyphArray<W, H, N> glyphArray(digits, reverse);
     return NumberGlyphArray<Base, W, H, N>(glyphArray);
 }
 
 template <int W, int H, size_t N, typename Visitor>
 decltype(auto)
-VisitFormattedGlyphArray(NumberBase base, DigitArray<N> digits, bool reverse,
-                         Visitor &&visitor) {
+VisitFormattedGlyphArray(NumberBase base, const DigitArray<N> &digits,
+                         bool reverse, Visitor &&visitor) {
     switch (base) {
     case Hexadecimal:
         return visitor(

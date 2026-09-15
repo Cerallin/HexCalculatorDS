@@ -524,21 +524,16 @@ constexpr FontChar
 versionChar(char c) {
     if (c >= '0' && c <= '9') {
         return static_cast<FontChar>(FontVersion0 + (c - '0'));
-    } else {
-        // make lowercase
-        if (c >= 'A' && c <= 'Z') {
-            c += ('a' - 'A');
-        } else {
-            // do nothing
-        }
+    }
 
-        if (c == 'v') {
-            return FontVersionV;
-        } else if (c == '.') {
-            return FontVersionDot;
-        } else {
-            return FontEmpty;
-        }
+    const char lower =
+        (c >= 'A' && c <= 'Z') ? static_cast<char>(c + ('a' - 'A')) : c;
+    if (lower == 'v') {
+        return FontVersionV;
+    } else if (lower == '.') {
+        return FontVersionDot;
+    } else {
+        return FontEmpty;
     }
 }
 

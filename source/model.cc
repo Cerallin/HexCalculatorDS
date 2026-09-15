@@ -98,7 +98,7 @@ bool
 FormulaModel::flipBit(int index) {
     auto number = currentNumber;
 
-    const auto bitMask = NumberDataType(1) << index;
+    auto bitMask = NumberDataType(1) << index;
     currentNumber = (number ^ bitMask);
 
     return currentNumber != number;

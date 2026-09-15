@@ -77,13 +77,10 @@ struct Area {
         assert(x_max - x_min <= std::numeric_limits<uint8_t>::max());
         assert(y_max - y_min <= std::numeric_limits<uint8_t>::max());
 
-        auto width = static_cast<uint8_t>(x_max - x_min);
-        auto height = static_cast<uint8_t>(y_max - y_min);
-
         x = x_min;
         y = y_min;
-        w = width;
-        h = height;
+        w = static_cast<uint8_t>(x_max - x_min);
+        h = static_cast<uint8_t>(y_max - y_min);
     }
 
     constexpr Area(int16_t px, int16_t py, uint8_t width, uint8_t height)
@@ -97,7 +94,7 @@ struct CharArea {
     uint8_t w;
     uint8_t h;
 
-    explicit CharArea(Area area)
+    explicit CharArea(const Area &area)
         : x(area.x / W), y(area.y / H), w(area.w / W), h(area.h / (L * H)) {}
 
     static constexpr uint8_t lineHeight = L;
@@ -375,9 +372,24 @@ class TouchScreenHandler {
         return buttons[index];
     }
 
+    const TouchButton &
+    GetButton(size_t index) const {
+        assert(index < size);
+        return buttons[index];
+    }
+
     HEXCALC_ARM_CODE
     TouchButton *
     GetMatrix(Point position) {
+        auto m = (position.x + M) % M;
+        auto n = (position.y + N) % N;
+
+        return buttonMatrix[m][n];
+    }
+
+    HEXCALC_ARM_CODE
+    const TouchButton *
+    GetMatrix(Point position) const {
         auto m = (position.x + M) % M;
         auto n = (position.y + N) % N;
 
@@ -453,7 +465,7 @@ class TouchScreenHandler {
     void
     PressFocus(void) {
         if (previouslySelected) {
-            auto &button = *previouslySelected;
+            const auto &button = *previouslySelected;
             button.ExecuteCommand(commands, button.Type(), button.Index());
         }
     }
