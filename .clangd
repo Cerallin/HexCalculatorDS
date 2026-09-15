@@ -1,0 +1,7 @@
+# Prefer CMake compile_commands; strip GCC-only flags clangd rejects.
+# Do NOT add --target=... here: query-driver passes CompileFlags to g++,
+# and arm-none-eabi-g++ does not accept Clang's -target.
+CompileFlags:
+  CompilationDatabase: build
+  Remove:
+    - -mthumb-interwork
