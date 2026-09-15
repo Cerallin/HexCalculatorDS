@@ -82,6 +82,8 @@ class FormulaModel {
     void notifyAcceptOperator(OperatorType op);
     void notifyAcceptNumber(NumberDataType number);
 
+    bool flipBit(int index);
+
     EventResult handleInput(const Event &e);
 };
 

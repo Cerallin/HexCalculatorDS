@@ -45,6 +45,11 @@ class DigitPad : public NonCopyable {
 
     void MoveFocus(Direction dir);
 
+    int
+    GetFocusedIndex(void) const {
+        return 64 - 1 - (focus.x + (focus.y * colNum));
+    }
+
   private:
     friend class DigitFocus;
 

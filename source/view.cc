@@ -727,6 +727,13 @@ EditorView::HandleEvent(const Event &e) {
         BasicView::markDirty();
 
         return Consumed;
+    } else if (e.type == EventType::PreviousTouchEvent) {
+        // Flip the focused digit
+        vm.Cmds().FlipBit(digitPad.GetFocusedIndex());
+        debugf("EditorView flipped digit %d\n", digitPad.GetFocusedIndex());
+        // No need to mark dirty here, since it will finally trigger a
+        // ValueChangedEvent
+        return Consumed;
     } else if (e.type == EventType::ValueChangedEvent) {
         BasicView::markDirty();
         debugf("EditorView value changed\n");

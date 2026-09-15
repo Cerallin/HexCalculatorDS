@@ -46,6 +46,8 @@ class Commands {
     void InputOperatorRBrac(void);
     void InputPrevious(void);
 
+    void FlipBit(int index);
+
     void Evaluate(void);
 
     void SwitchBaseUpper(void);

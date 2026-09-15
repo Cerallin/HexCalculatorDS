@@ -75,6 +75,9 @@ FormulaModel::HandleEvent(const Event &e) {
         if (currentNumber != oldValue) {
             valueChanged = true;
         }
+    } else if (e.type == FlipDigitEvent) {
+        int index = e.data;
+        valueChanged = flipBit(index);
     } else {
         // Skip unhandled event type
         return Skipped;
@@ -89,6 +92,16 @@ FormulaModel::HandleEvent(const Event &e) {
     }
 
     return Consumed;
+}
+
+bool
+FormulaModel::flipBit(int index) {
+    auto number = currentNumber;
+
+    const uint64_t bitMask = uint64_t(1) << index;
+    currentNumber = (number ^ bitMask);
+
+    return currentNumber != number;
 }
 
 void

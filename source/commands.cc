@@ -301,6 +301,15 @@ Commands::InputPrevious(void) {
 }
 
 void
+Commands::FlipBit(int index) {
+    debugf("Flip digit %d pressed\n", index);
+    bus.Post(Event{
+        index,
+        EventType::FlipDigitEvent,
+    });
+}
+
+void
 Commands::SwitchBaseUpper(void) {
     auto numberBase = config.Base();
     switch (numberBase) {

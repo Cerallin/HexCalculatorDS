@@ -36,6 +36,7 @@ enum EventType {
     OperatorAcceptEvent, // when operator is accepted into formula tree
     FormulaUpdatedEvent, // formula model invalidated
     ValueChangedEvent,   // value model invalidated
+    FlipDigitEvent,      // when the user flips a digit
     // change config
     UpdateBaseEvent,  // when the user changes the number base
     UpdateWidthEvent, // when the user changes the number width
