@@ -218,15 +218,18 @@ enum ButtonType : uint8_t {
     // Shift directly instead of adding operators
     ButtonLShiftBin,
     ButtonRShiftBin,
+    // Digit pad buttons
+    ButtonFlipBit,
 };
 
 class TouchButton {
   public:
     constexpr TouchButton(void)
-        : TouchButton(Area(0, 0, 0, 0), ButtonInvalid, 0, 0) {}
+        : TouchButton(Area(0, 0, 0, 0), ButtonInvalid, 0, 0, 0) {}
 
-    constexpr TouchButton(Area area, ButtonType type, int16_t x, int16_t y)
-        : area(area), type(type), position{x, y}, disabled(false),
+    constexpr TouchButton(Area area, ButtonType type, int16_t x, int16_t y,
+                          int index = 0)
+        : area(area), type(type), position{x, y}, index(index), disabled(false),
           selected(false) {}
 
     /**
@@ -306,7 +309,13 @@ class TouchButton {
         return position;
     }
 
-    static void ExecuteCommand(Commands &commands, ButtonType type);
+    int
+    Index(void) const {
+        return index;
+    }
+
+    static void ExecuteCommand(Commands &commands, ButtonType type,
+                               int index = 0);
 
   private:
     /**
@@ -321,6 +330,8 @@ class TouchButton {
     ButtonType type;
 
     Point position;
+
+    int index;
 
     /**
      * @brief Whether the button is currently disabled. If true, the button will
@@ -341,7 +352,8 @@ class TouchScreenHandler {
           previouslySelected(nullptr), size(0) {}
 
     TouchButton *
-    RegisterButton(const Area &area, ButtonType type, int16_t m, int16_t n) {
+    RegisterButton(const Area &area, ButtonType type, int16_t m, int16_t n,
+                   int index = 0) {
         constexpr int16_t width = static_cast<int16_t>(M);
         constexpr int16_t height = static_cast<int16_t>(N);
 
@@ -350,7 +362,7 @@ class TouchScreenHandler {
         assert(size < Capacity());
 
         auto &button = buttons[size++];
-        button = TouchButton(area, type, m, n);
+        button = TouchButton(area, type, m, n, index);
 
         buttonMatrix[m][n] = &button;
 
@@ -377,7 +389,7 @@ class TouchScreenHandler {
         for (size_t i = 0; i < Capacity(); i++) {
             auto &button = buttons[i];
             if (button.Active() && button.ResponsibleFor(input)) {
-                button.ExecuteCommand(commands, button.Type());
+                button.ExecuteCommand(commands, button.Type(), button.Index());
                 ChangeFocus(&button);
                 return true;
             }
@@ -442,7 +454,7 @@ class TouchScreenHandler {
     PressFocus(void) {
         if (previouslySelected) {
             auto &button = *previouslySelected;
-            button.ExecuteCommand(commands, button.Type());
+            button.ExecuteCommand(commands, button.Type(), button.Index());
         }
     }
 

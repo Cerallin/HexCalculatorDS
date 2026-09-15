@@ -62,7 +62,7 @@ Commands::FlipBit(int index) {
     debugf("Flip digit %d pressed\n", index);
     bus.Post(Event{
         index,
-        EventType::FlipDigitEvent,
+        EventType::FlipBitEvent,
     });
 }
 

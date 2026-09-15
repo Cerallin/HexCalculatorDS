@@ -42,13 +42,18 @@ class DigitPad : public NonCopyable {
 
     void DrawDigits(void);
     void Setup(void);
+    void RegisterDigitButtons(void);
 
     void MoveFocus(Direction dir);
 
     int
-    GetFocusedIndex(void) const {
+    GetFocus(void) const {
         return 64 - 1 - (focus.x + (focus.y * colNum));
     }
+
+    void SetFocus(int index);
+
+    void Handle(const Point &touchPoint);
 
   private:
     friend class DigitFocus;
@@ -73,6 +78,8 @@ class DigitPad : public NonCopyable {
     Point focus;
 
     DigitFocus digitFocus;
+
+    TouchScreenHandler<colNum, rowNum> handler;
 };
 
 } // namespace HexCalc

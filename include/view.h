@@ -395,7 +395,7 @@ class EditorView : public SubView<EditorView> {
     static constexpr size_t buttonRowNum = 3;
 
     ViewModel &vm;
-    TouchScreenHandler<buttonColNum, buttonRowNum> handler;
+    TouchScreenHandler<buttonColNum, buttonRowNum> buttonHandler;
     TouchButton *buttons[buttonColNum * buttonRowNum];
 
     DigitPad digitPad;

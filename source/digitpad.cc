@@ -56,7 +56,8 @@ DigitFocus::SetPosition(Point newPos) {
 }
 
 DigitPad::DigitPad(SubDisplay &display, ViewModel &viewModel)
-    : display(display), vm(viewModel), focus(-1, -1), digitFocus(display) {}
+    : display(display), vm(viewModel), focus(-1, -1), digitFocus(display),
+      handler(viewModel.Cmds()) {}
 
 void
 DigitPad::DrawDigits(void) {
@@ -97,6 +98,23 @@ DigitPad::Setup(void) {
 }
 
 void
+DigitPad::RegisterDigitButtons(void) {
+    // Register digit buttons
+    for (size_t i = 0; i < colNum; i++) {
+        for (size_t j = 0; j < rowNum; j++) {
+            int16_t x = offsetX + (i * gapX) + ((i / columnCount) * columnGap);
+            int16_t y = offsetY + (j * lineHeight);
+            uint8_t width = 8;
+            uint8_t height = 18;
+            Area area(x, y, width, height);
+            int bitIndex = 64 - 1 - static_cast<int>((j * colNum) + i);
+            HEXCALC_GCC_UNUSED auto button = handler.RegisterButton(
+                area, ButtonType::ButtonFlipBit, i, j, bitIndex);
+        }
+    }
+}
+
+void
 DigitPad::MoveFocus(Direction dir) {
     if (focus.x < 0 && focus.y < 0) {
         // If no button is focused, set focus to the first button
@@ -110,4 +128,23 @@ DigitPad::MoveFocus(Direction dir) {
     debugf("Focus: (%d, %d)\n", focus.x, focus.y);
 
     digitFocus.SetPosition(focus);
+}
+
+void
+DigitPad::SetFocus(int index) {
+    int bitIndex = 64 - 1 - index;
+    int x = bitIndex % colNum;
+    int y = bitIndex / colNum;
+    focus = Point(x, y);
+    digitFocus.SetPosition(focus);
+    // Show focus sprites
+    digitFocus.Show();
+}
+
+void
+DigitPad::Handle(const Point &touchPoint) {
+    bool handled = handler.Handle(touchPoint);
+    if (!handled) {
+        digitFocus.Hide();
+    }
 }

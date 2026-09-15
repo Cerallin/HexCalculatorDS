@@ -75,7 +75,7 @@ FormulaModel::HandleEvent(const Event &e) {
         if (currentNumber != oldValue) {
             valueChanged = true;
         }
-    } else if (e.type == FlipDigitEvent) {
+    } else if (e.type == FlipBitEvent) {
         int index = e.data;
         valueChanged = flipBit(index);
     } else {

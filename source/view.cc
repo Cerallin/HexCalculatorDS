@@ -657,48 +657,50 @@ template class TranscodeView<Octal>;
 template class TranscodeView<Binary>;
 
 EditorView::EditorView(SubDisplay &display, ViewModel &vm)
-    : SubView(display), vm(vm), handler(vm.Cmds()), digitPad(display, vm) {
-    // TODO buttons
-    HEXCALC_GCC_UNUSED auto buttonBitwiseNot = handler.RegisterButton(
+    : SubView(display), vm(vm), buttonHandler(vm.Cmds()),
+      digitPad(display, vm) {
+    // buttons
+    HEXCALC_GCC_UNUSED auto buttonBitwiseNot = buttonHandler.RegisterButton(
         Area(AREA_BIN_0_X, AREA_BIN_0_Y, AREA_BIN_0_W, AREA_BIN_0_H),
         ButtonType::ButtonBitwiseNot, 0, 0);
-    HEXCALC_GCC_UNUSED auto buttonNegate = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonNegate = buttonHandler.RegisterButton(
         Area(AREA_BIN_1_X, AREA_BIN_1_Y, AREA_BIN_1_W, AREA_BIN_1_H),
         ButtonType::ButtonNegate, 1, 0);
-    HEXCALC_GCC_UNUSED auto buttonClear = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonClear = buttonHandler.RegisterButton(
         Area(AREA_BIN_2_X, AREA_BIN_2_Y, AREA_BIN_2_W, AREA_BIN_2_H),
         ButtonType::ButtonClear, 2, 0);
 
-    // FIXME this button will cause wrong behavior when switching between input
-    // views, so it is disabled for now.
-    HEXCALC_GCC_UNUSED auto buttonChangeView = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonChangeView = buttonHandler.RegisterButton(
         Area(AREA_BIN_3_X, AREA_BIN_3_Y, AREA_BIN_3_W, AREA_BIN_3_H),
         ButtonType::ButtonToggleView, 0, 1);
+    // FIXME this button will cause wrong behavior when switching between input
+    // views, so it is disabled for now.
     buttonChangeView->Disable();
 
-    HEXCALC_GCC_UNUSED auto buttonLShiftMode = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonLShiftMode = buttonHandler.RegisterButton(
         Area(AREA_BIN_SHIFT_MODE_PREV_X, AREA_BIN_SHIFT_MODE_PREV_Y,
              AREA_BIN_SHIFT_MODE_PREV_W, AREA_BIN_SHIFT_MODE_PREV_H),
         ButtonType::ButtonLShiftMode, 1, 1);
 
-    HEXCALC_GCC_UNUSED auto buttonRShiftMode = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonRShiftMode = buttonHandler.RegisterButton(
         Area(AREA_BIN_SHIFT_MODE_NEXT_X, AREA_BIN_SHIFT_MODE_NEXT_Y,
              AREA_BIN_SHIFT_MODE_NEXT_W, AREA_BIN_SHIFT_MODE_NEXT_H),
         ButtonType::ButtonRShiftMode, 2, 1);
 
-    HEXCALC_GCC_UNUSED auto buttonLShift = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonLShift = buttonHandler.RegisterButton(
         Area(AREA_BIN_6_X, AREA_BIN_6_Y, AREA_BIN_6_W, AREA_BIN_6_H),
         ButtonType::ButtonLShiftBin, 3, 1);
 
-    HEXCALC_GCC_UNUSED auto buttonRShift = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonRShift = buttonHandler.RegisterButton(
         Area(AREA_BIN_7_X, AREA_BIN_7_Y, AREA_BIN_7_W, AREA_BIN_7_H),
         ButtonType::ButtonRShiftBin, 4, 1);
 
-    HEXCALC_GCC_UNUSED auto buttonEvaluate = handler.RegisterButton(
+    HEXCALC_GCC_UNUSED auto buttonEvaluate = buttonHandler.RegisterButton(
         Area(AREA_BIN_8_X, AREA_BIN_8_Y, AREA_BIN_8_W, AREA_BIN_8_H),
         ButtonType::ButtonEvaluate, 4, 2);
 
-    // TODO digits
+    // digits
+    digitPad.RegisterDigitButtons();
 }
 
 void
@@ -721,7 +723,8 @@ EditorView::HandleEvent(const Event &e) {
 
         debugf("Touch at (%d, %d)\n", touchPoint.x, touchPoint.y);
 
-        handler.Handle(touchPoint);
+        buttonHandler.Handle(touchPoint);
+        digitPad.Handle(touchPoint);
 
         // To update selected button state after handling touch input
         BasicView::markDirty();
@@ -729,14 +732,20 @@ EditorView::HandleEvent(const Event &e) {
         return Consumed;
     } else if (e.type == EventType::PreviousTouchEvent) {
         // Flip the focused digit
-        vm.Cmds().FlipBit(digitPad.GetFocusedIndex());
-        debugf("EditorView flipped digit %d\n", digitPad.GetFocusedIndex());
+        vm.Cmds().FlipBit(digitPad.GetFocus());
+        debugf("EditorView flipped digit %d\n", digitPad.GetFocus());
         // No need to mark dirty here, since it will finally trigger a
         // ValueChangedEvent
         return Consumed;
     } else if (e.type == EventType::ValueChangedEvent) {
         BasicView::markDirty();
         debugf("EditorView value changed\n");
+        return Consumed;
+    } else if (e.type == EventType::FlipBitEvent) {
+        // Change the focused bit
+        digitPad.SetFocus(e.data);
+        BasicView::markDirty();
+        debugf("EditorView focused bit %d\n", e.data);
         return Consumed;
     } else {
         return Skipped;
@@ -752,8 +761,8 @@ EditorView::ForceUpdate(void) {
     digitPad.DrawDigits();
 
     // Update button states, minus 1 for evaluate button
-    for (size_t i = 0; i < handler.Size() - 1; i++) {
-        const auto &button = handler.GetButton(i);
+    for (size_t i = 0; i < buttonHandler.Size() - 1; i++) {
+        const auto &button = buttonHandler.GetButton(i);
         if (button.Selected()) {
             debugf("Button %zu selected\n", i);
             display.SelectButton(i);
