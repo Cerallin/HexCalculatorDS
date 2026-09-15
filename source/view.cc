@@ -153,6 +153,8 @@ InputView::InputView(SubDisplay &display, ViewModel &vm)
 
 void
 InputView::Setup(void) {
+    // Set scroll
+    display.ScrollTileLayers(0, 0);
     // Setup image
     display.SetupView(subscreenImageBitmap, subscreenImagePal);
     // Setup buttons
@@ -705,6 +707,8 @@ EditorView::EditorView(SubDisplay &display, ViewModel &vm)
 
 void
 EditorView::Setup(void) {
+    // Set scroll
+    display.ScrollTileLayers(0, -1);
     // Setup image
     display.SetupView(subscreenBinaryImageBitmap, subscreenBinaryImagePal);
     // Setup number pad

@@ -48,8 +48,13 @@ class BasicLayer {
     }
 
     void
+    SetScroll(int x, int y) const {
+        bgSetScroll(bg, offsetX + x, offsetY + y);
+    }
+
+    void
     ResetScroll(void) const {
-        bgSetScroll(bg, offsetX, offsetY);
+        SetScroll(0, 0);
     }
 
   protected:
