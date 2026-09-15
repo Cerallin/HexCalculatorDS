@@ -61,27 +61,26 @@ DigitPad::DigitPad(SubDisplay &display, ViewModel &viewModel)
 
 void
 DigitPad::DrawDigits(void) {
-    size_t glyphOffset = sizeof(subFontMap) / sizeof(subFontMap[0]);
-    Glyph glyph1(0 + glyphOffset, 1 + glyphOffset);
-    Glyph glyph0(3 + glyphOffset, 2 + glyphOffset);
+    constexpr size_t glyphOffset = sizeof(subFontMap) / sizeof(subFontMap[0]);
+    constexpr Glyph glyph1(0 + glyphOffset, 1 + glyphOffset);
+    constexpr Glyph glyph0(3 + glyphOffset, 2 + glyphOffset);
 
-    auto number = vm.GetValueDigits<64>(NumberBase::Binary);
-    // TODO: check assembly code for optimization
-    for (size_t i = 0; i < colNum; i++) {
-        for (size_t j = 0; j < rowNum; j++) {
+    // Walk bits MSB-first in row-major order: (i,j) -> bit 63-(j*colNum+i)
+    auto value = vm.GetRawValue();
+    for (size_t j = 0; j < rowNum; j++) {
+        const size_t y = offsetY + (j * lineHeight);
+        for (size_t i = 0; i < colNum; i++) {
             size_t x = offsetX + (i * gapX);
             // Add a gap between every N columns
             x += (i / columnCount) * columnGap;
 
-            size_t y = offsetY + (j * lineHeight);
-
-            auto digit = number[64 - 1 - ((j * colNum) + i)];
-
-            if (digit == Digit0) {
-                display.PrintGlyph(x, y, glyph0);
-            } else { // Digit1
+            const bool bitSet = (value & (NumberDataType(1) << 63)) != 0;
+            if (bitSet) {
                 display.PrintGlyph(x, y, glyph1);
+            } else {
+                display.PrintGlyph(x, y, glyph0);
             }
+            value <<= 1;
         }
     }
 }

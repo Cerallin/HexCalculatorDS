@@ -29,6 +29,11 @@ class ValueManager {
 
     NumberBase GetNumberBase(void) const;
 
+    NumberDataType
+    GetRawValue(void) const {
+        return formulaModel.CurrentNumber();
+    }
+
     template <size_t N>
     DigitArray<N>
     GetValueDigits(NumberBase base) const {
@@ -239,6 +244,11 @@ class ViewModel : private NonCopyable {
     NumberBase
     GetNumberBase(void) const {
         return valueManager.GetNumberBase();
+    }
+
+    NumberDataType
+    GetRawValue(void) const {
+        return valueManager.GetRawValue();
     }
 
     template <size_t N>
