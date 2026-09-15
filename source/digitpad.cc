@@ -142,7 +142,7 @@ DigitPad::SetFocus(int index) {
 }
 
 void
-DigitPad::Handle(const Point &touchPoint) {
+DigitPad::HandleButtons(const Point &touchPoint) {
     bool handled = handler.Handle(touchPoint);
     if (!handled) {
         digitFocus.Hide();

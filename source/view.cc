@@ -713,10 +713,9 @@ EditorView::Setup(void) {
 
 EventResult
 EditorView::HandleEvent(const Event &e) {
-    // TODO handle events
     if (e.type == EventType::MoveFocusEvent) {
         digitPad.MoveFocus(static_cast<Direction>(e.data));
-        BasicView::markDirty();
+        // No need to mark dirty here, because sprites are handled separately
         return Consumed;
     } else if (e.type == EventType::TouchScreenEvent) {
         Point touchPoint(e.data);
@@ -724,10 +723,10 @@ EditorView::HandleEvent(const Event &e) {
         debugf("Touch at (%d, %d)\n", touchPoint.x, touchPoint.y);
 
         buttonHandler.Handle(touchPoint);
-        digitPad.Handle(touchPoint);
+        digitPad.HandleButtons(touchPoint);
 
-        // To update selected button state after handling touch input
-        BasicView::markDirty();
+        // No need to mark dirty here, since it will finally trigger a
+        // ValueChangedEvent
 
         return Consumed;
     } else if (e.type == EventType::PreviousTouchEvent) {
@@ -744,7 +743,8 @@ EditorView::HandleEvent(const Event &e) {
     } else if (e.type == EventType::FlipBitEvent) {
         // Change the focused bit
         digitPad.SetFocus(e.data);
-        BasicView::markDirty();
+        // No need to mark dirty here, since it will finally trigger a
+        // ValueChangedEvent
         debugf("EditorView focused bit %d\n", e.data);
         return Consumed;
     } else {
@@ -757,7 +757,6 @@ EditorView::HandleEvent(const Event &e) {
 
 void
 EditorView::ForceUpdate(void) {
-    // TODO update editor view
     digitPad.DrawDigits();
 
     // Update button states, minus 1 for evaluate button

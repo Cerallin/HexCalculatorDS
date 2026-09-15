@@ -53,7 +53,7 @@ class DigitPad : public NonCopyable {
 
     void SetFocus(int index);
 
-    void Handle(const Point &touchPoint);
+    void HandleButtons(const Point &touchPoint);
 
   private:
     friend class DigitFocus;
