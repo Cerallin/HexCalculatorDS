@@ -192,6 +192,18 @@ Commands::ToggleSign(void) {
 }
 
 void
+Commands::InputLeftShift(void) {
+    bus.Post(Event{static_cast<EventDataType>(LeftShift),
+                   EventType::NumberShiftEvent});
+}
+
+void
+Commands::InputRightShift(void) {
+    bus.Post(Event{static_cast<EventDataType>(RightShift),
+                   EventType::NumberShiftEvent});
+}
+
+void
 Commands::SwitchShiftModeLeft(void) {
     debugf("Switch shift mode left <- triggered\n");
 

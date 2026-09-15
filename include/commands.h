@@ -29,6 +29,10 @@ class Commands {
     void SwitchBaseLower(void);
     void SwitchWidthUpper(void);
     void SwitchWidthLower(void);
+
+    void InputLeftShift(void);
+    void InputRightShift(void);
+
     void ToggleSign(void);
 
     void SwitchShiftModeLeft(void);

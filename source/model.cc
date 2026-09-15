@@ -75,6 +75,17 @@ FormulaModel::HandleEvent(const Event &e) {
         if (currentNumber != oldValue) {
             valueChanged = true;
         }
+    } else if (e.type == EventType::NumberShiftEvent) {
+        // TODO circular/logical/arithmetic
+        OperatorType op = static_cast<OperatorType>(e.data);
+        if (op == LeftShift) {
+            currentNumber <<= 1;
+        } else if (op == RightShift) {
+            currentNumber >>= 1;
+        } else {
+            // Should never reach here
+        }
+        valueChanged = true;
     } else if (e.type == FlipBitEvent) {
         int index = e.data;
         valueChanged = flipBit(index);
