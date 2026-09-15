@@ -28,25 +28,70 @@ readHardwareInput() {
 }
 
 void
-TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
+TouchButton::ExecuteCommand(Commands &commands, ButtonType type, int index) {
     switch (type) {
     case ButtonAnd:
-        commands.InputOperatorAnd();
+        commands.InputOperator(OperatorType::BitwiseAnd);
         break;
     case ButtonOr:
-        commands.InputOperatorOr();
+        commands.InputOperator(OperatorType::BitwiseOr);
         break;
     case ButtonModulo:
-        commands.InputOperatorModulo();
+        commands.InputOperator(OperatorType::Modulo);
         break;
     case ButtonA:
-        commands.InputNumberA();
+        commands.InputNumber(DigitA);
+        break;
+    case ButtonB:
+        commands.InputNumber(DigitB);
+        break;
+    case ButtonC:
+        commands.InputNumber(DigitC);
+        break;
+    case ButtonD:
+        commands.InputNumber(DigitD);
+        break;
+    case ButtonE:
+        commands.InputNumber(DigitE);
+        break;
+    case ButtonF:
+        commands.InputNumber(DigitF);
+        break;
+    case Button0:
+        commands.InputNumber(Digit0);
+        break;
+    case Button1:
+        commands.InputNumber(Digit1);
+        break;
+    case Button2:
+        commands.InputNumber(Digit2);
+        break;
+    case Button3:
+        commands.InputNumber(Digit3);
+        break;
+    case Button4:
+        commands.InputNumber(Digit4);
+        break;
+    case Button5:
+        commands.InputNumber(Digit5);
+        break;
+    case Button6:
+        commands.InputNumber(Digit6);
+        break;
+    case Button7:
+        commands.InputNumber(Digit7);
+        break;
+    case Button8:
+        commands.InputNumber(Digit8);
+        break;
+    case Button9:
+        commands.InputNumber(Digit9);
         break;
     case ButtonLShift:
-        commands.InputOperatorLShift();
+        commands.InputOperator(OperatorType::LeftShift);
         break;
     case ButtonRShift:
-        commands.InputOperatorRShift();
+        commands.InputOperator(OperatorType::RightShift);
         break;
     case ButtonClear:
         commands.Clear();
@@ -54,74 +99,29 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
     case ButtonBackspace:
         commands.InputOperatorBackspace();
         break;
-    case ButtonB:
-        commands.InputNumberB();
-        break;
     case ButtonLBrac:
-        commands.InputOperatorLBrac();
+        commands.InputOperator(OperatorType::LeftBracket);
         break;
     case ButtonRBrac:
-        commands.InputOperatorRBrac();
+        commands.InputOperator(OperatorType::RightBracket);
         break;
     case ButtonDivide:
-        commands.InputOperatorDivide();
+        commands.InputOperator(OperatorType::Divide);
         break;
     case ButtonMultiply:
-        commands.InputOperatorMultiply();
-        break;
-    case ButtonC:
-        commands.InputNumberC();
-        break;
-    case Button7:
-        commands.InputNumber7();
-        break;
-    case Button8:
-        commands.InputNumber8();
-        break;
-    case Button9:
-        commands.InputNumber9();
+        commands.InputOperator(OperatorType::Multiply);
         break;
     case ButtonMinus:
-        commands.InputOperatorMinus();
-        break;
-    case ButtonD:
-        commands.InputNumberD();
-        break;
-    case Button4:
-        commands.InputNumber4();
-        break;
-    case Button5:
-        commands.InputNumber5();
-        break;
-    case Button6:
-        commands.InputNumber6();
+        commands.InputOperator(OperatorType::Minus);
         break;
     case ButtonPlus:
-        commands.InputOperatorPlus();
-        break;
-    case ButtonE:
-        commands.InputNumberE();
-        break;
-    case Button1:
-        commands.InputNumber1();
-        break;
-    case Button2:
-        commands.InputNumber2();
-        break;
-    case Button3:
-        commands.InputNumber3();
-        break;
-    case ButtonF:
-        commands.InputNumberF();
+        commands.InputOperator(OperatorType::Plus);
         break;
     case ButtonNegate:
-        commands.InputOperatorNegate();
-        break;
-    case Button0:
-        commands.InputNumber0();
+        commands.InputOperator(OperatorType::Negate);
         break;
     case ButtonBitwiseNot:
-        commands.InputOperatorNot();
+        commands.InputOperator(OperatorType::BitwiseNot);
         break;
     case ButtonEvaluate:
         commands.Evaluate();
@@ -131,6 +131,9 @@ TouchButton::ExecuteCommand(Commands &commands, ButtonType type) {
         break;
     case ButtonToggleSign:
         commands.ToggleSign();
+        break;
+    case ButtonFlipBit:
+        commands.FlipBit(index);
         break;
     default:
         break;
