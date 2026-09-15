@@ -218,8 +218,8 @@ SubDisplay::DrawDrawerBorders(void) {
 }
 
 Sprite<SubDisplay> *
-SubDisplay::AddSprite(Point position, int priority) {
-    return sm.Add(position, priority);
+SubDisplay::AddSprite(Point position, int priority, bool hFlip, bool vFlip) {
+    return sm.Add(position, priority, hFlip, vFlip);
 }
 
 void

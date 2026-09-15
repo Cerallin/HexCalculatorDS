@@ -13,6 +13,9 @@
 
 namespace HexCalc {
 
+constexpr int VersionTileOffset = 16;
+constexpr int DigitFocusTileOffset = 32;
+
 class MainDisplay;
 class SubDisplay;
 
@@ -25,8 +28,11 @@ class Sprite {
     static constexpr auto SpriteSize = SpriteSize_8x8;
     static constexpr auto SpriteColorFormat = SpriteColorFormat_16Color;
 
-    constexpr Sprite(Point position, const uint16_t *tile, int priority)
-        : position(position), tile(tile), priority(priority), dirty(true) {}
+    constexpr Sprite(Point position, const uint16_t *tile, int priority,
+                     bool hFlip = false, bool vFlip = false, bool dirty = true)
+        : position(position), tile(tile), priority(priority), hFlip(hFlip),
+          vFlip(vFlip), dirty(dirty) {}
+
     constexpr Sprite(void) : Sprite(Point(0, 0), nullptr, -1) {}
 
     bool
@@ -40,6 +46,17 @@ class Sprite {
             tile = newTile;
             dirty = true;
         }
+    }
+
+    void
+    SetPosition(Point newPosition) {
+        position = newPosition;
+        dirty = true;
+    }
+
+    void
+    SetPosition(int x, int y) {
+        SetPosition(Point(x, y));
     }
 
     void
@@ -61,15 +78,21 @@ class Sprite {
     void
     Update(int id) {
         if (Valid()) {
-            // debug tile
-            debugf("tile: %p\n", tile);
+            // Set affine index based on flip flags
+            int affineIndex = 0;
+            if (hFlip || vFlip) {
+                affineIndex = -1;
+            }
+            // Debug tile
+            debugf("tile: %p, hFlip: %d, vFlip: %d\n", tile, hFlip, vFlip);
+
             oamSet(&oamState, id, position.x, position.y, priority, 0,
-                   SpriteSize, SpriteColorFormat, tile, 0, false, false, false,
-                   false, false);
+                   SpriteSize, SpriteColorFormat, tile, affineIndex, false,
+                   false, hFlip, vFlip, false);
         } else {
             // hide the sprite if it's invalid
             oamSet(&oamState, id, 0, 0, 0, 0, SpriteSize, SpriteColorFormat,
-                   nullptr, 0, false, true, false, false, false);
+                   nullptr, 0, false, true, hFlip, vFlip, false);
         }
 
         dirty = false;
@@ -78,7 +101,12 @@ class Sprite {
   private:
     Point position;
     const uint16_t *tile;
+
     int priority;
+
+    bool hFlip;
+    bool vFlip;
+
     bool dirty;
 };
 
@@ -99,7 +127,8 @@ class SpriteManager : NonCopyable {
     SpriteManager(void) : sprites{}, spriteCount(0) {}
 
     Sprite<DisplayType> *
-    Add(Point position, int priority = 0) {
+    Add(Point position, int priority = 0, bool hFlip = false,
+        bool vFlip = false) {
         if (spriteCount >= MaxSprites) {
             // no more free slots
             return nullptr;
@@ -115,8 +144,8 @@ class SpriteManager : NonCopyable {
 
         auto &sprite = sprites[index];
 
-        sprite =
-            Sprite<DisplayType>(position, oamGetGfxPtr(&oamState, 0), priority);
+        sprite = Sprite<DisplayType>(position, oamGetGfxPtr(&oamState, 0),
+                                     priority, hFlip, vFlip);
 
         spriteCount++;
 

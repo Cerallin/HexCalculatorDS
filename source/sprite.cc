@@ -9,6 +9,7 @@
 #include "font.h"
 #include "theme.h"
 
+#include "subDigitFocus.h"
 #include "subNumber.h"
 #include "subVersion.h"
 
@@ -31,10 +32,27 @@ SubSpriteManager::SubSpriteManager(void) : SpriteManager<SubDisplay>() {
                   "Palette size exceeds color format limit");
     dmaCopy(subSpritePal, SPRITE_PALETTE_SUB, sizeof(subSpritePal));
 
+    constexpr auto _tileOffset = [](int count) {
+        return (count * TileBytes) / sizeof(uint16_t);
+    };
+
     // Load shared graphics for version numbers
-    decompress(subVersionTiles, SpriteGfx() + 16 * TileBytes / sizeof(uint16_t),
-               LZ77Vram);
+    static_assert(
+        VersionTileOffset > sizeof(subNumberMapLen) / sizeof(subNumberMap[0]),
+        "VersionTileOffset must be greater than subNumberTiles count");
+    constexpr int versionOffset = _tileOffset(VersionTileOffset);
+    decompress(subVersionTiles, SpriteGfx() + versionOffset, LZ77Vram);
     // Use the same palette for version
+
+    // Load digit focus tile offset
+    static_assert(
+        DigitFocusTileOffset >
+            (sizeof(subNumberMapLen) / sizeof(subNumberMap[0])) +
+                (sizeof(subVersionMapLen) / sizeof(subVersionMap[0])),
+        "VersionTileOffset must be greater than subNumberTiles count");
+    constexpr int digitFocusOffset = _tileOffset(DigitFocusTileOffset);
+    dmaCopy(subDigitFocusTiles, SpriteGfx() + digitFocusOffset,
+            sizeof(subDigitFocusTiles));
 
     oamEnable(&oamState);
 }
@@ -57,7 +75,7 @@ SubSpriteManager::RegisterVerStr(void) {
     int16_t offsetY = 1;
     for (const auto &font : versionArr) {
         auto sp = Add(Point(10 + offsetX, offsetY));
-        const auto tileIndex = font - FontVersion0 + 16 + 1;
+        const int tileIndex = font - FontVersion0 + VersionTileOffset + 1;
         // 16 for number tiles, 1 for the backdrop color
         sp->SetTileOffset(tileIndex);
         offsetX += kerning(font);

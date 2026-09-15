@@ -26,11 +26,6 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
      */
     void Update(void);
 
-    /**
-     * @brief Handle InputViewChangedEvent to switch between InputView and
-     * EditorView, and dispatch other events to the currently active view.
-     *
-     */
     EventResult HandleEvent(const Event &e);
 
   private:

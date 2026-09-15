@@ -7,11 +7,11 @@
 #pragma once
 
 #include "common.h"
+#include "digitpad.h"
 #include "display.h"
 #include "event.h"
 #include "format.h"
 #include "input.h"
-#include "numberpad.h"
 #include "viewmodel.h"
 
 namespace HexCalc {
@@ -390,15 +390,15 @@ class EditorView : public SubView<EditorView> {
     void ForceUpdate(void);
 
   private:
-    /* buttons above the number pad */
+    /* buttons above the number pad, and the evaluate button */
     static constexpr size_t buttonColNum = 5;
-    static constexpr size_t buttonRowNum = 2;
+    static constexpr size_t buttonRowNum = 3;
 
     ViewModel &vm;
     TouchScreenHandler<buttonColNum, buttonRowNum> handler;
     TouchButton *buttons[buttonColNum * buttonRowNum];
 
-    NumberPad numberPad;
+    DigitPad digitPad;
 };
 
 class DrawerView : public SubView<DrawerView> {

@@ -386,7 +386,8 @@ class SubDisplay : public Display<SubDisplay> {
 
     void DrawDrawerBorders(void);
 
-    Sprite<SubDisplay> *AddSprite(Point position, int priority = 0);
+    Sprite<SubDisplay> *AddSprite(Point position, int priority = 0,
+                                  bool hFlip = false, bool vFlip = false);
     void ResetSprites(void);
 
     void CleanLayers(void);

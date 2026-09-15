@@ -175,6 +175,7 @@ class InputHandler {
 
 enum ButtonType : uint8_t {
     ButtonInvalid = 0xFF,
+    // Input buttons
     Button0 = 0,
     Button1,
     Button2,
@@ -207,8 +208,16 @@ enum ButtonType : uint8_t {
     ButtonClear,
     ButtonBackspace,
     ButtonEvaluate,
+    // Drawer buttons
     ButtonChangeWidth,
     ButtonToggleSign,
+    // Editor buttons
+    ButtonToggleView,
+    ButtonLShiftMode,
+    ButtonRShiftMode,
+    // Shift directly instead of adding operators
+    ButtonLShiftBin,
+    ButtonRShiftBin,
 };
 
 class TouchButton {

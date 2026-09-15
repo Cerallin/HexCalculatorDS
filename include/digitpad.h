@@ -13,20 +13,45 @@
 
 namespace HexCalc {
 
-class NumberPad : public NonCopyable {
+class DigitFocus {
   public:
-    NumberPad(SubDisplay &display, ViewModel &viewModel);
+    DigitFocus(SubDisplay &display);
 
-    void DrawBits(void);
-    void Reset(void);
+    void SetPosition(Point newPos);
+
+    bool
+    Visible(void) const {
+        return visible;
+    }
+
+    void Show(void);
+
+    void Hide(void);
+
+  private:
+    SubDisplay &display;
+
+    bool visible;
+
+    Sprite<SubDisplay> *sprites[4];
+};
+
+class DigitPad : public NonCopyable {
+  public:
+    DigitPad(SubDisplay &display, ViewModel &viewModel);
+
+    void DrawDigits(void);
+    void Setup(void);
 
     void MoveFocus(Direction dir);
 
   private:
+    friend class DigitFocus;
+
     static constexpr size_t colNum = 16;
     static constexpr size_t rowNum = 4;
 
-    static_assert(colNum * rowNum == 64, "NumberPad must have 64 digits");
+    static_assert(colNum * rowNum == 64, "DigitPad must have 64 digits");
 
     static constexpr size_t offsetX = 12;
     static constexpr size_t offsetY = 64;
@@ -41,6 +66,8 @@ class NumberPad : public NonCopyable {
     ViewModel &vm;
 
     Point focus;
+
+    DigitFocus digitFocus;
 };
 
 } // namespace HexCalc

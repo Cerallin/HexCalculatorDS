@@ -6,6 +6,7 @@
  */
 #include "view.h"
 #include "subscreenArea.h"
+#include "subscreenBinaryArea.h"
 #include "subscreenBinaryImage.h"
 #include "subscreenImage.h"
 
@@ -656,27 +657,105 @@ template class TranscodeView<Octal>;
 template class TranscodeView<Binary>;
 
 EditorView::EditorView(SubDisplay &display, ViewModel &vm)
-    : SubView(display), vm(vm), handler(vm.Cmds()), numberPad(display, vm) {
+    : SubView(display), vm(vm), handler(vm.Cmds()), digitPad(display, vm) {
     // TODO buttons
-    // TODO bits
+    HEXCALC_GCC_UNUSED auto buttonBitwiseNot = handler.RegisterButton(
+        Area(AREA_BIN_0_X, AREA_BIN_0_Y, AREA_BIN_0_W, AREA_BIN_0_H),
+        ButtonType::ButtonBitwiseNot, 0, 0);
+    HEXCALC_GCC_UNUSED auto buttonNegate = handler.RegisterButton(
+        Area(AREA_BIN_1_X, AREA_BIN_1_Y, AREA_BIN_1_W, AREA_BIN_1_H),
+        ButtonType::ButtonNegate, 1, 0);
+    HEXCALC_GCC_UNUSED auto buttonClear = handler.RegisterButton(
+        Area(AREA_BIN_2_X, AREA_BIN_2_Y, AREA_BIN_2_W, AREA_BIN_2_H),
+        ButtonType::ButtonClear, 2, 0);
+
+    // FIXME this button will cause wrong behavior when switching between input
+    // views, so it is disabled for now.
+    HEXCALC_GCC_UNUSED auto buttonChangeView = handler.RegisterButton(
+        Area(AREA_BIN_3_X, AREA_BIN_3_Y, AREA_BIN_3_W, AREA_BIN_3_H),
+        ButtonType::ButtonToggleView, 0, 1);
+    buttonChangeView->Disable();
+
+    HEXCALC_GCC_UNUSED auto buttonLShiftMode = handler.RegisterButton(
+        Area(AREA_BIN_SHIFT_MODE_PREV_X, AREA_BIN_SHIFT_MODE_PREV_Y,
+             AREA_BIN_SHIFT_MODE_PREV_W, AREA_BIN_SHIFT_MODE_PREV_H),
+        ButtonType::ButtonLShiftMode, 1, 1);
+
+    HEXCALC_GCC_UNUSED auto buttonRShiftMode = handler.RegisterButton(
+        Area(AREA_BIN_SHIFT_MODE_NEXT_X, AREA_BIN_SHIFT_MODE_NEXT_Y,
+             AREA_BIN_SHIFT_MODE_NEXT_W, AREA_BIN_SHIFT_MODE_NEXT_H),
+        ButtonType::ButtonRShiftMode, 2, 1);
+
+    HEXCALC_GCC_UNUSED auto buttonLShift = handler.RegisterButton(
+        Area(AREA_BIN_7_X, AREA_BIN_7_Y, AREA_BIN_7_W, AREA_BIN_7_H),
+        ButtonType::ButtonLShiftBin, 3, 1);
+
+    HEXCALC_GCC_UNUSED auto buttonRShift = handler.RegisterButton(
+        Area(AREA_BIN_8_X, AREA_BIN_8_Y, AREA_BIN_8_W, AREA_BIN_8_H),
+        ButtonType::ButtonRShiftBin, 4, 1);
+
+    HEXCALC_GCC_UNUSED auto buttonEvaluate = handler.RegisterButton(
+        Area(AREA_BIN_9_X, AREA_BIN_9_Y, AREA_BIN_9_W, AREA_BIN_9_H),
+        ButtonType::ButtonEvaluate, 4, 2);
+
+    // TODO digits
 }
 
 void
 EditorView::Setup(void) {
     // Setup image
     display.SetupView(subscreenBinaryImageBitmap, subscreenBinaryImagePal);
-    numberPad.DrawBits();
+    // Setup number pad
+    digitPad.Setup();
 }
 
 EventResult
 EditorView::HandleEvent(const Event &e) {
     // TODO handle events
-    return Failed;
+    if (e.type == EventType::MoveFocusEvent) {
+        digitPad.MoveFocus(static_cast<Direction>(e.data));
+        BasicView::markDirty();
+        return Consumed;
+    } else if (e.type == EventType::TouchScreenEvent) {
+        Point touchPoint(e.data);
+
+        debugf("Touch at (%d, %d)\n", touchPoint.x, touchPoint.y);
+
+        handler.Handle(touchPoint);
+
+        // To update selected button state after handling touch input
+        BasicView::markDirty();
+
+        return Consumed;
+    } else if (e.type == EventType::ValueChangedEvent) {
+        BasicView::markDirty();
+        debugf("EditorView value changed\n");
+        return Consumed;
+    } else {
+        return Skipped;
+    }
+
+    // Should never reach here
+    return Skipped;
 }
 
 void
 EditorView::ForceUpdate(void) {
     // TODO update editor view
+    digitPad.DrawDigits();
+
+    // Update button states, minus 1 for evaluate button
+    for (size_t i = 0; i < handler.Size() - 1; i++) {
+        const auto &button = handler.GetButton(i);
+        if (button.Selected()) {
+            debugf("Button %zu selected\n", i);
+            display.SelectButton(i);
+        } else if (button.Active()) {
+            display.EnableButton(i);
+        } else {
+            display.DisableButton(i);
+        }
+    }
 }
 
 DrawerView::DrawerView(SubDisplay &display, ViewModel &vm)
