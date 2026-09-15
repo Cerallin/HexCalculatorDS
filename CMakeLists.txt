@@ -95,6 +95,25 @@ add_custom_command(
     COMMENT "Generating sub binary font tilemap"
 )
 
+# Last 8x8 of binary tilemap; -p! shares palette with subFont / theme subPal
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subDigitFocus.c
+    COMMAND ${GRIT}
+        ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-binary-tilemap.png
+        -ftc
+        -gB4
+        -gTFF00FF
+        -m
+        -p!
+        -al384
+        -aw8
+        -at0
+        -ah8
+        -o subDigitFocus
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tiles/HexCalculatorDS-sub-binary-tilemap.png
+    COMMENT "Generating sub digit focus tile (shared palette)"
+)
+
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subNumber.c
     COMMAND ${GRIT}
@@ -202,6 +221,7 @@ add_executable(${PROJECT_NAME}.elf
     ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subBinaryFont.c
+    ${CMAKE_CURRENT_BINARY_DIR}/subDigitFocus.c
     ${CMAKE_CURRENT_BINARY_DIR}/subNumber.c
     ${CMAKE_CURRENT_BINARY_DIR}/subVersion.c
     ${CMAKE_CURRENT_BINARY_DIR}/subscreenImage.c
