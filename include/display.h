@@ -14,6 +14,26 @@
 
 namespace HexCalc {
 
+namespace {
+
+/**
+ * @brief Map a pixel X to the BG layer that owns that vertical strip.
+ *
+ * Main screen uses TileBGNum layers, each scrolled by OffsetPerBG pixels, so
+ * consecutive 2px (main) / 4px (sub) columns land on alternating layers.
+ * Unsigned divide + mask avoids the signed-div/mod sequence that ARM Thumb
+ * emits for `(x / OffsetPerBG) % TileBGNum`.
+ */
+template <int TileBGNum, int OffsetPerBG>
+constexpr int
+getLayerIndex(int16_t x) {
+    static_assert((TileBGNum & (TileBGNum - 1)) == 0,
+                  "TileBGNum must be a power of two");
+    return (static_cast<unsigned>(x) / OffsetPerBG) & (TileBGNum - 1);
+}
+
+} // namespace
+
 template <class Derived, typename DisplayType, int BorderWidth,
           int BorderHeight, int TextCount, int TextGlyphCount>
 class DrawerManager {
@@ -57,7 +77,8 @@ class DrawerManager {
     PutTile(int16_t x, int16_t y, FontType tile) const {
         assert(x % DisplayType::OffsetPerBG == 0);
         assert(y % TileHeight == 0);
-        auto _idx = (x / DisplayType::OffsetPerBG) % DisplayType::TileBGNum;
+        auto _idx =
+            getLayerIndex<DisplayType::TileBGNum, DisplayType::OffsetPerBG>(x);
         layers[_idx].Put(x / TileWidth, y / TileHeight, tile);
     }
 
@@ -65,7 +86,8 @@ class DrawerManager {
     PutGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
         assert(x % DisplayType::OffsetPerBG == 0);
         assert(y % TileHeight == 0);
-        auto _idx = (x / DisplayType::OffsetPerBG) % DisplayType::TileBGNum;
+        auto _idx =
+            getLayerIndex<DisplayType::TileBGNum, DisplayType::OffsetPerBG>(x);
         layers[_idx].PutGlyph(x / TileWidth, y / TileHeight, glyph);
     }
 
@@ -279,27 +301,49 @@ class MainDisplay : public Display<MainDisplay> {
     /**
      * @brief Print a line of glyphs.
      *
-     * @tparam Iterable An iterable type that contains Glyphs
+     * Walks layers by a fixed step instead of re-deriving the layer index from
+     * pixel X on every glyph. For CharWidth 6, layerStep is 3 (0→3→2→1…);
+     * for CharWidth 8, layerStep is 0 so the same layer is reused.
+     *
+     * @tparam GlyphIterable An iterable type that contains Glyphs
      * @param glyphRange The range of glyphs to print
-     * @param skip The number of glyphs to skip at the beginning of the line
      * @param start The starting position of the line
-     * @param charWidth The width of each character in pixels
      */
     template <typename GlyphIterable>
     void
     PrintLine(const GlyphIterable &glyphRange, const Point &start) const {
         constexpr auto charWidth = GlyphIterable::CharWidth;
-        auto x = start.x;
-        auto y = start.y;
-        // print glyphs
-        size_t index = 0;
+        // How many OffsetPerBG strips each glyph advances; 0 when charWidth is
+        // a multiple of TileWidth (always the same layer).
+        constexpr int layerStep = (charWidth / OffsetPerBG) & (TileBGNum - 1);
+
+        const uint8_t tileY =
+            static_cast<uint8_t>(static_cast<unsigned>(start.y) / TileHeight);
+        int16_t px = start.x;
+        auto tileX =
+            static_cast<uint8_t>(static_cast<unsigned>(px) / TileWidth);
+        int layerIdx = getLayerIndex<TileBGNum, OffsetPerBG>(px);
+
         for (const auto &glyph : glyphRange) {
-            auto glyphX = x + (index * charWidth);
-            this->PrintGlyph(glyphX, y, glyph);
-            index++;
+            layers[layerIdx].PutGlyph(tileX, tileY, glyph);
+            px += charWidth;
+            tileX = static_cast<uint8_t>(static_cast<unsigned>(px) / TileWidth);
+            if constexpr (layerStep != 0) {
+                layerIdx = (layerIdx + layerStep) & (TileBGNum - 1);
+            }
         }
     }
 
+    /**
+     * @brief Clear glyphs from @p start to the right edge of the screen.
+     *
+     * Same layer-rotation scheme as PrintLine; writes FontEmpty directly into
+     * each layer's map instead of calling PutTile per cell.
+     *
+     * @param start Leftmost pixel of the region to clear
+     * @param charWidth Glyph pitch in pixels (typically 6 or 8)
+     * @param underline If true, also clear the underline row (3 tile rows)
+     */
     void ClearLine(const Point &start, int charWidth,
                    bool underline = false) const;
 

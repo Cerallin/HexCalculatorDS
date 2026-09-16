@@ -68,9 +68,10 @@ void
 MainDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
-    auto _idx = (x / OffsetPerBG) % TileBGNum;
-    const auto &layer = layers[_idx];
-    layer.PutGlyph(x / TileWidth, y / TileHeight, glyph);
+    auto _idx = getLayerIndex<TileBGNum, OffsetPerBG>(x);
+    layers[_idx].PutGlyph(
+        static_cast<uint8_t>(static_cast<unsigned>(x) / TileWidth),
+        static_cast<uint8_t>(static_cast<unsigned>(y) / TileHeight), glyph);
 }
 
 void
@@ -78,28 +79,43 @@ MainDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
                      bool vFlip) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
-    auto _idx = (x / OffsetPerBG) % TileBGNum;
-    const auto &layer = layers[_idx];
-    layer.Put(x / TileWidth, y / TileHeight, tile, hFlip, vFlip);
+    auto _idx = getLayerIndex<TileBGNum, OffsetPerBG>(x);
+    layers[_idx].Put(
+        static_cast<uint8_t>(static_cast<unsigned>(x) / TileWidth),
+        static_cast<uint8_t>(static_cast<unsigned>(y) / TileHeight), tile,
+        hFlip, vFlip);
 }
 
 void
 MainDisplay::ClearLine(const Point &start, int charWidth,
                        bool underline) const {
-    auto x = start.x;
-    auto y = start.y;
+    assert(start.x % OffsetPerBG == 0);
+    assert(start.y % TileHeight == 0);
+    assert(charWidth > 0);
+    assert(charWidth % OffsetPerBG == 0);
 
-    assert(x % OffsetPerBG == 0);
-    assert(y % TileHeight == 0);
+    const int total = SCREEN_WIDTH / charWidth;
+    const int skip = start.x / charWidth;
+    const int clearNum = total - skip;
+    const int height = underline ? 3 : 2;
+    // Runtime equivalent of PrintLine's layerStep (charWidth is not constexpr).
+    const int layerStep = (charWidth / OffsetPerBG) & (TileBGNum - 1);
+    const int startLayer = getLayerIndex<TileBGNum, OffsetPerBG>(start.x);
+    const uint8_t startTileX =
+        static_cast<uint8_t>(static_cast<unsigned>(start.x) / TileWidth);
 
-    auto total = SCREEN_WIDTH / charWidth;
-    auto skip = start.x / charWidth;
-    auto clearNum = total - skip;
-    auto height = underline ? 3 : 2;
     for (int i = 0; i < height; i++) {
-        auto _y = y + (i * TileHeight);
+        const uint8_t tileY = static_cast<uint8_t>(
+            static_cast<unsigned>(start.y + (i * TileHeight)) / TileHeight);
+        int16_t px = start.x;
+        uint8_t tileX = startTileX;
+        int layerIdx = startLayer;
+
         for (int j = 0; j < clearNum; j++) {
-            PutTile(x + (j * charWidth), _y, FontEmpty);
+            layers[layerIdx].Put(tileX, tileY, FontEmpty);
+            px += charWidth;
+            tileX = static_cast<uint8_t>(static_cast<unsigned>(px) / TileWidth);
+            layerIdx = (layerIdx + layerStep) & (TileBGNum - 1);
         }
     }
 }
@@ -158,9 +174,10 @@ void
 SubDisplay::PrintGlyph(int16_t x, int16_t y, const Glyph &glyph) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
-    auto _idx = (x / OffsetPerBG) % TileBGNum;
-    const auto &layer = tileLayers[_idx];
-    layer.PutGlyph(x / TileWidth, y / TileHeight, glyph);
+    auto _idx = getLayerIndex<TileBGNum, OffsetPerBG>(x);
+    tileLayers[_idx].PutGlyph(
+        static_cast<uint8_t>(static_cast<unsigned>(x) / TileWidth),
+        static_cast<uint8_t>(static_cast<unsigned>(y) / TileHeight), glyph);
 }
 
 void
@@ -168,9 +185,11 @@ SubDisplay::PutTile(int16_t x, int16_t y, FontType tile, bool hFlip,
                     bool vFlip) const {
     assert(x % OffsetPerBG == 0);
     assert(y % TileHeight == 0);
-    auto _idx = (x / OffsetPerBG) % TileBGNum;
-    const auto &layer = tileLayers[_idx];
-    layer.Put(x / TileWidth, y / TileHeight, tile, hFlip, vFlip);
+    auto _idx = getLayerIndex<TileBGNum, OffsetPerBG>(x);
+    tileLayers[_idx].Put(
+        static_cast<uint8_t>(static_cast<unsigned>(x) / TileWidth),
+        static_cast<uint8_t>(static_cast<unsigned>(y) / TileHeight), tile,
+        hFlip, vFlip);
 }
 
 void
