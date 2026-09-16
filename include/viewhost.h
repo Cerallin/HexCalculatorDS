@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include "animation.h"
 #include "display.h"
 #include "view.h"
 #include "viewmodel.h"
@@ -54,10 +55,19 @@ class ViewHost : private NonCopyable {
 
     void Update(void);
 
+    bool
+    IsAnimating(void) const {
+        return animationGate.Busy();
+    }
+
   private:
+    // Displays
     MainDisplay mainDisplay;
     SubDisplay subDisplay;
 
+    // Animation gate
+    AnimationGate animationGate;
+    // Views
     ConfigView configView;
     FormulaView formulaView;
     ValueView valueView;
@@ -67,6 +77,10 @@ class ViewHost : private NonCopyable {
     TranscodeView<Binary> binView;
     IndicatorView indicatorView;
     InputViewAdapter inputViewAdapter;
+    // Animation effects
+    FormulaPageSlide formulaPageSlide;
+    // Animation manager
+    Animated<FormulaView> formulaAnim;
 
     void registerViews(ViewModel &viewModel);
 };

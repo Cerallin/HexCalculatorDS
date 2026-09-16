@@ -347,6 +347,19 @@ class MainDisplay : public Display<MainDisplay> {
     void ClearLine(const Point &start, int charWidth,
                    bool underline = false) const;
 
+    /**
+     * @brief Clear every OffsetPerBG strip in a horizontal band.
+     *
+     * Unlike ClearLine (which steps by charWidth), this hits all four tile
+     * layers so residue from sub-glyph scroll offsets cannot remain.
+     *
+     * @param start Leftmost pixel of the band
+     * @param pixelWidth Width in pixels (must be a multiple of OffsetPerBG)
+     * @param underline If true, also clear the underline row (3 tile rows)
+     */
+    void ClearLineBand(const Point &start, int pixelWidth,
+                       bool underline = false) const;
+
     static constexpr int Bpp = 4;
     static constexpr int TileWidth = 8;
     static constexpr int TileHeight = 8;

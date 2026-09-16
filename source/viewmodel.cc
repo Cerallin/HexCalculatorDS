@@ -219,18 +219,27 @@ FormulaManager::formulaInsertDigits() {
 
 bool
 FormulaManager::switchPage(Direction dir) {
+    const size_t pageSize = MaxPageGlyphs;
+    const size_t maxStart = maxWindowStart(formulaGlyphs.Size(), pageSize);
+    const size_t start = effectiveWindowStart();
+
     if (dir == DirRight) {
-        if (currentPage > 1) {
-            currentPage--;
-
-            return true;
+        if (start >= maxStart) {
+            return false;
         }
-    } else if (dir == DirLeft) {
-        if ((currentPage * MaxPageGlyphs) < formulaGlyphs.Size()) {
-            currentPage++;
+        const size_t next = start + pageSize;
+        windowStart = (next > maxStart) ? maxStart : next;
+        pinnedToEnd = (windowStart >= maxStart);
+        return true;
+    }
 
-            return true;
+    if (dir == DirLeft) {
+        if (start == 0) {
+            return false;
         }
+        windowStart = start > pageSize ? start - pageSize : 0;
+        pinnedToEnd = false;
+        return true;
     }
 
     return false;
@@ -240,7 +249,7 @@ void
 FormulaManager::resetFormulaState(void) {
     formulaState = Evaluated;
     leftBracketCount = 0;
-    currentPage = 1;
+    pinWindowToEnd();
 }
 
 EventResult
@@ -277,9 +286,9 @@ FormulaManager::HandleEvent(const Event &e) {
         if (op == OperatorType::Equal) {
             formulaState = Evaluated;
         }
-        // Always reset current page to 1 after operator is accepted since the
-        // user may want to see the result
-        currentPage = 1;
+        // Always pin to the newest glyphs after an operator so the user sees
+        // the end of the formula.
+        pinWindowToEnd();
         notifyFormulaUpdate();
     } else if (e.type == EvaluateErrorEvent) {
         // Reset formula state to allow user to input new formula

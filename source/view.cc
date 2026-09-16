@@ -381,8 +381,8 @@ FormulaView::ForceUpdate(void) {
     // Clear all glyphs
     clear();
 
-    const auto &paginator = vm.GetFormulaPaginator();
-    const auto &glyphs = paginator.Glyphs();
+    const auto page = vm.GetFormulaPage();
+    const auto &glyphs = page.Glyphs;
 
     // Draw current page of formula glyphs, aligned to the right
     auto skipGlyphs = area.w - glyphs.Size();
@@ -393,7 +393,7 @@ FormulaView::ForceUpdate(void) {
     // 2 is offset
     auto nextX = viewArea.x + 2;
     auto nextY = viewArea.y;
-    if (paginator.HasNextPage()) {
+    if (page.HasNext) {
         display.PrintGlyph(nextX, nextY, Glyph(Font6x8LArrow));
     } else {
         display.PrintGlyph(nextX, nextY, Glyph(FontEmpty));
@@ -401,7 +401,7 @@ FormulaView::ForceUpdate(void) {
     // -> indicates there are more glyphs on the right (previous page)
     auto prevX = viewArea.x + (area.w * glyphs.CharWidth);
     auto prevY = viewArea.y;
-    if (paginator.HasPreviousPage()) {
+    if (page.HasPrevious) {
         display.PrintGlyph(prevX, prevY, Glyph(Font6x8RArrow));
     } else {
         display.PrintGlyph(prevX, prevY, Glyph(FontEmpty));
@@ -410,8 +410,9 @@ FormulaView::ForceUpdate(void) {
 
 void
 FormulaView::clear(void) {
+    // Band clear: animation may have left glyphs on non-CharWidth strips.
     Point start(viewArea.x, viewArea.y);
-    display.ClearLine(start, CharWidth);
+    display.ClearLineBand(start, SCREEN_WIDTH - viewArea.x);
 }
 
 template <size_t MaxGlyphs, size_t N>

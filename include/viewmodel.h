@@ -68,44 +68,32 @@ class ValueManager {
     FormulaModel &formulaModel;
 };
 
-template <size_t MaxFormulaGlyphs, size_t MaxPageGlyphs>
-class PaginatedGlyphArray {
-  public:
-    PaginatedGlyphArray(const GlyphArray6x8<MaxFormulaGlyphs> &formulaGlyphs,
-                        int page, size_t totalSize)
-        : glyphs(formulaGlyphs,
-                 std::max(0, static_cast<ssize_t>(formulaGlyphs.Size()) -
-                                 static_cast<ssize_t>(page * MaxPageGlyphs)),
-                 MaxPageGlyphs),
-          page(page), totalSize(totalSize) {}
-
-    const auto &
-    Glyphs() const {
-        return glyphs;
-    }
-
-    bool
-    HasNextPage() const {
-        return (page * MaxPageGlyphs) < totalSize;
-    }
-
-    bool
-    HasPreviousPage() const {
-        return page > 1;
-    }
-
-  private:
-    GlyphArray6x8<MaxPageGlyphs> glyphs;
-    int page;
-    size_t totalSize;
+/**
+ * @brief Sliding window over formula glyphs (frontend-style page metadata).
+ *
+ * The window moves by pageSize each step, clamped to [0, max(0,
+ * total-pageSize)]. Default view is pinned to the end (newest glyphs). Left
+ * goes toward the start; right goes toward the end — so 12345 / pageSize 2
+ * yields: left:  [45] -> [23] -> [12] right: [12] -> [34] -> [45]
+ */
+template <size_t MaxPageGlyphs>
+struct FormulaPageInfo {
+    GlyphArray6x8<MaxPageGlyphs> Glyphs;
+    int Page;
+    int TotalPages;
+    size_t PageSize;
+    size_t Total;
+    size_t StartIndex;
+    bool HasNext;
+    bool HasPrevious;
 };
 
 class FormulaManager {
   public:
     FormulaManager(EventBus &eventBus, ValueManager &vm)
         : eventBus(eventBus), vm(vm), formulaGlyphs(), formulaState(Evaluated),
-          currentNumber(NumberZero), leftBracketCount(0), currentPage(1),
-          collectingNumber(false) {}
+          currentNumber(NumberZero), leftBracketCount(0), windowStart(0),
+          pinnedToEnd(true), collectingNumber(false) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -124,16 +112,46 @@ class FormulaManager {
     static constexpr size_t MaxPageGlyphs =
         (SCREEN_WIDTH / GlyphArray6x8<0>::CharWidth) - 2 * padding;
 
-    /**
-     * @brief Get the glyphs to be displayed for the current page of the formula
-     *
-     * @return const GlyphArray6x8<MaxPageGlyphs> The glyphs to be displayed for
-     * the current page of the formula
-     */
-    const auto
-    GetFormulaPaginator() const {
-        return PaginatedGlyphArray<MaxFormulaGlyphs, MaxPageGlyphs>(
-            formulaGlyphs, currentPage, formulaGlyphs.Size());
+    static constexpr size_t MaxTransitionGlyphs = 2 * MaxPageGlyphs;
+
+    FormulaPageInfo<MaxPageGlyphs>
+    GetFormulaPageAt(size_t startIndex) const {
+        const size_t total = formulaGlyphs.Size();
+        const size_t pageSize = MaxPageGlyphs;
+        const size_t maxStart = maxWindowStart(total, pageSize);
+        const size_t start = startIndex > maxStart ? maxStart : startIndex;
+        const int totalPages =
+            total == 0 ? 1
+                       : static_cast<int>((total + pageSize - 1) / pageSize);
+        const int page = (start >= maxStart)
+                             ? totalPages
+                             : static_cast<int>(start / pageSize) + 1;
+
+        return FormulaPageInfo<MaxPageGlyphs>{
+            GlyphArray6x8<MaxPageGlyphs>(formulaGlyphs, start, pageSize),
+            page,
+            totalPages,
+            pageSize,
+            total,
+            start,
+            start > 0,
+            start < maxStart,
+        };
+    }
+
+    FormulaPageInfo<MaxPageGlyphs>
+    GetFormulaPage(void) const {
+        return GetFormulaPageAt(effectiveWindowStart());
+    }
+
+    GlyphArray6x8<MaxTransitionGlyphs>
+    GetFormulaSlice(size_t start, size_t count) const {
+        return GlyphArray6x8<MaxTransitionGlyphs>(formulaGlyphs, start, count);
+    }
+
+    size_t
+    GetWindowStart(void) const {
+        return effectiveWindowStart();
     }
 
     size_t
@@ -171,9 +189,31 @@ class FormulaManager {
      */
     int leftBracketCount;
 
-    int currentPage;
+    size_t windowStart;
+    bool pinnedToEnd;
 
     bool collectingNumber;
+
+    static size_t
+    maxWindowStart(size_t total, size_t pageSize) {
+        return total > pageSize ? total - pageSize : 0;
+    }
+
+    size_t
+    effectiveWindowStart(void) const {
+        const size_t maxStart =
+            maxWindowStart(formulaGlyphs.Size(), MaxPageGlyphs);
+        if (pinnedToEnd) {
+            return maxStart;
+        }
+        return windowStart > maxStart ? maxStart : windowStart;
+    }
+
+    void
+    pinWindowToEnd(void) {
+        pinnedToEnd = true;
+        windowStart = maxWindowStart(formulaGlyphs.Size(), MaxPageGlyphs);
+    }
 
     void notifyFormulaUpdate(void);
 
@@ -181,13 +221,11 @@ class FormulaManager {
     void formulaInsertDigits();
 
     /**
-     * @brief Switch to the next or previous page of the formula display, if
-     * applicable.
+     * @brief Slide the formula window left (older) or right (newer).
      *
-     * @param dir The direction to switch the page (DirLeft for next page,
-     * DirRight for previous page)
-     * @return true if the page was switched, false if there is no next/previous
-     * page to switch to
+     * @param dir DirLeft: start -= pageSize (floor 0); DirRight: start +=
+     * pageSize (ceil maxStart)
+     * @return true if the window moved
      */
     bool switchPage(Direction dir);
 
@@ -270,9 +308,24 @@ class ViewModel : private NonCopyable {
         return valueManager.GetValueDigitsPerByte<N>(i, base);
     }
 
-    const auto
-    GetFormulaPaginator() const {
-        return formulaManager.GetFormulaPaginator();
+    FormulaPageInfo<FormulaManager::MaxPageGlyphs>
+    GetFormulaPageAt(size_t startIndex) const {
+        return formulaManager.GetFormulaPageAt(startIndex);
+    }
+
+    FormulaPageInfo<FormulaManager::MaxPageGlyphs>
+    GetFormulaPage(void) const {
+        return formulaManager.GetFormulaPage();
+    }
+
+    GlyphArray6x8<FormulaManager::MaxTransitionGlyphs>
+    GetFormulaSlice(size_t start, size_t count) const {
+        return formulaManager.GetFormulaSlice(start, count);
+    }
+
+    size_t
+    GetWindowStart(void) const {
+        return formulaManager.GetWindowStart();
     }
 
     auto

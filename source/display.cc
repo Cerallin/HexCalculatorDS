@@ -120,6 +120,36 @@ MainDisplay::ClearLine(const Point &start, int charWidth,
     }
 }
 
+void
+MainDisplay::ClearLineBand(const Point &start, int pixelWidth,
+                           bool underline) const {
+    assert(start.x % OffsetPerBG == 0);
+    assert(start.y % TileHeight == 0);
+    assert(pixelWidth > 0);
+    assert(pixelWidth % OffsetPerBG == 0);
+
+    const int height = underline ? 3 : 2;
+    const int clearNum = pixelWidth / OffsetPerBG;
+    const int startLayer = getLayerIndex<TileBGNum, OffsetPerBG>(start.x);
+    const uint8_t startTileX =
+        static_cast<uint8_t>(static_cast<unsigned>(start.x) / TileWidth);
+
+    for (int i = 0; i < height; i++) {
+        const uint8_t tileY = static_cast<uint8_t>(
+            static_cast<unsigned>(start.y + (i * TileHeight)) / TileHeight);
+        int16_t px = start.x;
+        uint8_t tileX = startTileX;
+        int layerIdx = startLayer;
+
+        for (int j = 0; j < clearNum; j++) {
+            layers[layerIdx].Put(tileX, tileY, FontEmpty);
+            px += OffsetPerBG;
+            tileX = static_cast<uint8_t>(static_cast<unsigned>(px) / TileWidth);
+            layerIdx = (layerIdx + 1) & (TileBGNum - 1);
+        }
+    }
+}
+
 SubDisplay::SubDisplay(void)
     : Display(), bmpLayer(0, 0),
       tileLayers{

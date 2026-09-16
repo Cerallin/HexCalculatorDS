@@ -80,6 +80,11 @@ class MainView : public BasicView<Derived, MainDisplay> {
 
     static constexpr auto viewAlign = Align;
 
+    const Area &
+    GetArea(void) const {
+        return viewArea;
+    }
+
     template <int W, int H, size_t N>
     void
     PrintFormattedGlyphs(NumberBase base, DigitArray<N> digits,

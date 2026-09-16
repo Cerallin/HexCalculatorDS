@@ -38,7 +38,9 @@ main(void) {
     while (true) {
         swiWaitForVBlank();
 
-        inputHandler.Update();
+        if (!viewHost.IsAnimating()) {
+            inputHandler.Update();
+        }
         viewModel.DispatchEvents();
         viewHost.Update();
     }

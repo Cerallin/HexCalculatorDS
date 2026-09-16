@@ -9,12 +9,28 @@
 using namespace HexCalc;
 
 ViewHost::ViewHost(ViewModel &viewModel)
-    : mainDisplay(), subDisplay(), configView(mainDisplay, viewModel),
-      formulaView(mainDisplay, viewModel), valueView(mainDisplay, viewModel),
-      hexView(mainDisplay, viewModel), decView(mainDisplay, viewModel),
-      octView(mainDisplay, viewModel), binView(mainDisplay, viewModel),
-      indicatorView(mainDisplay, viewModel),
-      inputViewAdapter(subDisplay, viewModel) {
+    : // Displays
+      mainDisplay(), subDisplay(),
+
+      // Animation gate
+      animationGate(),
+
+      // Views
+      configView(mainDisplay, viewModel),      //
+      formulaView(mainDisplay, viewModel),     //
+      valueView(mainDisplay, viewModel),       //
+      hexView(mainDisplay, viewModel),         //
+      decView(mainDisplay, viewModel),         //
+      octView(mainDisplay, viewModel),         //
+      binView(mainDisplay, viewModel),         //
+      indicatorView(mainDisplay, viewModel),   //
+      inputViewAdapter(subDisplay, viewModel), //
+      // Animation effects
+      formulaPageSlide(formulaView),
+      // Animation manager
+      formulaAnim(formulaView, animationGate) //
+{
+    formulaAnim.Add(formulaPageSlide);
     registerViews(viewModel);
 }
 
@@ -23,7 +39,6 @@ ViewHost::registerViews(ViewModel &viewModel) {
     auto &bus = viewModel.Bus();
 
     bus.Subscribe(configView);
-    bus.Subscribe(formulaView);
     bus.Subscribe(valueView);
     bus.Subscribe(hexView);
     bus.Subscribe(decView);
@@ -31,13 +46,16 @@ ViewHost::registerViews(ViewModel &viewModel) {
     bus.Subscribe(binView);
     bus.Subscribe(indicatorView);
     bus.Subscribe(inputViewAdapter);
+
+    bus.Subscribe(formulaAnim);
 }
 
 void
 ViewHost::Update(void) {
+    animationGate.Update();
+
     // render dirty views instead of drawing placeholder glyphs
     configView.Update();
-    formulaView.Update();
     valueView.Update();
     hexView.Update();
     decView.Update();
@@ -45,6 +63,8 @@ ViewHost::Update(void) {
     binView.Update();
     indicatorView.Update();
     inputViewAdapter.Update();
+
+    formulaAnim.Update();
 
     // Must be called once per frame --said libnds
     bgUpdate();
