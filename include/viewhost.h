@@ -8,6 +8,7 @@
 
 #include "animation.h"
 #include "display.h"
+#include "formulapageslide.h"
 #include "view.h"
 #include "viewmodel.h"
 
