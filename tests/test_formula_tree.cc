@@ -377,6 +377,59 @@ TEST(FormulaTree, TestEvaluatePartial2) {
     CHECK_EQUAL(6, formula->Result());
 }
 
+TEST(FormulaTree, TestSignedQWordMinDivideByMinusOne) {
+    // INT64_MIN / -1 must not trap; two's-complement wrap keeps INT64_MIN.
+    configNumber(Decimal, QWord, Signed);
+
+    CHECK(formula->Input(HexCalc::FormulaData(0x8000000000000000ull)));
+    CHECK(formula->Input(HexCalc::FormulaData(Divide)));
+    CHECK(formula->Input(HexCalc::FormulaData(0xFFFFFFFFFFFFFFFFull)));
+
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
+    CHECK_EQUAL(0x8000000000000000ull, formula->Result());
+}
+
+TEST(FormulaTree, TestSignedQWordMinModuloMinusOne) {
+    configNumber(Decimal, QWord, Signed);
+
+    CHECK(formula->Input(HexCalc::FormulaData(0x8000000000000000ull)));
+    CHECK(formula->Input(HexCalc::FormulaData(Modulo)));
+    CHECK(formula->Input(HexCalc::FormulaData(0xFFFFFFFFFFFFFFFFull)));
+
+    CHECK_EQUAL(EvalSuccess, formula->Evaluate());
+    CHECK_EQUAL(0ull, formula->Result());
+}
+
+TEST_GROUP(NumberShift){void setup(){configNumber(Hexadecimal, QWord, Signed);
+}
+void
+teardown() {}
+}
+;
+
+TEST(NumberShift, ArithmeticRightShiftPreservesSignBit) {
+    auto result = HexCalc::Operator::ShiftRight(0x8000000000000000ull, QWord,
+                                                ArithmeticMode);
+    CHECK_EQUAL(0xC000000000000000ull, result);
+}
+
+TEST(NumberShift, LogicalRightShiftClearsSignBit) {
+    auto result = HexCalc::Operator::ShiftRight(0x8000000000000000ull, QWord,
+                                                LogicalMode);
+    CHECK_EQUAL(0x4000000000000000ull, result);
+}
+
+TEST(NumberShift, CircularLeftShiftWrapsMsb) {
+    auto result = HexCalc::Operator::ShiftLeft(0x8000000000000000ull, QWord,
+                                               CircularMode);
+    CHECK_EQUAL(0x1ull, result);
+}
+
+TEST(NumberShift, CircularRightShiftWrapsLsbIntoMsb) {
+    auto result = HexCalc::Operator::ShiftRight(0x1ull, QWord, CircularMode);
+    CHECK_EQUAL(0x8000000000000000ull, result);
+}
+
 int
 main(int ac, char **av) {
     return CommandLineTestRunner::RunAllTests(ac, av);

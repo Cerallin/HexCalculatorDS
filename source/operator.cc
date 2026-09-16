@@ -26,12 +26,30 @@ _signExtend(uint64_t v, NumberWidth w) {
     v &= mask;
 
     if constexpr (std::is_signed_v<T>) {
-        uint64_t signBit = (mask + 1) >> 1;
+        // Do not use (mask + 1) >> 1: for QWord, mask + 1 overflows to 0.
+        uint64_t signBit = uint64_t(1) << (static_cast<unsigned>(w) - 1);
         if (v & signBit) {
             v |= ~mask;
         }
     }
     return static_cast<T>(v);
+}
+
+/**
+ * @brief True when signed a / b or a % b would overflow (INT_MIN / -1).
+ */
+template <typename T>
+static constexpr bool
+_signedDivOverflow(T a, T b) {
+    if constexpr (std::is_signed_v<T>) {
+        using U = std::make_unsigned_t<T>;
+        constexpr U signBit = U(1) << (sizeof(T) * 8 - 1);
+        return b == T(-1) && static_cast<U>(a) == signBit;
+    } else {
+        (void)a;
+        (void)b;
+        return false;
+    }
 }
 
 template <typename T>
@@ -45,9 +63,24 @@ _doOp(OperatorType op, T a, T b) {
     case OperatorType::Multiply:
         return static_cast<uint64_t>(a * b);
     case OperatorType::Divide:
-        return static_cast<uint64_t>(b == 0 ? 0 : (a / b));
+        if (b == 0) {
+            return 0;
+        }
+        // INT_MIN / -1 is undefined for signed types; keep the dividend
+        // (two's-complement wrap of the mathematical result).
+        if (_signedDivOverflow(a, b)) {
+            return static_cast<uint64_t>(a);
+        }
+        return static_cast<uint64_t>(a / b);
     case OperatorType::Modulo:
-        return static_cast<uint64_t>(b == 0 ? 0 : (a % b));
+        if (b == 0) {
+            return 0;
+        }
+        // INT_MIN % -1 is undefined; mathematically the remainder is 0.
+        if (_signedDivOverflow(a, b)) {
+            return 0;
+        }
+        return static_cast<uint64_t>(a % b);
     case OperatorType::BitwiseAnd:
         return static_cast<uint64_t>(a & b);
     case OperatorType::BitwiseOr:
