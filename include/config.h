@@ -14,8 +14,8 @@ namespace HexCalc {
 class ConfigModel {
   public:
     ConfigModel(void)
-        : base(NumberBase::Decimal), width(NumberWidth::QWord), sign(Unsigned) {
-    }
+        : base(NumberBase::Decimal), width(NumberWidth::QWord), sign(Unsigned),
+          shiftMode(ArithmeticMode) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -34,10 +34,16 @@ class ConfigModel {
         return sign;
     }
 
+    NumberShiftMode
+    ShiftMode(void) const {
+        return shiftMode;
+    }
+
   private:
     NumberBase base;
     NumberWidth width;
     NumberSign sign;
+    NumberShiftMode shiftMode;
 };
 
 extern ConfigModel config;

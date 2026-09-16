@@ -29,6 +29,8 @@ class ValueManager {
 
     NumberBase GetNumberBase(void) const;
 
+    NumberShiftMode GetShiftMode(void) const;
+
     NumberDataType
     GetRawValue(void) const {
         return formulaModel.CurrentNumber();
@@ -244,6 +246,11 @@ class ViewModel : private NonCopyable {
     NumberBase
     GetNumberBase(void) const {
         return valueManager.GetNumberBase();
+    }
+
+    NumberShiftMode
+    GetShiftMode(void) const {
+        return valueManager.GetShiftMode();
     }
 
     NumberDataType

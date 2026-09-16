@@ -76,12 +76,15 @@ FormulaModel::HandleEvent(const Event &e) {
             valueChanged = true;
         }
     } else if (e.type == EventType::NumberShiftEvent) {
-        // TODO circular/logical/arithmetic
+        NumberShiftMode shiftMode = config.ShiftMode();
+        NumberWidth width = config.Width();
         OperatorType op = static_cast<OperatorType>(e.data);
         if (op == LeftShift) {
-            currentNumber <<= 1;
+            currentNumber =
+                Operator::ShiftLeft(currentNumber, width, shiftMode);
         } else if (op == RightShift) {
-            currentNumber >>= 1;
+            currentNumber =
+                Operator::ShiftRight(currentNumber, width, shiftMode);
         } else {
             // Should never reach here
         }
@@ -275,14 +278,10 @@ FormulaModel::handleInput(const Event &e) {
         // check overflow
         auto base = config.Base();
         auto width = config.Width();
-        auto sign = config.Sign();
 
         auto digit = eventData.data.digit;
 
-        auto maxValue = NumberMax(width, sign);
-        bool willOverflow = (currentNumber > (maxValue - digit) / base);
-
-        if (willOverflow) {
+        if (WouldOverflowDigit(currentNumber, digit, base, width)) {
             // reject
         } else {
             // join the new digit to the current number

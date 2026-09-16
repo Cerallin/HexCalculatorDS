@@ -678,7 +678,7 @@ ShiftModeManager::UpdateTiles(void) {
 
 EditorView::EditorView(SubDisplay &display, ViewModel &vm)
     : SubView(display), vm(vm), buttonHandler(vm.Cmds()),
-      shiftModeManager(display), digitPad(display, vm) {
+      shiftModeManager(display, vm), digitPad(display, vm) {
     // buttons
     HEXCALC_GCC_UNUSED auto buttonBitwiseNot = buttonHandler.RegisterButton(
         Area(AREA_BIN_0_X, AREA_BIN_0_Y, AREA_BIN_0_W, AREA_BIN_0_H),
@@ -770,25 +770,6 @@ EditorView::HandleEvent(const Event &e) {
         debugf("EditorView focused bit %d\n", e.data);
         return Consumed;
     } else if (e.type == EventType::SwitchShiftModeEvent) {
-        using ShiftMode = ShiftModeManager::ShiftMode;
-
-        auto mode = shiftModeManager.GetShiftMode();
-
-        Direction dir = static_cast<Direction>(e.data);
-        if (dir == DirLeft) {
-            mode = static_cast<ShiftMode>(
-                (mode - 1 + ShiftMode::MAX_SHIFT_MODE_COUNT) %
-                ShiftMode::MAX_SHIFT_MODE_COUNT);
-        } else if (dir == DirRight) {
-            mode = static_cast<ShiftMode>((mode + 1) %
-                                          ShiftMode::MAX_SHIFT_MODE_COUNT);
-        } else {
-            // Should never reach here
-            return Failed;
-        }
-
-        shiftModeManager.SetShiftMode(mode);
-
         BasicView::markDirty();
 
         return Consumed;

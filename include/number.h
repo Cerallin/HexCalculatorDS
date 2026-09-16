@@ -30,6 +30,13 @@ enum NumberSign : uint8_t {
     Unsigned,
 };
 
+enum NumberShiftMode : uint8_t {
+    ArithmeticMode,
+    CircularMode,
+    LogicalMode,
+    MAX_SHIFT_MODE_COUNT,
+};
+
 using NumberDataType = uint64_t;
 static constexpr NumberDataType NumberZero = NumberDataType(0);
 
@@ -55,20 +62,14 @@ WidthMask(NumberWidth w) {
     }
 }
 
-constexpr NumberDataType
-NumberMax(NumberWidth w, NumberSign s) {
-    switch (w) {
-    case Byte:
-        return (s == Signed) ? 0x7F : 0xFF;
-    case Word:
-        return (s == Signed) ? 0x7FFF : 0xFFFF;
-    case DWord:
-        return (s == Signed) ? 0x7FFFFFFF : 0xFFFFFFFF;
-    case QWord:
-        return (s == Signed) ? 0x7FFFFFFFFFFFFFFF : 0xFFFFFFFFFFFFFFFF;
-    default:
-        return 0xFFFFFFFFFFFFFFFFull;
-    }
+/**
+ * @brief Whether appending @p digit in @p base would exceed the current width.
+ */
+constexpr bool
+WouldOverflowDigit(NumberDataType current, NumberDataType digit,
+                   NumberBase base, NumberWidth width) {
+    const NumberDataType maxValue = WidthMask(width);
+    return current > (maxValue - digit) / static_cast<NumberDataType>(base);
 }
 
 enum Digit : int8_t {
@@ -146,7 +147,8 @@ class Number {
     template <size_t N>
     auto
     Transcode(NumberBase base) const {
-        if (value == 0) {
+        NumberDataType v = value & WidthMask(width);
+        if (v == 0) {
             DigitArray<N> digits;
             digits[0] = Digit0;
             digits.size = 1;
@@ -155,45 +157,25 @@ class Number {
 
         size_t count = 0;
         DigitArray<N> digits;
-        if ((sign == Signed) && (base == Decimal)) { // signed
+        if ((sign == Signed) && (base == Decimal)) {
+            // Use unsigned two's-complement abs so INT*_MIN (e.g.
+            // 0x8000000000000000) does not invoke signed negation UB.
             auto widthMask = WidthMask(width);
-            int64_t v = static_cast<int64_t>(value & widthMask);
-            // check the sign bit
-            bool negative;
-            if (width < 64) {
-                negative = ((v & (uint64_t(1) << (width - 1))) != 0);
-                if (negative) {
-                    v = (v ^ widthMask) + 1;
-                    v &= widthMask;
-                }
-            } else {
-                negative = (v < 0);
-                if (negative) {
-                    v = -v;
-                }
+            const bool negative = (v & (NumberDataType(1) << (width - 1))) != 0;
+            if (negative) {
+                v = ((v ^ widthMask) + 1) & widthMask;
             }
             digits.negative = negative;
-            for (size_t i = 0; i < N; ++i) {
-                if (v == 0) {
-                    break;
-                }
-                digits[i] = static_cast<Digit>(v % base);
-                v /= base;
-                count++;
-            }
-            digits.size = count;
-        } else { // unsigned
-            NumberDataType v = value;
-            for (size_t i = 0; i < N; ++i) {
-                if (v == 0) {
-                    break;
-                }
-                digits[i] = static_cast<Digit>(v % base);
-                v /= base;
-                count++;
-            }
-            digits.size = count;
         }
+        for (size_t i = 0; i < N; ++i) {
+            if (v == 0) {
+                break;
+            }
+            digits[i] = static_cast<Digit>(v % base);
+            v /= base;
+            count++;
+        }
+        digits.size = count;
         return digits;
     }
 

@@ -48,6 +48,11 @@ ValueManager::GetNumberBase(void) const {
     return config.Base();
 }
 
+NumberShiftMode
+ValueManager::GetShiftMode(void) const {
+    return config.ShiftMode();
+}
+
 void
 FormulaManager::notifyFormulaUpdate(void) {
     eventBus.Post(Event{

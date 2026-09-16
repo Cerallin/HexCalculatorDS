@@ -382,25 +382,8 @@ class InputView : public SubView<InputView> {
 
 class ShiftModeManager {
   public:
-    ShiftModeManager(SubDisplay &display)
-        : display(display), mode(ArithmeticMode) {}
-
-    enum ShiftMode {
-        ArithmeticMode,
-        CircularMode,
-        LogicalMode,
-        MAX_SHIFT_MODE_COUNT,
-    };
-
-    ShiftMode
-    GetShiftMode(void) const {
-        return mode;
-    }
-
-    void
-    SetShiftMode(ShiftMode newMode) {
-        mode = newMode;
-    }
+    ShiftModeManager(SubDisplay &display, ViewModel &vm)
+        : display(display), vm(vm) {}
 
     void UpdateTiles(void);
 
@@ -424,10 +407,12 @@ class ShiftModeManager {
     };
 
     SubDisplay &display;
-    ShiftMode mode;
+    ViewModel &vm;
 
-    constexpr auto &
+    const auto &
     getTilemap(void) const {
+        auto mode = vm.GetShiftMode();
+
         switch (mode) {
         case ArithmeticMode:
             return arithmeticTilemap;

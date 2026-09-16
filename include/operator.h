@@ -133,6 +133,25 @@ NumberDataType Divide(NumberDataType a, NumberDataType b);
 NumberDataType Plus(NumberDataType a, NumberDataType b);
 NumberDataType Minus(NumberDataType a, NumberDataType b);
 
+/**
+ * @brief Shift a number left by one bit under the given width and shift mode.
+ *
+ * Logical / arithmetic: vacated bits are filled with 0.
+ * Circular: the MSB wraps into the LSB.
+ */
+NumberDataType ShiftLeft(NumberDataType value, NumberWidth width,
+                         NumberShiftMode mode);
+
+/**
+ * @brief Shift a number right by one bit under the given width and shift mode.
+ *
+ * Logical: vacated bits are filled with 0.
+ * Arithmetic: vacated bits are filled with the sign bit (MSB).
+ * Circular: the LSB wraps into the MSB.
+ */
+NumberDataType ShiftRight(NumberDataType value, NumberWidth width,
+                          NumberShiftMode mode);
+
 }; // namespace Operator
 
 }; // namespace HexCalc

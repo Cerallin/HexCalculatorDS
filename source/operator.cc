@@ -192,4 +192,42 @@ Minus(NumberDataType a, NumberDataType b) {
     return _operateCalc(OperatorType::Minus, a, b);
 }
 
+NumberDataType
+ShiftLeft(NumberDataType value, NumberWidth width, NumberShiftMode mode) {
+    const unsigned bits = static_cast<unsigned>(width);
+    const NumberDataType mask = WidthMask(width);
+    value &= mask;
+
+    switch (mode) {
+    case CircularMode:
+        // Rotate left: MSB moves into LSB.
+        return ((value << 1) | (value >> (bits - 1))) & mask;
+    case LogicalMode:
+    case ArithmeticMode:
+    default:
+        // Logical and arithmetic left shifts both fill with zeros.
+        return (value << 1) & mask;
+    }
+}
+
+NumberDataType
+ShiftRight(NumberDataType value, NumberWidth width, NumberShiftMode mode) {
+    const unsigned bits = static_cast<unsigned>(width);
+    const NumberDataType mask = WidthMask(width);
+    const NumberDataType signBit = NumberDataType(1) << (bits - 1);
+    value &= mask;
+
+    switch (mode) {
+    case CircularMode:
+        // Rotate right: LSB moves into MSB.
+        return ((value >> 1) | ((value & 1) << (bits - 1))) & mask;
+    case ArithmeticMode:
+        // Preserve sign: vacated MSB is filled with the old sign bit.
+        return ((value >> 1) | (value & signBit)) & mask;
+    case LogicalMode:
+    default:
+        return (value >> 1) & mask;
+    }
+}
+
 }; // namespace HexCalc::Operator
