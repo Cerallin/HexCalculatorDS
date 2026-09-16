@@ -6,8 +6,16 @@
 
 FROM devkitpro/devkitarm:20241104
 
-# update apt repositories and upgrade packages
-RUN apt-get update && apt-get upgrade -y
+# Bullseye LTS ended 2026-08-31; live debian-security indexes 404.
+# Use the snapshot mirrors already present in the base image.
+RUN sed -i \
+      -e 's|^deb http://deb.debian.org|# deb http://deb.debian.org|' \
+      -e 's|^deb http://security.debian.org|# deb http://security.debian.org|' \
+      -e 's|^# deb http://snapshot.debian.org|deb http://snapshot.debian.org|' \
+      /etc/apt/sources.list \
+ && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until \
+ && apt-get update
+
 RUN apt-get install -y --no-install-recommends apt-utils
 RUN apt-get install -y --no-install-recommends sudo ssh ca-certificates curl wget bzip2 gnupg
 RUN apt-get install -y --no-install-recommends zip unzip patch vim
@@ -17,7 +25,7 @@ RUN apt-get install -y --no-install-recommends gdb cppcheck make
 RUN apt-get install -y --no-install-recommends cmake automake autoconf autoconf-archive autoconf-doc libtool
 RUN apt-get install -y --no-install-recommends libfreeimage3 libfreeimage-dev
 RUN apt-get install -y --no-install-recommends imagemagick
-RUN apt-get install -y --no-install-recommends clang-format
+RUN apt-get install -y --no-install-recommends clang-format clangd
 RUN apt-get install -y --no-install-recommends python3-opencv python3-numpy
 
 # locale

@@ -6,8 +6,7 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-vscode.cpptools",
-                "ms-vscode.cpptools-extension-pack",
+                "llvm-vs-code-extensions.vscode-clangd",
                 "ms-vscode.hexeditor",
                 "streetsidesoftware.code-spell-checker",
                 "yzhang.markdown-all-in-one",
