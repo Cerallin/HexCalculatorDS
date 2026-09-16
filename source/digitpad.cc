@@ -59,11 +59,23 @@ DigitPad::DigitPad(SubDisplay &display, ViewModel &viewModel)
     : display(display), vm(viewModel), focus(-1, -1), digitFocus(display),
       handler(viewModel.Cmds()) {}
 
+bool
+DigitPad::isBitActive(int bitIndex) const {
+    return bitIndex < static_cast<int>(vm.GetNumberWidth());
+}
+
+Point
+DigitPad::bitToPoint(int bitIndex) const {
+    int index = 64 - 1 - bitIndex;
+    return Point(index % colNum, index / colNum);
+}
+
 void
 DigitPad::DrawDigits(void) {
     constexpr size_t glyphOffset = sizeof(subFontMap) / sizeof(subFontMap[0]);
     constexpr Glyph glyph1(0 + glyphOffset, 1 + glyphOffset);
     constexpr Glyph glyph0(3 + glyphOffset, 2 + glyphOffset);
+    constexpr Glyph glyph0Disabled(48 + glyphOffset, 49 + glyphOffset);
 
     // Walk bits MSB-first in row-major order: (i,j) -> bit 63-(j*colNum+i)
     auto value = vm.GetRawValue();
@@ -71,12 +83,17 @@ DigitPad::DrawDigits(void) {
         size_t y = offsetY + (j * lineHeight);
         for (size_t i = 0; i < colNum; i++) {
             size_t x = offsetX + (i * gapX) + (i / columnCount) * columnGap;
+            int bitIndex = 64 - 1 - static_cast<int>((j * colNum) + i);
 
-            bool bitSet = (value & (NumberDataType(1) << 63)) != 0;
-            if (bitSet) {
-                display.PrintGlyph(x, y, glyph1);
+            if (!isBitActive(bitIndex)) {
+                display.PrintGlyph(x, y, glyph0Disabled);
             } else {
-                display.PrintGlyph(x, y, glyph0);
+                bool bitSet = (value & (NumberDataType(1) << 63)) != 0;
+                if (bitSet) {
+                    display.PrintGlyph(x, y, glyph1);
+                } else {
+                    display.PrintGlyph(x, y, glyph0);
+                }
             }
             value <<= 1;
         }
@@ -84,8 +101,32 @@ DigitPad::DrawDigits(void) {
 }
 
 void
+DigitPad::updateButtons(void) {
+    for (size_t i = 0; i < handler.Size(); i++) {
+        auto &button = handler.GetButton(i);
+        if (isBitActive(button.Index())) {
+            button.Enable();
+        } else {
+            button.Disable();
+        }
+    }
+}
+
+void
+DigitPad::HandleWidthChange(void) {
+    updateButtons();
+
+    // Drop focus if the highlighted bit is no longer in range
+    if ((focus.x >= 0) && (focus.y >= 0) && !isBitActive(GetFocus())) {
+        focus = Point(-1, -1);
+        digitFocus.Hide();
+    }
+}
+
+void
 DigitPad::Setup(void) {
     DrawDigits();
+    updateButtons();
 
     // Reset focus
     focus = Point(-1, -1);
@@ -117,28 +158,73 @@ DigitPad::RegisterDigitButtons(void) {
     }
 }
 
+int
+DigitPad::nextBitIndex(int bitIndex, Direction dir, int width) const {
+    // Navigate in active bit-index space. Left/right must not wrap across the
+    // full 16-wide row (most cells are disabled when width < 64).
+    switch (dir) {
+    case Direction::DirLeft:
+        // Visually left is the next higher bit
+        return (bitIndex + 1) % width;
+    case Direction::DirRight:
+        return (bitIndex - 1 + width) % width;
+    case Direction::DirUp: {
+        const int next = bitIndex + static_cast<int>(colNum);
+        if (next < width) {
+            return next;
+        }
+        // Same column: wrap to the lowest active bit
+        const int col = bitToPoint(bitIndex).x;
+        for (int b = 0; b < width; ++b) {
+            if (bitToPoint(b).x == col) {
+                return b;
+            }
+        }
+        return bitIndex;
+    }
+    case Direction::DirDown: {
+        const int next = bitIndex - static_cast<int>(colNum);
+        if (next >= 0) {
+            return next;
+        }
+        // Same column: wrap to the highest active bit
+        const int col = bitToPoint(bitIndex).x;
+        for (int b = width - 1; b >= 0; --b) {
+            if (bitToPoint(b).x == col) {
+                return b;
+            }
+        }
+        return bitIndex;
+    }
+    default:
+        return bitIndex;
+    }
+}
+
 void
 DigitPad::MoveFocus(Direction dir) {
+    int width = static_cast<int>(vm.GetNumberWidth());
+
     if (focus.x < 0 && focus.y < 0) {
-        // If no button is focused, set focus to the first button
-        focus = Point(0, 0);
-        // Show focus sprites
-        digitFocus.Show();
+        // Prefer the MSB among bits that are active for the current width
+        focus = bitToPoint(width - 1);
     } else {
-        focus = focus.NextPosition<colNum, rowNum>(dir);
+        focus = bitToPoint(nextBitIndex(GetFocus(), dir, width));
     }
 
     debugf("Focus: (%d, %d)\n", focus.x, focus.y);
 
     digitFocus.SetPosition(focus);
+    digitFocus.Show();
 }
 
 void
 DigitPad::SetFocus(int index) {
-    int bitIndex = 64 - 1 - index;
-    int x = bitIndex % colNum;
-    int y = bitIndex / colNum;
-    focus = Point(x, y);
+    if (!isBitActive(index)) {
+        return;
+    }
+
+    focus = bitToPoint(index);
     digitFocus.SetPosition(focus);
     // Show focus sprites
     digitFocus.Show();
@@ -148,6 +234,7 @@ void
 DigitPad::HandleButtons(const Point &touchPoint) {
     bool handled = handler.Handle(touchPoint);
     if (!handled) {
+        focus = Point(-1, -1);
         digitFocus.Hide();
     }
 }

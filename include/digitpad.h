@@ -45,6 +45,12 @@ class DigitPad : public NonCopyable {
     void Teardown(void);
     void RegisterDigitButtons(void);
 
+    /**
+     * @brief Enable/disable digit buttons for the current NumberWidth and clear
+     * focus if it sits on a disabled bit.
+     */
+    void HandleWidthChange(void);
+
     void MoveFocus(Direction dir);
 
     int
@@ -81,6 +87,11 @@ class DigitPad : public NonCopyable {
     DigitFocus digitFocus;
 
     TouchScreenHandler<colNum, rowNum> handler;
+
+    bool isBitActive(int bitIndex) const;
+    Point bitToPoint(int bitIndex) const;
+    int nextBitIndex(int bitIndex, Direction dir, int width) const;
+    void updateButtons(void);
 };
 
 } // namespace HexCalc

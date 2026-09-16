@@ -761,6 +761,11 @@ EditorView::HandleEvent(const Event &e) {
         BasicView::markDirty();
         debugf("EditorView value changed\n");
         return Consumed;
+    } else if (e.type == EventType::UpdateWidthEvent) {
+        digitPad.HandleWidthChange();
+        BasicView::markDirty();
+        debugf("EditorView width updated\n");
+        return Consumed;
     } else if (e.type == EventType::FlipBitEvent) {
         // Change the focused bit
         digitPad.SetFocus(e.data);
