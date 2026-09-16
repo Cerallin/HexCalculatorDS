@@ -29,8 +29,6 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
     EventResult HandleEvent(const Event &e);
 
   private:
-    SubDisplay &display;
-    ViewModel &vm;
     InputView inputView;
     EditorView editorView;
     DrawerView drawerView;

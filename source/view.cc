@@ -12,7 +12,7 @@
 using namespace HexCalc;
 
 InputView::InputView(SubDisplay &display, ViewModel &vm)
-    : SubView(display), vm(vm), handler(vm.Cmds()), leftBracketCount(0) {
+    : SubView(display, vm), handler(vm.Cmds()), leftBracketCount(0) {
     // Print version string
     display.ShowVerStr();
 
@@ -592,7 +592,8 @@ TranscodeView<Base>::printHeader(void) const {
 template <NumberBase Base>
 void
 TranscodeView<Base>::printNumber(void) const {
-    auto digits = vm.GetValueDigits<MaxDigitsForType<Base>()>(Base);
+    const auto &vm = this->GetVM();
+    auto digits = vm.template GetValueDigits<MaxDigitsForType<Base>()>(Base);
     auto glyphs = MakeFormattedGlyphArray<Base, 6, 8>(digits, false);
 
     Point start(this->viewArea.x +
@@ -605,10 +606,12 @@ TranscodeView<Base>::printNumber(void) const {
 template <>
 void
 TranscodeView<Binary>::printNumber(void) const {
+    const auto &vm = this->GetVM();
     // TODO Adjust the height of TranscodeView dynamically to accommodate
     // different widths of number display
     for (int i = 0; i < 4; i++) {
-        auto digits = vm.GetValueDigitsPerByte<Number::MaxBinDigits>(i, Binary);
+        auto digits =
+            vm.template GetValueDigitsPerByte<Number::MaxBinDigits>(i, Binary);
         auto glyphs = MakeFormattedGlyphArray<Binary, 6, 8>(digits, false);
         Point start(this->viewArea.x +
                         (headerSkip + header.Size() + numberGap) * CharWidth,
@@ -673,7 +676,7 @@ ShiftModeManager::UpdateTiles(void) {
 }
 
 EditorView::EditorView(SubDisplay &display, ViewModel &vm)
-    : SubView(display), vm(vm), buttonHandler(vm.Cmds()),
+    : SubView(display, vm), buttonHandler(vm.Cmds()),
       shiftModeManager(display, vm), digitPad(display, vm) {
     // buttons
     HEXCALC_GCC_UNUSED auto buttonBitwiseNot = buttonHandler.RegisterButton(
@@ -806,7 +809,7 @@ EditorView::ForceUpdate(void) {
 }
 
 DrawerView::DrawerView(SubDisplay &display, ViewModel &vm)
-    : SubView<DrawerView>(display), vm(vm), handler(vm.Cmds()) {
+    : SubView<DrawerView>(display, vm), handler(vm.Cmds()) {
     HEXCALC_GCC_UNUSED auto buttonWidthDrawer = handler.RegisterButton(
         Area(160 - 6, 0, 218 - 160, 25), ButtonType::ButtonChangeWidth, 0, 0);
 

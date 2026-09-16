@@ -53,10 +53,9 @@ ViewHost::Update(void) {
 }
 
 InputViewAdapter::InputViewAdapter(SubDisplay &subDisplay, ViewModel &viewModel)
-    : SubView(subDisplay), display(subDisplay), vm(viewModel),
-      inputView(subDisplay, viewModel), editorView(subDisplay, viewModel),
-      drawerView(subDisplay, viewModel), state(InputState),
-      shouldSwitchView(true) {}
+    : SubView(subDisplay, viewModel), inputView(subDisplay, viewModel),
+      editorView(subDisplay, viewModel), drawerView(subDisplay, viewModel),
+      state(InputState), shouldSwitchView(true) {}
 
 void
 InputViewAdapter::Update(void) {

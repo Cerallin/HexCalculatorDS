@@ -20,7 +20,8 @@ template <class Derived, typename DisplayType>
 class BasicView {
   public:
     // Initially, the view needs to be rendered at least once.
-    explicit BasicView(DisplayType &display) : display(display), dirty(true) {}
+    explicit BasicView(DisplayType &display, ViewModel &vm)
+        : display(display), vm(vm), dirty(true) {}
 
     EventResult
     HandleEvent(const Event &e) {
@@ -35,8 +36,19 @@ class BasicView {
         dirty = false;
     }
 
+    const auto &
+    GetVM(void) const {
+        return vm;
+    }
+
+    const auto &
+    GetDisplay(void) const {
+        return display;
+    }
+
   protected:
     DisplayType &display;
+    ViewModel &vm;
 
     void
     markDirty(void) {
@@ -63,8 +75,8 @@ enum ViewAlign : uint8_t {
 template <class Derived, ViewAlign Align>
 class MainView : public BasicView<Derived, MainDisplay> {
   public:
-    MainView(Area area, MainDisplay &display)
-        : BasicView<Derived, MainDisplay>(display), viewArea(area) {}
+    MainView(Area area, MainDisplay &display, ViewModel &vm)
+        : BasicView<Derived, MainDisplay>(display, vm), viewArea(area) {}
 
     static constexpr auto viewAlign = Align;
 
@@ -111,8 +123,7 @@ class ConfigView : public MainView<ConfigView, AlignLeft> {
         : MainView(Area(offsetX, line * MainDisplay::TileHeight,
                         lineWidth * MainDisplay::TileWidth,
                         height * MainDisplay::TileHeight),
-                   display),
-          vm(vm) {}
+                   display, vm) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -139,8 +150,6 @@ class ConfigView : public MainView<ConfigView, AlignLeft> {
   private:
     static constexpr size_t maxGlyphs = 6;
 
-    ViewModel &vm;
-
     GlyphArray8x8<maxGlyphs> getGlyphs() const;
 };
 
@@ -152,8 +161,8 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     FormulaView(MainDisplay &display, ViewModel &vm)
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
-                   display),
-          vm(vm), page(0) {}
+                   display, vm),
+          page(0) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -178,7 +187,6 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr size_t CharHeight = 8;
 
   private:
-    ViewModel &vm;
     int page;
 
     /**
@@ -196,8 +204,8 @@ class ValueView : public MainView<ValueView, AlignRight> {
     ValueView(MainDisplay &display, ViewModel &vm)
         : MainView(Area(offsetX, line * TileHeight, lineWidth * TileWidth,
                         height * TileHeight),
-                   display),
-          vm(vm), lastEvaluateResult(EvalSuccess) {}
+                   display, vm),
+          lastEvaluateResult(EvalSuccess) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -223,8 +231,6 @@ class ValueView : public MainView<ValueView, AlignRight> {
     static constexpr size_t CharHeight = 8;
 
   private:
-    ViewModel &vm;
-
     FormulaEvaluateResult lastEvaluateResult;
 };
 
@@ -239,8 +245,8 @@ class TranscodeView : public MainView<TranscodeView<Base>, AlignLeft> {
               //
               Area(0, line * TileHeight, lineWidth * TileWidth,
                    height * TileHeight),
-              display),
-          vm(vm), selected(false) {}
+              display, vm),
+          selected(false) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -308,7 +314,6 @@ class TranscodeView : public MainView<TranscodeView<Base>, AlignLeft> {
 
     static constexpr HeaderGlyphArray6x8 header = MakeHeader();
 
-    ViewModel &vm;
     bool selected;
 
     void printHeader(void) const;
@@ -328,8 +333,8 @@ class IndicatorView : public MainView<IndicatorView, AlignLeft> {
     IndicatorView(MainDisplay &display, ViewModel &vm)
         : MainView(Area(barOffsetX, indicatorAreaY, TileWidth,
                         indicatorAreaHeight * TileHeight),
-                   display),
-          vm(vm), currentBase(vm.GetNumberBase()) {}
+                   display, vm),
+          currentBase(vm.GetNumberBase()) {}
 
     EventResult HandleEvent(const Event &e);
 
@@ -340,7 +345,6 @@ class IndicatorView : public MainView<IndicatorView, AlignLeft> {
     static constexpr int16_t indicatorAreaY = 8 * TileHeight;
     static constexpr int16_t indicatorAreaHeight = 15;
 
-    ViewModel &vm;
     NumberBase currentBase;
 
     int16_t getIndicatorY(NumberBase base) const;
@@ -349,8 +353,8 @@ class IndicatorView : public MainView<IndicatorView, AlignLeft> {
 template <class Derived>
 class SubView : public BasicView<Derived, SubDisplay> {
   public:
-    explicit SubView(SubDisplay &display)
-        : BasicView<Derived, SubDisplay>(display) {}
+    explicit SubView(SubDisplay &display, ViewModel &vm)
+        : BasicView<Derived, SubDisplay>(display, vm) {}
 
     /**
      * @brief Prepare this view when it becomes active on the sub screen.
@@ -384,7 +388,6 @@ class InputView : public SubView<InputView> {
     static constexpr size_t colNum = 5;
     static constexpr size_t rowNum = 7;
 
-    ViewModel &vm;
     TouchScreenHandler<colNum, rowNum> handler;
     TouchButton *numberButtons[16];
     TouchButton *rightBracketButton;
@@ -459,7 +462,6 @@ class EditorView : public SubView<EditorView> {
     static constexpr size_t buttonColNum = 5;
     static constexpr size_t buttonRowNum = 3;
 
-    ViewModel &vm;
     TouchScreenHandler<buttonColNum, buttonRowNum> buttonHandler;
     TouchButton *buttons[buttonColNum * buttonRowNum];
 
@@ -481,7 +483,6 @@ class DrawerView : public SubView<DrawerView> {
     static constexpr size_t colNum = 2;
     static constexpr size_t rowNum = 1;
 
-    ViewModel &vm;
     TouchScreenHandler<colNum, rowNum> handler;
 };
 
