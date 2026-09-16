@@ -12,6 +12,8 @@
 #include "mainFont.h"
 #include "subBinaryFont.h"
 #include "subFont.h"
+#include "subscreenBinaryImage.h"
+#include "subscreenImage.h"
 
 using namespace HexCalc;
 
@@ -19,6 +21,13 @@ static constexpr int VRAM_C_SIZE = 128 * 1024;    // 128 Kb
 static constexpr int bmpBaseBankSize = 16 * 1024; // 16 Kb
 static constexpr int mapBaseBankSize = 2048;      // 2 Kb
 static constexpr int byteSize = 8;
+// grit exports 256x192@8 bitmaps (visible screen)
+static constexpr size_t ScreenBitmapSize = SCREEN_WIDTH * SCREEN_HEIGHT;
+
+namespace {
+alignas(4) uint8_t decodedInputBitmap[ScreenBitmapSize];
+alignas(4) uint8_t decodedBinaryBitmap[ScreenBitmapSize];
+} // namespace
 
 static constexpr auto
 align64(int x) {
@@ -138,6 +147,10 @@ SubDisplay::SubDisplay(void)
     constexpr int gfxOffset = subFontMapLen * byteSize;
     decompress(subBinaryFontTiles, &gfxPtr[gfxOffset], LZ77Vram);
 
+    // Pre-decode subscreen bitmaps into main RAM for fast view switching
+    decompress(subscreenImageBitmap, decodedInputBitmap, LZ77);
+    decompress(subscreenBinaryImageBitmap, decodedBinaryBitmap, LZ77);
+
     InitializePalette();
 }
 
@@ -178,13 +191,27 @@ SubDisplay::InitializePalette(void) {
 }
 
 void
-SubDisplay::SetupView(const void *bitmap, const uint16_t *palette) {
+SubDisplay::SetupView(Image image) {
+    const uint16_t *palette = nullptr;
+    const uint8_t *bitmap = nullptr;
+
+    switch (image) {
+    case Image::InputImage:
+        palette = subscreenImagePal;
+        bitmap = decodedInputBitmap;
+        break;
+    case Image::BinaryImage:
+        palette = subscreenBinaryImagePal;
+        bitmap = decodedBinaryBitmap;
+        break;
+    }
+
     // copy image palette
     dmaCopy(&palette[MAX_4BPP_PAL_COUNT], &BG_PALETTE_SUB[MAX_4BPP_PAL_COUNT],
             (MAX_8BPP_PAL_COUNT - MAX_4BPP_PAL_COUNT) * sizeof(uint16_t));
 
-    // decompress image bitmap (LZ77) into VRAM
-    decompress(bitmap, bgGetGfxPtr(bmpLayer.GetBg()), LZ77Vram);
+    // copy pre-decoded bitmap into VRAM
+    dmaCopy(bitmap, bgGetGfxPtr(bmpLayer.GetBg()), ScreenBitmapSize);
 }
 
 void

@@ -370,12 +370,22 @@ class SubDisplay : public Display<SubDisplay> {
     void InitializePalette(void);
 
     /**
-     * @brief Setup the view with the given bitmap and palette.
+     * @brief Pre-decoded subscreen background images.
      *
-     * @param bitmap Compressed bitmap data (LZ77).
-     * @param palette 8bpp palette data to be copied.
+     * Bitmaps are LZ77-decompressed into main RAM at construction time so that
+     * view switches only need a dmaCopy into VRAM.
      */
-    void SetupView(const void *bitmap, const uint16_t *palette);
+    enum class Image : uint8_t {
+        InputImage,
+        BinaryImage,
+    };
+
+    /**
+     * @brief Setup the view with a pre-decoded bitmap and its palette.
+     *
+     * @param image Which preloaded subscreen image to copy into VRAM.
+     */
+    void SetupView(Image image);
 
     void DisableButton(int index);
     void EnableButton(int index);

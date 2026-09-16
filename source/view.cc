@@ -8,8 +8,6 @@
 #include "subFont.h"
 #include "subscreenArea.h"
 #include "subscreenBinaryArea.h"
-#include "subscreenBinaryImage.h"
-#include "subscreenImage.h"
 
 using namespace HexCalc;
 
@@ -157,7 +155,7 @@ InputView::Setup(void) {
     // Set scroll
     display.ScrollTileLayers(0, 0);
     // Setup image
-    display.SetupView(subscreenImageBitmap, subscreenImagePal);
+    display.SetupView(SubDisplay::Image::InputImage);
     // Setup buttons
     handleBaseChange();
 }
@@ -728,7 +726,7 @@ EditorView::Setup(void) {
     // Set scroll
     display.ScrollTileLayers(0, -1);
     // Setup image
-    display.SetupView(subscreenBinaryImageBitmap, subscreenBinaryImagePal);
+    display.SetupView(SubDisplay::Image::BinaryImage);
     // Setup number pad
     digitPad.Setup();
 }
