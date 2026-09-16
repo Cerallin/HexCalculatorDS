@@ -30,13 +30,14 @@ _TOP_ROWS_MAX_Y = 57
 _ARROW_HIT_PAD = 2
 
 # Bit-weight / carry index labels sit in the gaps between binary digit rows
-# (coords after crop 5,6,5,4). Use the full inter-row gap so a small vertical
-# shift in the design art still keeps the subscripts (and their 1px shadows).
+# (coords after crop 5,6,5,4). Start each band where label *text* begins, not
+# at the top of the inter-row gap: the first gap rows only hold bracket / digit
+# shadow bleed from the row above (e.g. band 2 y=143 picks up [1] brackets).
 _CARRY_LABEL_BANDS = [
-    (79, 98),
-    (111, 130),
-    (143, 162),
-    (175, 191),
+    (83, 98),
+    (115, 130),
+    (147, 162),
+    (179, 191),
 ]
 # Clear binary digits left of equals / copyright; covers all four rows + labels.
 _BINARY_FIELD = ((0, 57), (228, 135))
