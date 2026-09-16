@@ -163,15 +163,15 @@ InputView::HandleEvent(const Event &e) {
     if (e.type == EventType::UpdateBaseEvent) {
         handleBaseChange();
 
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("InputView invalidated by UpdateBaseEvent\n");
 
         return Consumed;
     } else if (e.type == EventType::UpdateSignEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         return Consumed;
     } else if (e.type == EventType::UpdateWidthEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         return Consumed;
     } else if (e.type == EventType::MoveFocusEvent) {
         Point pos{0, 0};
@@ -183,7 +183,7 @@ InputView::HandleEvent(const Event &e) {
         auto &button = getFocus(pos, dir);
         handler.ChangeFocus(&button);
 
-        BasicView::markDirty();
+        BasicView::Invalidate();
         return Consumed;
     } else if (e.type == EventType::PreviousTouchEvent) {
         handler.PressFocus();
@@ -196,7 +196,7 @@ InputView::HandleEvent(const Event &e) {
         handler.Handle(touchPoint);
 
         // To update selected button state after handling touch input
-        BasicView::markDirty();
+        BasicView::Invalidate();
 
         return Consumed;
     } else if (e.type == EventType::OperatorAcceptEvent) {
@@ -204,7 +204,7 @@ InputView::HandleEvent(const Event &e) {
         if (newLeftBracketCount != leftBracketCount) {
             updateLBrackCount(newLeftBracketCount);
             // Reset right bracket button status
-            BasicView::markDirty();
+            BasicView::Invalidate();
 
             return Consumed;
         }
@@ -212,7 +212,7 @@ InputView::HandleEvent(const Event &e) {
     } else if (e.type == EventType::ClearEvent) {
         updateLBrackCount(0);
         // Reset right bracket button status
-        BasicView::markDirty();
+        BasicView::Invalidate();
 
         return Consumed;
     }
@@ -309,7 +309,7 @@ ConfigView::HandleEvent(const Event &e) {
         return Skipped;
     }
 
-    BasicView::markDirty();
+    BasicView::Invalidate();
     debugf("ConfigView invalidated\n");
 
     return Consumed;
@@ -367,7 +367,7 @@ FormulaView::HandleEvent(const Event &e) {
         return Skipped;
     }
 
-    BasicView::markDirty();
+    BasicView::Invalidate();
     debugf("FormulaView invalidated\n");
 
     return Consumed;
@@ -454,25 +454,25 @@ EventResult
 ValueView::HandleEvent(const Event &e) {
     if (e.type == EventType::ValueChangedEvent) {
         lastEvaluateResult = EvalSuccess;
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("ValueView updated\n");
         return Consumed;
     } else if (e.type == EventType::UpdateBaseEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("ValueView base changed\n");
         return Consumed;
     } else if (e.type == EventType::UpdateSignEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("ValueView sign changed\n");
         return Consumed;
     } else if (e.type == EventType::EvaluateErrorEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("ValueView evaluation error: %d\n", e.data);
         lastEvaluateResult = static_cast<FormulaEvaluateResult>(e.data);
         return Consumed;
     } else if (e.type == EventType::ClearEvent) {
         if (lastEvaluateResult != EvalSuccess) {
-            BasicView::markDirty();
+            BasicView::Invalidate();
             debugf("ValueView cleared\n");
             lastEvaluateResult = EvalSuccess;
             return Consumed;
@@ -509,7 +509,7 @@ IndicatorView::HandleEvent(const Event &e) {
             return Skipped;
         }
 
-        BasicView::markDirty();
+        BasicView::Invalidate();
         return Consumed;
     }
 
@@ -628,7 +628,7 @@ TranscodeView<Base>::HandleEvent(const Event &e) {
     // unsigned to signed.
     if constexpr (Base == Decimal) {
         if (e.type == EventType::UpdateSignEvent) {
-            BasicView<TranscodeView<Base>, MainDisplay>::markDirty();
+            BasicView<TranscodeView<Base>, MainDisplay>::Invalidate();
             debugf("TranscodeView(%d) refreshed\n", static_cast<int>(Base));
             return Consumed;
         }
@@ -637,7 +637,7 @@ TranscodeView<Base>::HandleEvent(const Event &e) {
     // For all views, when the value changes, the view should be updated to
     // reflect the new value.
     if (e.type == EventType::ValueChangedEvent) {
-        BasicView<TranscodeView<Base>, MainDisplay>::markDirty();
+        BasicView<TranscodeView<Base>, MainDisplay>::Invalidate();
         debugf("TranscodeView(%d) refreshed\n", static_cast<int>(Base));
         return Consumed;
     }
@@ -761,12 +761,12 @@ EditorView::HandleEvent(const Event &e) {
         // ValueChangedEvent
         return Consumed;
     } else if (e.type == EventType::ValueChangedEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("EditorView value changed\n");
         return Consumed;
     } else if (e.type == EventType::UpdateWidthEvent) {
         digitPad.HandleWidthChange();
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("EditorView width updated\n");
         return Consumed;
     } else if (e.type == EventType::FlipBitEvent) {
@@ -777,7 +777,7 @@ EditorView::HandleEvent(const Event &e) {
         debugf("EditorView focused bit %d\n", e.data);
         return Consumed;
     } else if (e.type == EventType::SwitchShiftModeEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
 
         return Consumed;
     } else {
@@ -820,15 +820,15 @@ DrawerView::DrawerView(SubDisplay &display, ViewModel &vm)
 EventResult
 DrawerView::HandleEvent(const Event &e) {
     if (e.type == EventType::UpdateWidthEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("DrawerView width updated\n");
         return Consumed;
     } else if (e.type == EventType::UpdateSignEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("DrawerView sign updated\n");
         return Consumed;
     } else if (e.type == EventType::InputViewChangedEvent) {
-        BasicView::markDirty();
+        BasicView::Invalidate();
         debugf("DrawerView invalidated by InputViewChangedEvent\n");
         return Consumed;
     } else if (e.type == EventType::TouchScreenEvent) {
@@ -839,7 +839,7 @@ DrawerView::HandleEvent(const Event &e) {
         handler.Handle(touchPoint);
 
         // To update selected button state after handling touch input
-        BasicView::markDirty();
+        BasicView::Invalidate();
 
         return Consumed;
     } else {

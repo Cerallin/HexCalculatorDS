@@ -99,7 +99,7 @@ InputViewAdapter::HandleEvent(const Event &e) {
             // should never reach here
         }
 
-        markDirty();
+        Invalidate();
         shouldSwitchView = true;
 
         return Consumed;

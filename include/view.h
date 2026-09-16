@@ -46,14 +46,14 @@ class BasicView {
         return display;
     }
 
+    void
+    Invalidate(void) {
+        dirty = true;
+    }
+
   protected:
     DisplayType &display;
     ViewModel &vm;
-
-    void
-    markDirty(void) {
-        dirty = true;
-    }
 
   private:
     bool dirty;
