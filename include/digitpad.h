@@ -42,6 +42,7 @@ class DigitPad : public NonCopyable {
 
     void DrawDigits(void);
     void Setup(void);
+    void Teardown(void);
     void RegisterDigitButtons(void);
 
     void MoveFocus(Direction dir);

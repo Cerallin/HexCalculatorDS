@@ -351,6 +351,24 @@ class SubView : public BasicView<Derived, SubDisplay> {
   public:
     explicit SubView(SubDisplay &display)
         : BasicView<Derived, SubDisplay>(display) {}
+
+    /**
+     * @brief Prepare this view when it becomes active on the sub screen.
+     *
+     * Derived views should provide their own Setup when they own tiles,
+     * sprites, or other state that must be initialized on entry.
+     */
+    void
+    Setup(void) {}
+
+    /**
+     * @brief Release view-specific state before switching away.
+     *
+     * Derived views should provide their own Teardown when they own
+     * persistent sprites or focus that CleanLayers will not clear.
+     */
+    void
+    Teardown(void) {}
 };
 
 class InputView : public SubView<InputView> {
@@ -433,6 +451,7 @@ class EditorView : public SubView<EditorView> {
     EventResult HandleEvent(const Event &e);
 
     void Setup(void);
+    void Teardown(void);
     void ForceUpdate(void);
 
   private:

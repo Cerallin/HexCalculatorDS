@@ -91,8 +91,10 @@ InputViewAdapter::HandleEvent(const Event &e) {
 
     if (e.type == EventType::InputViewChangedEvent) {
         if (state == InputState) {
+            inputView.Teardown();
             state = EditorState;
         } else if (state == EditorState) {
+            editorView.Teardown();
             state = InputState;
         } else {
             // should never reach here

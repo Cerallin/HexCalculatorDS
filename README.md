@@ -68,7 +68,7 @@ selected button, which is equivalent to touching the button on the sub screen.
 
 ### v1.3.0
 
-- [ ] New input view for binary input
+- [x] New input view for binary input
 - [ ] Add animations
 
 ### v2.0.0

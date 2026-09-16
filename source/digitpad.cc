@@ -95,6 +95,12 @@ DigitPad::Setup(void) {
 }
 
 void
+DigitPad::Teardown(void) {
+    focus = Point(-1, -1);
+    digitFocus.Hide();
+}
+
+void
 DigitPad::RegisterDigitButtons(void) {
     // Register digit buttons
     for (size_t i = 0; i < colNum; i++) {

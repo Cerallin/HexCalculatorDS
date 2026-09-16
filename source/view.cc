@@ -731,6 +731,11 @@ EditorView::Setup(void) {
     digitPad.Setup();
 }
 
+void
+EditorView::Teardown(void) {
+    digitPad.Teardown();
+}
+
 EventResult
 EditorView::HandleEvent(const Event &e) {
     if (e.type == EventType::MoveFocusEvent) {
