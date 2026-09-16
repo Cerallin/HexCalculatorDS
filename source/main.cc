@@ -4,6 +4,7 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+#include "animationhost.h"
 #include "input.h"
 #include "viewhost.h"
 #include "viewmodel.h"
@@ -28,7 +29,8 @@ main(void) {
     HexCalc::Commands commands(eventBus);
     HexCalc::InputHandler inputHandler(eventBus, commands);
     HexCalc::ViewModel viewModel(eventBus, commands);
-    HexCalc::ViewHost viewHost(viewModel);
+    HexCalc::AnimationHost::Views viewHost(viewModel);
+    HexCalc::AnimationHost animHost(viewHost, viewModel);
 
     constexpr int repeatDelay = 7;
     constexpr int repeatRate = 3;
@@ -38,11 +40,11 @@ main(void) {
     while (true) {
         swiWaitForVBlank();
 
-        if (!viewHost.IsAnimating()) {
+        if (!animHost.IsAnimating()) {
             inputHandler.Update();
         }
         viewModel.DispatchEvents();
-        viewHost.Update();
+        animHost.Update();
     }
 
     return 0;

@@ -10,7 +10,7 @@
 #include "view.h"
 #include "viewmodel.h"
 
-namespace HexCalc {
+namespace HexCalc::AnimationEffects {
 
 /**
  * @brief Formula page slide: continuous glyph-strip scroll by startIndex delta.
@@ -46,4 +46,4 @@ class FormulaPageSlide {
     static bool TickThunk(void *ctx);
 };
 
-}; // namespace HexCalc
+}; // namespace HexCalc::AnimationEffects

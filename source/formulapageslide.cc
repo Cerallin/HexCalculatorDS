@@ -7,6 +7,7 @@
 #include "formulapageslide.h"
 
 using namespace HexCalc;
+using namespace HexCalc::AnimationEffects;
 
 namespace {
 

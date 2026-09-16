@@ -6,11 +6,11 @@
  */
 #pragma once
 
-#include "animation.h"
 #include "display.h"
-#include "formulapageslide.h"
 #include "view.h"
 #include "viewmodel.h"
+
+#include <type_traits>
 
 namespace HexCalc {
 
@@ -44,31 +44,124 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
 };
 
 /**
+ * @brief Default claims: no view is taken over by AnimationHost.
+ */
+struct NoViewClaims {
+    template <typename V>
+    struct IsClaimed : std::false_type {};
+};
+
+/**
  * @brief The ViewHost class manages the views on the main and sub screens. It
  * is responsible for updating the views when the models change and handling
  * user inputs by dispatching events to the appropriate views. It also
  * initializes the displays and registers the views with the ViewModel.
  *
+ * @tparam Claims Compile-time policy for views owned by AnimationHost.
+ *         Claimed view types are skipped in Subscribe/Update.
  */
+template <typename Claims = NoViewClaims>
 class ViewHost : private NonCopyable {
   public:
-    explicit ViewHost(ViewModel &viewModel);
+    explicit ViewHost(ViewModel &viewModel)
+        : mainDisplay(), subDisplay(), configView(mainDisplay, viewModel),
+          formulaView(mainDisplay, viewModel),
+          valueView(mainDisplay, viewModel), hexView(mainDisplay, viewModel),
+          decView(mainDisplay, viewModel), octView(mainDisplay, viewModel),
+          binView(mainDisplay, viewModel),
+          indicatorView(mainDisplay, viewModel),
+          inputViewAdapter(subDisplay, viewModel) {
+        // Register views
+        auto &bus = viewModel.Bus();
 
-    void Update(void);
+        subscribeUnlessClaimed(bus, configView);
+        subscribeUnlessClaimed(bus, formulaView);
+        subscribeUnlessClaimed(bus, valueView);
+        subscribeUnlessClaimed(bus, hexView);
+        subscribeUnlessClaimed(bus, decView);
+        subscribeUnlessClaimed(bus, octView);
+        subscribeUnlessClaimed(bus, binView);
+        subscribeUnlessClaimed(bus, indicatorView);
+        subscribeUnlessClaimed(bus, inputViewAdapter);
+    }
 
-    bool
-    IsAnimating(void) const {
-        return animationGate.Busy();
+    void
+    Update(void) {
+        updateUnlessClaimed(configView);
+        updateUnlessClaimed(formulaView);
+        updateUnlessClaimed(valueView);
+        updateUnlessClaimed(hexView);
+        updateUnlessClaimed(decView);
+        updateUnlessClaimed(octView);
+        updateUnlessClaimed(binView);
+        updateUnlessClaimed(indicatorView);
+        updateUnlessClaimed(inputViewAdapter);
+
+        // Must be called once per frame --said libnds
+        bgUpdate();
+
+        subDisplay.UpdateSprites();
+    }
+
+    MainDisplay &
+    GetMainDisplay(void) {
+        return mainDisplay;
+    }
+
+    SubDisplay &
+    GetSubDisplay(void) {
+        return subDisplay;
+    }
+
+    ConfigView &
+    GetConfigView(void) {
+        return configView;
+    }
+
+    FormulaView &
+    GetFormulaView(void) {
+        return formulaView;
+    }
+
+    ValueView &
+    GetValueView(void) {
+        return valueView;
+    }
+
+    TranscodeView<Hexadecimal> &
+    GetHexView(void) {
+        return hexView;
+    }
+
+    TranscodeView<Decimal> &
+    GetDecView(void) {
+        return decView;
+    }
+
+    TranscodeView<Octal> &
+    GetOctView(void) {
+        return octView;
+    }
+
+    TranscodeView<Binary> &
+    GetBinView(void) {
+        return binView;
+    }
+
+    IndicatorView &
+    GetIndicatorView(void) {
+        return indicatorView;
+    }
+
+    InputViewAdapter &
+    GetInputViewAdapter(void) {
+        return inputViewAdapter;
     }
 
   private:
-    // Displays
     MainDisplay mainDisplay;
     SubDisplay subDisplay;
 
-    // Animation gate
-    AnimationGate animationGate;
-    // Views
     ConfigView configView;
     FormulaView formulaView;
     ValueView valueView;
@@ -78,12 +171,22 @@ class ViewHost : private NonCopyable {
     TranscodeView<Binary> binView;
     IndicatorView indicatorView;
     InputViewAdapter inputViewAdapter;
-    // Animation effects
-    FormulaPageSlide formulaPageSlide;
-    // Animation manager
-    Animated<FormulaView> formulaAnim;
 
-    void registerViews(ViewModel &viewModel);
+    template <typename V>
+    void
+    subscribeUnlessClaimed(EventBus &bus, V &view) {
+        if constexpr (!Claims::template IsClaimed<V>::value) {
+            bus.Subscribe(view);
+        }
+    }
+
+    template <typename V>
+    void
+    updateUnlessClaimed(V &view) {
+        if constexpr (!Claims::template IsClaimed<V>::value) {
+            view.Update();
+        }
+    }
 };
 
 }; // namespace HexCalc
