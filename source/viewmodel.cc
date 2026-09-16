@@ -192,6 +192,11 @@ FormulaManager::formulaInsertDigits() {
     }
 
     auto base = vm.GetNumberBase();
+    // Display binary numbers in hexadecimal for better readability
+    // (same as ValueView)
+    if (base == NumberBase::Binary) {
+        base = NumberBase::Hexadecimal;
+    }
     auto sign = vm.GetNumberSign();
     auto width = vm.GetNumberWidth();
 
