@@ -1,4 +1,5 @@
 # Prefer CMake compile_commands; strip GCC-only flags clangd rejects.
+# System includes come from --query-driver in .vscode/settings.json.
 # Do NOT add --target=... here: query-driver passes CompileFlags to g++,
 # and arm-none-eabi-g++ does not accept Clang's -target.
 CompileFlags:
