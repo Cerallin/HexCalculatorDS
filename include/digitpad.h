@@ -19,19 +19,12 @@ class DigitFocus {
 
     void SetPosition(Point newPos);
 
-    bool
-    Visible(void) const {
-        return visible;
-    }
-
     void Show(void);
 
     void Hide(void);
 
   private:
     SubDisplay &display;
-
-    bool visible;
 
     Sprite<SubDisplay> *sprites[4];
 };

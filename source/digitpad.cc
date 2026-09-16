@@ -9,7 +9,7 @@
 
 using namespace HexCalc;
 
-DigitFocus::DigitFocus(SubDisplay &display) : display(display), visible(false) {
+DigitFocus::DigitFocus(SubDisplay &display) : display(display) {
     // Add sprites
     sprites[0] = display.AddSprite(Point(0, 0), 1, false, false);
     sprites[1] = display.AddSprite(Point(0, 0), 1, true, false);
@@ -26,8 +26,6 @@ DigitFocus::Show(void) {
     sprites[1]->SetTileOffset(DigitFocusTileOffset + 1);
     sprites[2]->SetTileOffset(DigitFocusTileOffset + 1);
     sprites[3]->SetTileOffset(DigitFocusTileOffset + 1);
-
-    visible = true;
 }
 
 void
@@ -36,8 +34,6 @@ DigitFocus::Hide(void) {
     sprites[1]->SetTileOffset(0);
     sprites[2]->SetTileOffset(0);
     sprites[3]->SetTileOffset(0);
-
-    visible = false;
 }
 
 void
