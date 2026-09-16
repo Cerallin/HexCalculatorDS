@@ -342,8 +342,6 @@ class SubDisplay : public Display<SubDisplay> {
   public:
     SubDisplay(void);
 
-    void ScrollTileLayers(int x, int y) const;
-
     /**
      * @brief Print a glyph at the given position.
      *

@@ -29,15 +29,17 @@ _TOP_ROWS_MAX_Y = 57
 # Padding added around detected Circular arrow glyphs for touch hit boxes.
 _ARROW_HIT_PAD = 2
 
-# Bit-weight / carry index labels under each binary row (coords after crop 5,6,5,4).
+# Bit-weight / carry index labels sit in the gaps between binary digit rows
+# (coords after crop 5,6,5,4). Use the full inter-row gap so a small vertical
+# shift in the design art still keeps the subscripts (and their 1px shadows).
 _CARRY_LABEL_BANDS = [
-    (84, 90),
-    (116, 122),
-    (148, 154),
-    (180, 186),
+    (79, 98),
+    (111, 130),
+    (143, 162),
+    (175, 191),
 ]
-# Clear binary digits left of equals / copyright; covers all four rows.
-_BINARY_FIELD = ((0, 57), (228, 125))
+# Clear binary digits left of equals / copyright; covers all four rows + labels.
+_BINARY_FIELD = ((0, 57), (228, 135))
 
 # Circular pill body uses a fixed palette slot (runtime / text-layer reserved range).
 _CIRCULAR_BG_PALETTE_INDEX = 6
