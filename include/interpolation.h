@@ -45,6 +45,12 @@ uint16_t LerpRgb15(uint16_t from, uint16_t to, uint16_t t256);
 uint16_t LerpU16(uint16_t from, uint16_t to, uint16_t t256);
 
 /**
+ * @brief Linear interpolate two signed ints. t256 is in [0, 256].
+ *        Use for pixel positions that may be negative.
+ */
+int LerpInt(int from, int to, uint16_t t256);
+
+/**
  * @brief Triangle wave: 0 -> 256 -> 0 over one period (linear).
  */
 uint16_t LinearTriangle(uint16_t phase, uint16_t period);

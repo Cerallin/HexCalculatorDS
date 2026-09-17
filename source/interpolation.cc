@@ -36,6 +36,16 @@ LerpU16(uint16_t from, uint16_t to, uint16_t t256) {
                                  (delta * static_cast<int>(t256)) / kScale);
 }
 
+int
+LerpInt(int from, int to, uint16_t t256) {
+    if (t256 >= kScale) {
+        return to;
+    }
+
+    const int delta = to - from;
+    return from + (delta * static_cast<int>(t256)) / kScale;
+}
+
 uint16_t
 LerpRgb15(uint16_t from, uint16_t to, uint16_t t256) {
     if (t256 >= kScale) {

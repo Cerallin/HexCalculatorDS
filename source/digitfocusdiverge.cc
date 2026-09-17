@@ -20,15 +20,6 @@ constexpr Point kOutward[DigitFocus::CornerCount] = {
     Point(1, 1),
 };
 
-int
-lerpInt(int from, int to, uint16_t t256) {
-    if (t256 >= 256) {
-        return to;
-    }
-    const int delta = to - from;
-    return from + (delta * static_cast<int>(t256)) / 256;
-}
-
 } // namespace
 
 DigitFocusDiverge::DigitFocusDiverge(EditorView &editorView,
@@ -173,8 +164,8 @@ DigitFocusDiverge::tickDiverge(void) {
     Point corners[DigitFocus::CornerCount] = {Point(0, 0), Point(0, 0),
                                               Point(0, 0), Point(0, 0)};
     for (int i = 0; i < DigitFocus::CornerCount; i++) {
-        corners[i].x = lerpInt(startCorners[i].x, endCorners[i].x, eased);
-        corners[i].y = lerpInt(startCorners[i].y, endCorners[i].y, eased);
+        corners[i].x = LerpInt(startCorners[i].x, endCorners[i].x, eased);
+        corners[i].y = LerpInt(startCorners[i].y, endCorners[i].y, eased);
     }
     digitFocus.SetCornerPositions(corners);
     digitFocus.SetSignColor(
@@ -211,8 +202,8 @@ DigitFocusDiverge::tickConverge(void) {
     Point corners[DigitFocus::CornerCount] = {Point(0, 0), Point(0, 0),
                                               Point(0, 0), Point(0, 0)};
     for (int i = 0; i < DigitFocus::CornerCount; i++) {
-        corners[i].x = lerpInt(startCorners[i].x, endCorners[i].x, eased);
-        corners[i].y = lerpInt(startCorners[i].y, endCorners[i].y, eased);
+        corners[i].x = LerpInt(startCorners[i].x, endCorners[i].x, eased);
+        corners[i].y = LerpInt(startCorners[i].y, endCorners[i].y, eased);
     }
     digitFocus.SetCornerPositions(corners);
     digitFocus.SetSignColor(

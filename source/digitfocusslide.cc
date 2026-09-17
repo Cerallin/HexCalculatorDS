@@ -12,15 +12,6 @@ using namespace HexCalc::AnimationEffects;
 
 namespace {
 
-int
-lerpInt(int from, int to, uint16_t t256) {
-    if (t256 >= 256) {
-        return to;
-    }
-    const int delta = to - from;
-    return from + (delta * static_cast<int>(t256)) / 256;
-}
-
 constexpr int
 sign(int delta) {
     if (delta > 0) {
@@ -134,15 +125,15 @@ DigitFocusSlide::Tick(void) {
         const uint16_t t256 = static_cast<uint16_t>(
             (static_cast<uint32_t>(phase + 1) * 256) / MoveFrames);
         const uint16_t eased = EaseInOutCubicBezier(t256);
-        int16_t x = lerpInt(fromPx.x, overshoot.x, eased);
-        int16_t y = lerpInt(fromPx.y, overshoot.y, eased);
+        int16_t x = LerpInt(fromPx.x, overshoot.x, eased);
+        int16_t y = LerpInt(fromPx.y, overshoot.y, eased);
         digitFocus.SetPixelPosition(x, y);
     } else {
         const uint16_t settlePhase = static_cast<uint16_t>(phase - MoveFrames);
         const uint16_t t256 = static_cast<uint16_t>(
             (static_cast<uint32_t>(settlePhase + 1) * 256) / SettleFrames);
-        int16_t x = lerpInt(overshoot.x, toPx.x, t256);
-        int16_t y = lerpInt(overshoot.y, toPx.y, t256);
+        int16_t x = LerpInt(overshoot.x, toPx.x, t256);
+        int16_t y = LerpInt(overshoot.y, toPx.y, t256);
         digitFocus.SetPixelPosition(x, y);
     }
 
