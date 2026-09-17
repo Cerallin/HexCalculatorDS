@@ -641,19 +641,41 @@ template class TranscodeView<Decimal>;
 template class TranscodeView<Octal>;
 template class TranscodeView<Binary>;
 
-void
-ShiftModeManager::UpdateTiles(void) {
-    constexpr int offsetX = 60;
-    constexpr int offsetY = 40;
+int
+ShiftModeManager::tileId(int mapIndex) {
     constexpr int tileOffset =
         -1 + (sizeof(subFontMap) / sizeof(subFontMap[0]));
+    return tileOffset + mapIndex;
+}
 
-    const auto &tilemap = getTilemap();
+const ShiftModeManager::Tilemap &
+ShiftModeManager::ShiftModeTextTileMap(NumberShiftMode mode) {
+    switch (mode) {
+    case ArithmeticMode:
+        return arithmeticTilemap;
+    case CircularMode:
+        return circularTilemap;
+    case LogicalMode:
+        return logicalTilemap;
+    default:
+        return arithmeticTilemap;
+    }
+}
 
-    for (int i = 0; i < textWidth; i++) {
-        for (int j = 0; j < textHeight; j++) {
-            const auto &tile = tileOffset + tilemap[j][i];
-            display.PutTile((i * 8) + offsetX, (j * 8) + offsetY, tile);
+void
+ShiftModeManager::PutMapTile(int col, int row, int mapIndex) const {
+    int tileX = (col * TileWidthPx) + TextOffsetX;
+    int tileY = (row * TileWidthPx) + TextOffsetY;
+    display.PutTile(tileX, tileY, static_cast<FontType>(tileId(mapIndex)));
+}
+
+void
+ShiftModeManager::UpdateTiles(void) {
+    const auto &tilemap = ShiftModeTextTileMap(vm.GetShiftMode());
+
+    for (int i = 0; i < TextWidth; i++) {
+        for (int j = 0; j < TextHeight; j++) {
+            PutMapTile(i, j, tilemap[j][i]);
         }
     }
 }

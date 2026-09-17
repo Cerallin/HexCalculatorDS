@@ -110,4 +110,32 @@ class FormulaPageSlide : public BasicEffect {
     static bool TickThunk(void *ctx);
 };
 
+/**
+ * @brief Editor shift-mode label slide within the 9x2 tile window.
+ */
+class ShiftModeSlide : public BasicEffect {
+  public:
+    ShiftModeSlide(EditorView &editorView);
+
+    bool TryHandle(const Event &e, AnimationGate &gate);
+    bool SuppressesViewUpdate(void) const;
+
+  private:
+    EditorView &editorView;
+    const ViewModel &vm;
+    ShiftModeManager &shiftModes;
+
+    Direction dir;
+    NumberShiftMode fromMode;
+    NumberShiftMode toMode;
+    NumberShiftMode lastMode;
+    int16_t offsetPx;
+    int16_t distancePx;
+
+    bool Tick(void);
+    void DrawFrame(void) const;
+
+    static bool TickThunk(void *ctx);
+};
+
 }; // namespace HexCalc::AnimationEffects

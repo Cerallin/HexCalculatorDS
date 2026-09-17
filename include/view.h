@@ -423,48 +423,42 @@ class InputView : public SubView<InputView> {
 
 class ShiftModeManager {
   public:
+    static constexpr int TextWidth = 9;
+    static constexpr int TextHeight = 2;
+    static constexpr int TextOffsetX = 60;
+    static constexpr int TextOffsetY = 40;
+    static constexpr int TileWidthPx = 8;
+
+    using Tilemap = int[TextHeight][TextWidth];
+
     ShiftModeManager(SubDisplay &display, ViewModel &vm)
         : display(display), vm(vm) {}
 
     void UpdateTiles(void);
 
-  private:
-    static constexpr int textWidth = 9;
-    static constexpr int textHeight = 2;
+    static const Tilemap &ShiftModeTextTileMap(NumberShiftMode mode);
+    void PutMapTile(int col, int row, int mapIndex) const;
 
-    static constexpr int logicalTilemap[textHeight][textWidth] = {
+  private:
+    static constexpr Tilemap logicalTilemap = {
         {0, 0, 24, 27, 29, 21, 33, 31, 0},
         {0, 0, 25, 26, 28, 22, 30, 32, 0},
     };
 
-    static constexpr int circularTilemap[textHeight][textWidth] = {
+    static constexpr Tilemap circularTilemap = {
         {0, 35, 34, 39, 40, 43, 45, 46, 0},
         {0, 36, 37, 38, 41, 42, 44, 47, 0},
     };
 
-    static constexpr int arithmeticTilemap[textHeight][textWidth] = {
+    static constexpr Tilemap arithmeticTilemap = {
         {7, 8, 10, 12, 14, 15, 17, 19, 21},
         {6, 23, 11, 13, 9, 16, 18, 20, 22},
     };
 
+    static int tileId(int mapIndex);
+
     SubDisplay &display;
     ViewModel &vm;
-
-    const auto &
-    getTilemap(void) const {
-        auto mode = vm.GetShiftMode();
-
-        switch (mode) {
-        case ArithmeticMode:
-            return arithmeticTilemap;
-        case CircularMode:
-            return circularTilemap;
-        case LogicalMode:
-            return logicalTilemap;
-        default:
-            return arithmeticTilemap;
-        }
-    }
 };
 
 class EditorView : public SubView<EditorView> {
@@ -476,6 +470,11 @@ class EditorView : public SubView<EditorView> {
     void Setup(void);
     void Teardown(void);
     void ForceUpdate(void);
+
+    ShiftModeManager &
+    GetShiftModeManager(void) {
+        return shiftModeManager;
+    }
 
   private:
     /* buttons above the number pad, and the evaluate button */

@@ -12,6 +12,7 @@ AnimationHost::AnimationHost(Views &views, ViewModel &vm)
     : views(views), gate(), formulaPageSlide(views.GetFormulaView()),
       focusSignBreathe(views.GetInputViewAdapter().GetInputView(),
                        views.GetSubDisplay()),
+      shiftModeSlide(views.GetInputViewAdapter().GetEditorView()),
       formulaAnimation(views.GetFormulaView(), gate),
       inputAnimation(views.GetInputViewAdapter(), gate) {
     bind();
@@ -30,6 +31,7 @@ void
 AnimationHost::bind(void) {
     formulaAnimation.Add(formulaPageSlide);
     inputAnimation.Add(focusSignBreathe);
+    inputAnimation.Add(shiftModeSlide);
 }
 
 void

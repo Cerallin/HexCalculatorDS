@@ -50,6 +50,7 @@ class AnimationHost : private NonCopyable {
     // Animation effects
     AnimationEffects::FormulaPageSlide formulaPageSlide;
     AnimationEffects::FocusSignBreathe focusSignBreathe;
+    AnimationEffects::ShiftModeSlide shiftModeSlide;
 
     // Animation wrappers
     Animated<FormulaView> formulaAnimation;
