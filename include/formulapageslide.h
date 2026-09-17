@@ -22,6 +22,9 @@ class FormulaPageSlide {
     bool TryHandle(const Event &e, AnimationGate &gate);
     bool Suppress(const Event &e) const;
     bool IsActive(void) const;
+    void AfterHandle(const Event &e, AnimationGate &gate);
+    void Cancel(void);
+    bool SuppressesViewUpdate(void) const;
 
   private:
     using StripGlyphs = GlyphArray6x8<FormulaManager::MaxTransitionGlyphs>;

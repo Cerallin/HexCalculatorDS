@@ -22,7 +22,7 @@ using AnimationViewClaims = ViewClaims<FormulaView>;
  * @brief Optional animation layer over ViewHost.
  *
  * Owns AnimationGate and Animated wrappers, binds them to the event bus, and
- * exposes IsAnimating for the main loop. Removing this host and using
+ * exposes IsBlocking for the main loop. Removing this host and using
  * ViewHost<> alone disables animation.
  */
 class AnimationHost : private NonCopyable {
@@ -31,8 +31,13 @@ class AnimationHost : private NonCopyable {
 
     AnimationHost(Views &views, ViewModel &vm);
 
+    /**
+     * @brief Check if the animation is blocking.
+     *
+     * @return true if the animation is blocking, false otherwise.
+     */
     bool
-    IsAnimating(void) const {
+    IsBlocking(void) const {
         return gate.Busy();
     }
 

@@ -65,7 +65,8 @@ FormulaPageSlide::TryHandle(const Event &e, AnimationGate &gate) {
     offsetPx = 0;
     active = true;
 
-    if (!gate.Start(Animation(this, &FormulaPageSlide::TickThunk))) {
+    if (!gate.Start(AnimationChannel::Blocking,
+                    Animation(this, &FormulaPageSlide::TickThunk))) {
         active = false;
         lastStart = currentStart;
         view.Invalidate();
@@ -83,6 +84,21 @@ FormulaPageSlide::Suppress(const Event &e) const {
 bool
 FormulaPageSlide::IsActive(void) const {
     return active;
+}
+
+void
+FormulaPageSlide::AfterHandle(const Event &, AnimationGate &) {
+    // do nothing
+}
+
+void
+FormulaPageSlide::Cancel(void) {
+    // Blocking animations are not cancellable
+}
+
+bool
+FormulaPageSlide::SuppressesViewUpdate(void) const {
+    return true;
 }
 
 bool

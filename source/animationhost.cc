@@ -17,14 +17,13 @@ AnimationHost::AnimationHost(Views &views, ViewModel &vm)
 
 void
 AnimationHost::Update(void) {
-    gate.Update();
     views.Update();
     formulaAnimation.Update();
+    gate.Update();
 }
 
 void
 AnimationHost::bind(void) {
-    // Slide the formula by page
     formulaAnimation.Add(formulaPageSlide);
 }
 

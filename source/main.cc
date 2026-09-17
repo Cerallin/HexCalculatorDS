@@ -30,7 +30,7 @@ main(void) {
     HexCalc::InputHandler inputHandler(eventBus, commands);
     HexCalc::ViewModel viewModel(eventBus, commands);
     HexCalc::AnimationHost::Views viewHost(viewModel);
-    HexCalc::AnimationHost animHost(viewHost, viewModel);
+    HexCalc::AnimationHost animationHost(viewHost, viewModel);
 
     constexpr int repeatDelay = 7;
     constexpr int repeatRate = 3;
@@ -40,11 +40,11 @@ main(void) {
     while (true) {
         swiWaitForVBlank();
 
-        if (!animHost.IsAnimating()) {
+        if (!animationHost.IsBlocking()) {
             inputHandler.Update();
         }
         viewModel.DispatchEvents();
-        animHost.Update();
+        animationHost.Update();
     }
 
     return 0;

@@ -7,22 +7,33 @@
 #pragma once
 
 #include "event.h"
-#include "structure.h"
+#include "traits.h"
 
 namespace HexCalc {
 
-constexpr size_t MaxSlots = 4;
 constexpr size_t MaxEffects = 4;
 
 /**
- * @brief One-shot animation slot driven each frame by AnimationGate.
+ * @brief Animation slots keyed by input-blocking policy, not by effect kind.
+ *        Channels are ticked in parallel each frame.
+ */
+enum class AnimationChannel : uint8_t {
+    Blocking = 0,    // blocks input; cannot Cancel/Replace
+    NonBlocking = 1, // does not block input; Start replaces after Cancel
+    Count
+};
+
+/**
+ * @brief One animation instance driven each frame by AnimationGate.
  */
 class Animation {
   public:
     using TickFn = bool (*)(void *);
+    using CancelFn = void (*)(void *);
 
-    Animation(void *ctx, TickFn tick) : ctx(ctx), tick(tick) {}
-    Animation(void) : Animation(nullptr, nullptr) {}
+    Animation(void *ctx, TickFn tick, CancelFn cancel = nullptr)
+        : ctx(ctx), tick(tick), cancel(cancel) {}
+    Animation(void) : Animation(nullptr, nullptr, nullptr) {}
 
     bool
     Valid(void) const {
@@ -34,68 +45,122 @@ class Animation {
         return tick(ctx);
     }
 
+    void
+    Cancel(void) const {
+        cancel(ctx);
+    }
+
   private:
     void *ctx;
     TickFn tick;
+    CancelFn cancel;
 };
 
 /**
- * @brief Fixed-capacity LIFO animation runner. Busy() gates input in the main
- * loop. Newest animation is ticked first until it finishes.
+ * @brief Per-channel animation runner. Busy() is true only while Blocking is
+ *        occupied (main-loop input gate).
  */
-template <size_t MaxSlots>
-class TAnimationGate : private NonCopyable {
+class AnimationGate : private NonCopyable {
   public:
-    TAnimationGate(void) : slots() {}
+    AnimationGate(void) : slots() {}
 
+    static constexpr size_t ChannelCount =
+        static_cast<size_t>(AnimationChannel::Count);
+
+    /**
+     * @brief Start an animation on a given channel.
+     *
+     * @param channel The channel to start the animation on.
+     * @param animation The animation to start.
+     * @return true if the animation was started successfully, false otherwise.
+     */
     bool
-    Start(const Animation &a) {
-        return slots.Push(a);
+    Start(AnimationChannel channel, const Animation &animation) {
+        const size_t index = static_cast<size_t>(channel);
+        if (index >= ChannelCount) {
+            return false;
+        }
+
+        Animation &slot = slots[index];
+        if (slot.Valid()) {
+            // If the channel is blocking, do not start the animation.
+            if (channel == AnimationChannel::Blocking) {
+                return false;
+            } else {
+                // else if the channel is non-blocking, cancel the existing
+                // animation and start the new one.
+                slot.Cancel();
+                slot = Animation();
+            }
+        }
+
+        slot = animation;
+        return true;
+    }
+
+    void
+    Cancel(AnimationChannel channel) {
+        if (channel != AnimationChannel::Blocking) {
+            const size_t index = static_cast<size_t>(channel);
+            Animation &slot = slots[index];
+            if (slot.Valid()) {
+                slot.Cancel();
+                slot = Animation();
+            }
+        }
     }
 
     void
     Update(void) {
-        Animation a;
-        if (!slots.Pop(a)) {
-            return;
-        }
-        if (a.Tick()) {
-            slots.Push(a);
+        for (size_t i = 0; i < ChannelCount; i++) {
+            if (!slots[i].Valid()) {
+                continue;
+            }
+            if (!slots[i].Tick()) {
+                slots[i] = Animation();
+            }
         }
     }
 
     bool
     Busy(void) const {
-        return !slots.Empty();
+        return slots[static_cast<size_t>(AnimationChannel::Blocking)].Valid();
     }
 
   private:
-    Stack<Animation, MaxSlots> slots;
+    Animation slots[ChannelCount];
 };
-
-using AnimationGate = TAnimationGate<MaxSlots>;
 
 /**
  * @brief Type-erased animation effect plugged into Animated.
  */
-class AnimEffect {
+class AnimationEffect {
   public:
     using TryHandleFn = bool (*)(void *ctx, const Event &e,
                                  AnimationGate &gate);
     using SuppressFn = bool (*)(void *ctx, const Event &e);
     using IsActiveFn = bool (*)(void *ctx);
+    using AfterHandleFn = void (*)(void *ctx, const Event &e,
+                                   AnimationGate &gate);
+    using CancelFn = void (*)(void *ctx);
+    using SuppressesViewUpdateFn = bool (*)(void *ctx);
 
-    AnimEffect(void *ctx, TryHandleFn tryHandle, SuppressFn suppress,
-               IsActiveFn isActive)
+    AnimationEffect(void *ctx, TryHandleFn tryHandle, SuppressFn suppress,
+                    IsActiveFn isActive, AfterHandleFn afterHandle,
+                    CancelFn cancel,
+                    SuppressesViewUpdateFn suppressesViewUpdate)
         : ctx(ctx), tryHandle(tryHandle), suppress(suppress),
-          isActive(isActive) {}
+          isActive(isActive), afterHandle(afterHandle), cancel(cancel),
+          suppressesViewUpdate(suppressesViewUpdate) {}
 
-    AnimEffect(void) : AnimEffect(nullptr, nullptr, nullptr, nullptr) {}
+    AnimationEffect(void)
+        : AnimationEffect(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                          nullptr) {}
 
     template <typename T>
-    static AnimEffect
+    static AnimationEffect
     From(T &effect) {
-        return AnimEffect(
+        return AnimationEffect(
             &effect,
             [](void *ctx, const Event &e, AnimationGate &gate) -> bool {
                 return static_cast<T *>(ctx)->TryHandle(e, gate);
@@ -103,8 +168,13 @@ class AnimEffect {
             [](void *ctx, const Event &e) -> bool {
                 return static_cast<T *>(ctx)->Suppress(e);
             },
+            [](void *ctx) -> bool { return static_cast<T *>(ctx)->IsActive(); },
+            [](void *ctx, const Event &e, AnimationGate &gate) {
+                static_cast<T *>(ctx)->AfterHandle(e, gate);
+            },
+            [](void *ctx) { static_cast<T *>(ctx)->Cancel(); },
             [](void *ctx) -> bool {
-                return static_cast<T *>(ctx)->IsActive();
+                return static_cast<T *>(ctx)->SuppressesViewUpdate();
             });
     }
 
@@ -123,25 +193,43 @@ class AnimEffect {
         return isActive(ctx);
     }
 
+    void
+    AfterHandle(const Event &e, AnimationGate &gate) const {
+        afterHandle(ctx, e, gate);
+    }
+
+    void
+    Cancel(void) const {
+        cancel(ctx);
+    }
+
+    bool
+    SuppressesViewUpdate(void) const {
+        return suppressesViewUpdate(ctx);
+    }
+
   private:
     void *ctx;
     TryHandleFn tryHandle;
     SuppressFn suppress;
     IsActiveFn isActive;
+    AfterHandleFn afterHandle;
+    CancelFn cancel;
+    SuppressesViewUpdateFn suppressesViewUpdate;
 };
 
 /**
  * @brief Per-view proxy: single Subscribe/Update entry, multiple Effect slots.
  */
-template <typename View, size_t MaxEffects>
+template <typename View, size_t MaxEffectCount>
 class TAnimated {
   public:
     TAnimated(View &view, AnimationGate &gate)
         : view(view), gate(gate), effectCount(0) {}
 
     bool
-    Add(const AnimEffect &effect) {
-        if (effectCount >= MaxEffects) {
+    Add(const AnimationEffect &effect) {
+        if (effectCount >= MaxEffectCount) {
             return false;
         }
 
@@ -153,7 +241,7 @@ class TAnimated {
     template <typename Effect>
     bool
     Add(Effect &effect) {
-        return Add(AnimEffect::From(effect));
+        return Add(AnimationEffect::From(effect));
     }
 
     /**
@@ -175,26 +263,35 @@ class TAnimated {
             }
         }
 
-        return view.HandleEvent(e);
+        const EventResult result = view.HandleEvent(e);
+
+        for (size_t i = 0; i < effectCount; i++) {
+            effects[i].AfterHandle(e, gate);
+        }
+
+        return result;
     }
 
     /**
-     * @brief Bypass view.Update()
-     *
+     * @brief Bypass view.Update() when an active effect draws the view itself.
      */
     void
     Update(void) {
-        if (gate.Busy()) {
-            // do nothing
-        } else {
-            view.Update();
+        // If any active effect suppresses view update, do not update the view.
+        for (size_t i = 0; i < effectCount; i++) {
+            const auto &effect = effects[i];
+            if (effect.IsActive() && effect.SuppressesViewUpdate()) {
+                return;
+            }
         }
+        // Otherwise, update the view.
+        view.Update();
     }
 
   private:
     View &view;
     AnimationGate &gate;
-    AnimEffect effects[MaxEffects];
+    AnimationEffect effects[MaxEffectCount];
     size_t effectCount;
 };
 
