@@ -424,6 +424,24 @@ class TouchScreenHandler {
     }
 
     /**
+     * @brief Registration index of the focused button, or -1 if none.
+     */
+    int
+    FocusedIndex(void) const {
+        if (previouslySelected == nullptr) {
+            return -1;
+        }
+
+        for (size_t i = 0; i < size; i++) {
+            if (&buttons[i] == previouslySelected) {
+                return static_cast<int>(i);
+            }
+        }
+
+        return -1;
+    }
+
+    /**
      * @brief Change the currently focused button to the given button.
      *
      * @param button The button to focus, or nullptr to clear the focus.

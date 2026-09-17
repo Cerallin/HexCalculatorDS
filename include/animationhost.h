@@ -7,6 +7,7 @@
 #pragma once
 
 #include "animation.h"
+#include "focussignbreathe.h"
 #include "formulapageslide.h"
 #include "viewhost.h"
 
@@ -16,13 +17,13 @@ namespace HexCalc {
  * @brief Views owned by AnimationHost (skip raw Subscribe/Update).
  *        Extend with more types: ViewClaims<FormulaView, ValueView, ...>
  */
-using AnimationViewClaims = ViewClaims<FormulaView>;
+using AnimationViewClaims = ViewClaims<FormulaView, InputViewAdapter>;
 
 /**
  * @brief Optional animation layer over ViewHost.
  *
  * Owns AnimationGate and Animated wrappers, binds them to the event bus, and
- * exposes IsBlocking for the main loop. Removing this host and using
+ * exposes IsAnimating for the main loop. Removing this host and using
  * ViewHost<> alone disables animation.
  */
 class AnimationHost : private NonCopyable {
@@ -49,9 +50,11 @@ class AnimationHost : private NonCopyable {
 
     // Animation effects
     AnimationEffects::FormulaPageSlide formulaPageSlide;
+    AnimationEffects::FocusSignBreathe focusSignBreathe;
 
     // Animation wrappers
     Animated<FormulaView> formulaAnimation;
+    Animated<InputViewAdapter> inputAnimation;
 
     /*
      * @brief Bind animation effects to the animation wrapper.

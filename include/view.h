@@ -389,6 +389,26 @@ class InputView : public SubView<InputView> {
     void Setup(void);
     void ForceUpdate(void);
 
+    /**
+     * @brief Palette index of the focused keyboard button, or -1 if none /
+     *        drawer focus.
+     */
+    int
+    FocusedKeyboardIndex(void) const {
+        const int index = handler.FocusedIndex();
+        // Last two buttons are width/sign drawers (handled by DrawerView).
+        bool isDrawerFocus = index >= static_cast<int>(handler.Size()) - 2;
+        if ((index < 0) || isDrawerFocus) {
+            return -1;
+        }
+        return index;
+    }
+
+    bool
+    IsKeyboardButtonActive(int index) const {
+        return handler.GetButton(index).Active();
+    }
+
   private:
     static constexpr size_t colNum = 5;
     static constexpr size_t rowNum = 7;
@@ -402,6 +422,7 @@ class InputView : public SubView<InputView> {
 
     void handleBaseChange(void);
     void updateLBrackCount(int count);
+    void clearFocusIfInactive(void);
 
     TouchButton &getFocus(Point position, Direction dir);
 };

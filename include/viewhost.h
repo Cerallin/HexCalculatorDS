@@ -30,6 +30,21 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
 
     EventResult HandleEvent(const Event &e);
 
+    bool
+    IsInputState(void) const {
+        return state == InputState;
+    }
+
+    InputView &
+    GetInputView(void) {
+        return inputView;
+    }
+
+    const InputView &
+    GetInputView(void) const {
+        return inputView;
+    }
+
   private:
     InputView inputView;
     EditorView editorView;

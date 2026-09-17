@@ -252,6 +252,7 @@ InputView::handleBaseChange(void) {
             numberButtons[i]->Disable();
         }
     }
+    clearFocusIfInactive();
 }
 
 void
@@ -266,6 +267,7 @@ InputView::updateLBrackCount(int count) {
 
     if (leftBracketCount <= 0) {
         rightBracketButton->Disable();
+        handler.ChangeFocus(nullptr);
     } else {
         rightBracketButton->Enable();
     }
@@ -284,6 +286,14 @@ InputView::updateLBrackCount(int count) {
     } else {
         leftBracketSprites[0]->SetTileOffset(0);
         leftBracketSprites[1]->SetTileOffset(0);
+    }
+}
+
+void
+InputView::clearFocusIfInactive(void) {
+    auto *focused = handler.FocusedButton();
+    if ((focused != nullptr) && !focused->Active()) {
+        handler.ChangeFocus(nullptr);
     }
 }
 

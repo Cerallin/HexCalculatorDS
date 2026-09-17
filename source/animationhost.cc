@@ -10,7 +10,10 @@ using namespace HexCalc;
 
 AnimationHost::AnimationHost(Views &views, ViewModel &vm)
     : views(views), gate(), formulaPageSlide(views.GetFormulaView()),
-      formulaAnimation(views.GetFormulaView(), gate) {
+      focusSignBreathe(views.GetInputViewAdapter().GetInputView(),
+                       views.GetSubDisplay()),
+      formulaAnimation(views.GetFormulaView(), gate),
+      inputAnimation(views.GetInputViewAdapter(), gate) {
     bind();
     subscribe(vm.Bus());
 }
@@ -19,15 +22,18 @@ void
 AnimationHost::Update(void) {
     views.Update();
     formulaAnimation.Update();
+    inputAnimation.Update();
     gate.Update();
 }
 
 void
 AnimationHost::bind(void) {
     formulaAnimation.Add(formulaPageSlide);
+    inputAnimation.Add(focusSignBreathe);
 }
 
 void
 AnimationHost::subscribe(EventBus &bus) {
     bus.Subscribe(formulaAnimation);
+    bus.Subscribe(inputAnimation);
 }
