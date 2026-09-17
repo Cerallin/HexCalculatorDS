@@ -396,6 +396,13 @@ class TouchScreenHandler {
         return buttonMatrix[m][n];
     }
 
+    /**
+     * @brief Handle the touch input and execute corresponding commands if the
+     * button is responsible for the input.
+     *
+     * @param input The current touch input state
+     * @return true if the button handled the input, false otherwise
+     */
     bool
     Handle(const Point &input) {
         for (size_t i = 0; i < Capacity(); i++) {

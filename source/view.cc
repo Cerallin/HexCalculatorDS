@@ -754,16 +754,17 @@ EditorView::HandleEvent(const Event &e) {
         buttonHandler.Handle(touchPoint);
         digitPad.HandleButtons(touchPoint);
 
-        // No need to mark dirty here, since it will finally trigger a
-        // ValueChangedEvent
+        // Since the button state may change, the view should be invalidated
+        BasicView::Invalidate();
 
         return Consumed;
     } else if (e.type == EventType::PreviousTouchEvent) {
         // Flip the focused digit
         vm.Cmds().FlipBit(digitPad.GetFocus());
         debugf("EditorView flipped digit %d\n", digitPad.GetFocus());
-        // No need to mark dirty here, since it will finally trigger a
-        // ValueChangedEvent
+        // No need to mark dirty here:
+        // 1. button state won't change
+        // 2. if digit pad should change, a ValueChangedEvent will be triggered
         return Consumed;
     } else if (e.type == EventType::ValueChangedEvent) {
         BasicView::Invalidate();
