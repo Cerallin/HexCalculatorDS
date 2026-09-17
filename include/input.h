@@ -457,27 +457,14 @@ class TouchScreenHandler {
         previouslySelected = button;
     }
 
-    template <int16_t colNum, int16_t rowNum>
-    Point
-    NavigateFocus(Point position, Direction dir) {
-        Point nextPos = position.NextPosition<colNum, rowNum>(dir);
-
-        auto *button = GetMatrix(nextPos);
-
-        // this must be under '+'
-        if (button == nullptr) {
-            nextPos = nextPos.NextPosition<colNum, rowNum>(DirUp);
+    /**
+     * @brief Clear focus when the focused button is no longer active.
+     */
+    void
+    ClearFocusIfInactive(void) {
+        if ((previouslySelected != nullptr) && !previouslySelected->Active()) {
+            ChangeFocus(nullptr);
         }
-        // skip width and sign drawers
-        if (((nextPos.x == 3) || (nextPos.x == 4)) && (nextPos.y == 0)) {
-            nextPos = nextPos.NextPosition<colNum, rowNum>(DirDown);
-        }
-        // skip evaluate button
-        if (nextPos.x == 4 && nextPos.y == 6) {
-            nextPos = nextPos.NextPosition<colNum, rowNum>(dir);
-        }
-
-        return nextPos;
     }
 
     void
@@ -507,5 +494,78 @@ class TouchScreenHandler {
     TouchButton *buttonMatrix[M][N];
     TouchButton *previouslySelected;
     size_t size;
+};
+
+/**
+ * @brief Touch handler for the InputView keyboard (5x7), including D-pad
+ *        navigation that skips drawers / evaluate and inactive keys.
+ */
+class InputTouchScreenHandler : public TouchScreenHandler<5, 7> {
+  public:
+    using TouchScreenHandler::TouchScreenHandler;
+
+    static constexpr int16_t ColNum = 5;
+    static constexpr int16_t RowNum = 7;
+
+    Point
+    NavigateFocus(Point position, Direction dir) {
+        Point nextPos = position.NextPosition<ColNum, RowNum>(dir);
+
+        auto *button = GetMatrix(nextPos);
+
+        // Empty cell under '+': step up onto the plus key.
+        if (button == nullptr) {
+            nextPos = nextPos.NextPosition<ColNum, RowNum>(DirUp);
+        }
+        // Skip width and sign drawers.
+        if (((nextPos.x == 3) || (nextPos.x == 4)) && (nextPos.y == 0)) {
+            nextPos = nextPos.NextPosition<ColNum, RowNum>(DirDown);
+        }
+        // Skip evaluate button.
+        if (nextPos.x == 4 && nextPos.y == 6) {
+            nextPos = nextPos.NextPosition<ColNum, RowNum>(dir);
+        }
+
+        return nextPos;
+    }
+
+    TouchButton &
+    FindFocus(Point position, Direction dir) {
+        Point nextPos = position;
+        for (size_t step = 0; step < Capacity(); step++) {
+            nextPos = NavigateFocus(nextPos, dir);
+
+            auto *buttonPtr = GetMatrix(nextPos);
+            assert(buttonPtr != nullptr);
+
+            if (buttonPtr->Active()) {
+                return *buttonPtr;
+            }
+        }
+
+        // Fallback: should not happen while any keyboard key remains active.
+        auto *fallback = GetMatrix(nextPos);
+        assert(fallback != nullptr);
+        return *fallback;
+    }
+
+    void
+    MoveFocus(Direction dir) {
+        Point pos{0, 0};
+        const auto *focused = FocusedButton();
+        if (focused != nullptr) {
+            pos = focused->Position();
+        }
+        ChangeFocus(&FindFocus(pos, dir));
+    }
+};
+
+/**
+ * @brief Touch handler for EditorView action buttons (5x3). Thin wrapper for
+ *        now; D-pad navigation can be added here later.
+ */
+class EditorTouchScreenHandler : public TouchScreenHandler<5, 3> {
+  public:
+    using TouchScreenHandler::TouchScreenHandler;
 };
 }; // namespace HexCalc

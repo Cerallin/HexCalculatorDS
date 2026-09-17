@@ -174,14 +174,8 @@ InputView::HandleEvent(const Event &e) {
         BasicView::Invalidate();
         return Consumed;
     } else if (e.type == EventType::MoveFocusEvent) {
-        Point pos{0, 0};
-        const auto *focused = handler.FocusedButton();
-        if (focused != nullptr) {
-            pos = focused->Position();
-        }
         auto dir = static_cast<Direction>(e.data);
-        auto &button = getFocus(pos, dir);
-        handler.ChangeFocus(&button);
+        handler.MoveFocus(dir);
 
         BasicView::Invalidate();
         return Consumed;
@@ -252,7 +246,7 @@ InputView::handleBaseChange(void) {
             numberButtons[i]->Disable();
         }
     }
-    clearFocusIfInactive();
+    handler.ClearFocusIfInactive();
 }
 
 void
@@ -267,7 +261,7 @@ InputView::updateLBrackCount(int count) {
 
     if (leftBracketCount <= 0) {
         rightBracketButton->Disable();
-        handler.ChangeFocus(nullptr);
+        handler.ClearFocusIfInactive();
     } else {
         rightBracketButton->Enable();
     }
@@ -287,28 +281,6 @@ InputView::updateLBrackCount(int count) {
         leftBracketSprites[0]->SetTileOffset(0);
         leftBracketSprites[1]->SetTileOffset(0);
     }
-}
-
-void
-InputView::clearFocusIfInactive(void) {
-    auto *focused = handler.FocusedButton();
-    if ((focused != nullptr) && !focused->Active()) {
-        handler.ChangeFocus(nullptr);
-    }
-}
-
-TouchButton &
-InputView::getFocus(Point position, Direction dir) {
-    Point nextPos = handler.NavigateFocus<colNum, rowNum>(position, dir);
-
-    auto *buttonPtr = handler.GetMatrix(nextPos);
-    assert(buttonPtr != nullptr);
-
-    if (!buttonPtr->Active()) {
-        return getFocus(nextPos, dir);
-    }
-
-    return *buttonPtr;
 }
 
 EventResult

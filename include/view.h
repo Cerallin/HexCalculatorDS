@@ -410,10 +410,7 @@ class InputView : public SubView<InputView> {
     }
 
   private:
-    static constexpr size_t colNum = 5;
-    static constexpr size_t rowNum = 7;
-
-    TouchScreenHandler<colNum, rowNum> handler;
+    InputTouchScreenHandler handler;
     TouchButton *numberButtons[16];
     TouchButton *rightBracketButton;
 
@@ -422,9 +419,6 @@ class InputView : public SubView<InputView> {
 
     void handleBaseChange(void);
     void updateLBrackCount(int count);
-    void clearFocusIfInactive(void);
-
-    TouchButton &getFocus(Point position, Direction dir);
 };
 
 class ShiftModeManager {
@@ -488,7 +482,7 @@ class EditorView : public SubView<EditorView> {
     static constexpr size_t buttonColNum = 5;
     static constexpr size_t buttonRowNum = 3;
 
-    TouchScreenHandler<buttonColNum, buttonRowNum> buttonHandler;
+    EditorTouchScreenHandler buttonHandler;
     TouchButton *buttons[buttonColNum * buttonRowNum];
 
     ShiftModeManager shiftModeManager;
