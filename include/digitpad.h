@@ -15,18 +15,58 @@ namespace HexCalc {
 
 class DigitFocus {
   public:
+    static constexpr int CornerCount = 4;
+    static constexpr int BaseOffsetX = -1;
+    static constexpr int BaseOffsetY = 2;
+
     DigitFocus(SubDisplay &display);
 
-    void SetPosition(Point newPos);
+    /**
+     * @brief Place the focus frame at a digit cell (locked corner layout).
+     */
+    void SetPosition(Point cell);
+
+    /**
+     * @brief Place the focus frame by focus-base pixel (glyph origin + base
+     *        offset). Corners use the locked relative offsets.
+     */
+    void SetPixelPosition(int x, int y);
+
+    void SetPixelPosition(const Point &pos);
+
+    Point GetPixelPosition(void) const;
+
+    /**
+     * @brief Place each corner sprite independently (converge / reticle lock).
+     */
+    void SetCornerPositions(const Point corners[CornerCount]);
+
+    /**
+     * @brief Relative offsets of the four corner sprites from the focus base.
+     */
+    static void LockedCornerOffsets(Point out[CornerCount]);
 
     void Show(void);
 
     void Hide(void);
 
+    /**
+     * @brief Set the focus-frame sign color (palette bank entry used by tiles).
+     */
+    void SetSignColor(uint16_t color);
+
+    /**
+     * @brief Restore sign color to COLOR_COMMON_BORDER.
+     */
+    void ResetSignColor(void);
+
   private:
     SubDisplay &display;
 
-    Sprite<SubDisplay> *sprites[4];
+    Sprite<SubDisplay> *sprites[CornerCount];
+    Point pixelPos;
+
+    void applyLockedCorners(void);
 };
 
 class DigitPad : public NonCopyable {
@@ -54,6 +94,36 @@ class DigitPad : public NonCopyable {
     void SetFocus(int index);
 
     void HandleButtons(const Point &touchPoint);
+
+    bool
+    HasFocus(void) const {
+        return (focus.x >= 0) && (focus.y >= 0);
+    }
+
+    Point
+    FocusCell(void) const {
+        return focus;
+    }
+
+    DigitFocus &
+    GetDigitFocus(void) {
+        return digitFocus;
+    }
+
+    /**
+     * @brief Glyph origin pixel for a digit cell (same layout as DrawDigits).
+     */
+    static Point CellToPixel(Point cell);
+
+    /**
+     * @brief Focus-base pixel for a digit cell (CellToPixel + base offset).
+     */
+    static Point CellToFocusPixel(Point cell);
+
+    /**
+     * @brief Snap sprites to the current logical focus (locked layout).
+     */
+    void SnapFocusVisual(void);
 
   private:
     friend class DigitFocus;

@@ -476,6 +476,11 @@ class EditorView : public SubView<EditorView> {
         return shiftModeManager;
     }
 
+    DigitPad &
+    GetDigitPad(void) {
+        return digitPad;
+    }
+
   private:
     /* buttons above the number pad, and the evaluate button */
     static constexpr size_t buttonColNum = 5;

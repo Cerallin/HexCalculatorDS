@@ -6,15 +6,21 @@
  */
 #include "digitpad.h"
 #include "subFont.h"
+#include "theme.h"
 
 using namespace HexCalc;
 
-DigitFocus::DigitFocus(SubDisplay &display) : display(display) {
-    // Add sprites
+DigitFocus::DigitFocus(SubDisplay &display) : display(display), pixelPos(0, 0) {
+    // Add sprites on a dedicated palette bank for independent sign-color lerp.
     sprites[0] = display.AddSprite(Point(0, 0), 1, false, false);
     sprites[1] = display.AddSprite(Point(0, 0), 1, true, false);
     sprites[2] = display.AddSprite(Point(0, 0), 1, false, true);
     sprites[3] = display.AddSprite(Point(0, 0), 1, true, true);
+
+    for (int i = 0; i < CornerCount; ++i) {
+        sprites[i]->SetPalette(DigitFocusPaletteBank);
+    }
+    ResetSignColor();
 
     // Hide all sprites by default
     Hide();
@@ -37,18 +43,88 @@ DigitFocus::Hide(void) {
 }
 
 void
-DigitFocus::SetPosition(Point newPos) {
-    constexpr int offsetX = -1;
-    constexpr int offsetY = 2;
-    // Same layout as DigitPad::DrawDigits
-    int x = DigitPad::offsetX + (newPos.x * DigitPad::gapX) +
-            (newPos.x / DigitPad::columnCount) * DigitPad::columnGap;
-    int y = DigitPad::offsetY + (newPos.y * DigitPad::lineHeight);
+DigitFocus::SetSignColor(uint16_t color) {
+    display.SetSpritePaletteColor(DigitFocusPaletteBank,
+                                  DigitFocusSignColorIndex, color);
+}
 
-    sprites[0]->SetPosition(x + offsetX + 0, y + offsetY + 0);
-    sprites[1]->SetPosition(x + offsetX + 1, y + offsetY + 0);
-    sprites[2]->SetPosition(x + offsetX + 0, y + offsetY + 7);
-    sprites[3]->SetPosition(x + offsetX + 1, y + offsetY + 7);
+void
+DigitFocus::ResetSignColor(void) {
+    SetSignColor(COLOR_COMMON_BORDER);
+}
+
+void
+DigitFocus::LockedCornerOffsets(Point out[CornerCount]) {
+    out[0] = Point(0, 0);
+    out[1] = Point(1, 0);
+    out[2] = Point(0, 7);
+    out[3] = Point(1, 7);
+}
+
+void
+DigitFocus::applyLockedCorners(void) {
+    Point offsets[CornerCount] = {Point(0, 0), Point(1, 0), Point(0, 7),
+                                  Point(1, 7)};
+    for (int i = 0; i < CornerCount; i++) {
+        sprites[i]->SetPosition(pixelPos.x + offsets[i].x,
+                                pixelPos.y + offsets[i].y);
+    }
+}
+
+void
+DigitFocus::SetPixelPosition(int x, int y) {
+    pixelPos = Point(x, y);
+    applyLockedCorners();
+}
+
+void
+DigitFocus::SetPixelPosition(const Point &pos) {
+    SetPixelPosition(pos.x, pos.y);
+}
+
+Point
+DigitFocus::GetPixelPosition(void) const {
+    return pixelPos;
+}
+
+void
+DigitFocus::SetCornerPositions(const Point corners[CornerCount]) {
+    for (int i = 0; i < CornerCount; i++) {
+        sprites[i]->SetPosition(corners[i]);
+    }
+    // Keep pixelPos as the locked base implied by corner 0 when possible.
+    pixelPos = Point(corners[0].x, corners[0].y);
+}
+
+void
+DigitFocus::SetPosition(Point newPos) {
+    const Point base = DigitPad::CellToFocusPixel(newPos);
+    SetPixelPosition(base.x, base.y);
+}
+
+Point
+DigitPad::CellToPixel(Point cell) {
+    const int x = static_cast<int>(offsetX + (cell.x * gapX) +
+                                   (cell.x / columnCount) * columnGap);
+    const int y = static_cast<int>(offsetY + (cell.y * lineHeight));
+    return Point(x, y);
+}
+
+Point
+DigitPad::CellToFocusPixel(Point cell) {
+    const Point glyph = CellToPixel(cell);
+    return Point(glyph.x + DigitFocus::BaseOffsetX,
+                 glyph.y + DigitFocus::BaseOffsetY);
+}
+
+void
+DigitPad::SnapFocusVisual(void) {
+    if (!HasFocus()) {
+        digitFocus.Hide();
+        return;
+    }
+    digitFocus.SetPosition(focus);
+    digitFocus.Show();
 }
 
 DigitPad::DigitPad(SubDisplay &display, ViewModel &viewModel)
@@ -210,8 +286,9 @@ DigitPad::MoveFocus(Direction dir) {
 
     debugf("Focus: (%d, %d)\n", focus.x, focus.y);
 
-    digitFocus.SetPosition(focus);
-    digitFocus.Show();
+    // Final visual state lives here so focus still works without animation
+    // effects; effects may overwrite pixels in AfterHandle before OAM flush
+    SnapFocusVisual();
 }
 
 void
@@ -221,9 +298,7 @@ DigitPad::SetFocus(int index) {
     }
 
     focus = bitToPoint(index);
-    digitFocus.SetPosition(focus);
-    // Show focus sprites
-    digitFocus.Show();
+    SnapFocusVisual();
 }
 
 void
