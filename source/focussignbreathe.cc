@@ -60,8 +60,13 @@ void
 FocusSignBreathe::sync(AnimationGate &gate) {
     // Get the focused keyboard index
     const int focused = inputView.FocusedKeyboardIndex();
-    if (focused < 0) { // No focused keyboard index, cancel the animation.
-        gate.Cancel(AnimationChannel::NonBlocking);
+    if (focused < 0) {
+        // Only cancel when this effect owns NonBlocking; otherwise ClearEvent /
+        // TouchScreenEvent in EditorView would kill DigitFocusDiverge
+        // mid-start.
+        if (active) {
+            gate.Cancel(AnimationChannel::NonBlocking);
+        }
         return;
     }
 
