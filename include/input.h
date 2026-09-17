@@ -34,6 +34,11 @@ struct Point {
         return (static_cast<int>(x) << 16) | static_cast<int>(y);
     }
 
+    static constexpr bool
+    SamePosition(const Point &p1, const Point &p2) {
+        return (p1.x == p2.x) && (p1.y == p2.y);
+    }
+
     template <int16_t colNum, int16_t rowNum>
     HEXCALC_ARM_CODE constexpr Point
     NextPosition(Direction dir) const {
