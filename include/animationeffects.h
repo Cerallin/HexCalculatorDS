@@ -271,4 +271,36 @@ class DigitFocusSlide : public BasicEffect {
     static void CancelThunk(void *ctx);
 };
 
+/**
+ * @brief DigitPad focus press: nudge down 1px then return on same-cell FlipBit.
+ */
+class DigitFocusPress : public BasicEffect {
+  public:
+    DigitFocusPress(EditorView &editorView, DigitFocusAnimState &state);
+
+    void AfterHandle(const Event &e, AnimationGate &gate);
+    void Cancel(void);
+
+  private:
+    static constexpr uint16_t DownFrames = 2;
+    static constexpr uint16_t HoldFrames = 1;
+    static constexpr uint16_t UpFrames = 2;
+    static constexpr uint16_t TotalFrames = DownFrames + HoldFrames + UpFrames;
+    static constexpr int PressOffsetY = 1;
+
+    DigitPad &digitPad;
+    DigitFocus &digitFocus;
+    DigitFocusAnimState &state;
+
+    uint16_t phase;
+    Point basePx;
+
+    bool start(AnimationGate &gate);
+    bool Tick(void);
+    void snapToLogical(void);
+
+    static bool TickThunk(void *ctx);
+    static void CancelThunk(void *ctx);
+};
+
 }; // namespace HexCalc::AnimationEffects

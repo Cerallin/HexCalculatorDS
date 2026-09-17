@@ -20,6 +20,8 @@ AnimationHost::AnimationHost(Views &views, ViewModel &vm)
                         digitFocusAnimState),
       digitFocusSlide(views.GetInputViewAdapter().GetEditorView(),
                       digitFocusAnimState, digitFocusDiverge),
+      digitFocusPress(views.GetInputViewAdapter().GetEditorView(),
+                      digitFocusAnimState),
       formulaAnimation(views.GetFormulaView(), gate),
       inputAnimation(views.GetInputViewAdapter(), gate) {
     bind();
@@ -39,6 +41,9 @@ AnimationHost::bind(void) {
     formulaAnimation.Add(formulaPageSlide);
     inputAnimation.Add(focusSignBreathe);
     inputAnimation.Add(shiftModeSlide);
+    // Press before Converge: on first FlipBit, Converge sets lastCell then a
+    // later Press would steal NonBlocking. Press skips when !HasVisual.
+    inputAnimation.Add(digitFocusPress);
     inputAnimation.Add(digitFocusConverge);
     inputAnimation.Add(digitFocusSlide);
     inputAnimation.Add(digitFocusDiverge);

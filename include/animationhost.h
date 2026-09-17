@@ -57,6 +57,7 @@ class AnimationHost : private NonCopyable {
     AnimationEffects::DigitFocusConverge digitFocusConverge;
     AnimationEffects::DigitFocusDiverge digitFocusDiverge;
     AnimationEffects::DigitFocusSlide digitFocusSlide;
+    AnimationEffects::DigitFocusPress digitFocusPress;
 
     // Animation wrappers
     Animated<FormulaView> formulaAnimation;
