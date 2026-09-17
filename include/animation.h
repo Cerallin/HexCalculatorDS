@@ -11,7 +11,7 @@
 
 namespace HexCalc {
 
-constexpr size_t MaxEffects = 4;
+constexpr size_t MaxEffects = 8;
 
 /**
  * @brief Animation slots keyed by input-blocking policy, not by effect kind.

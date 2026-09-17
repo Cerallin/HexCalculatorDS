@@ -47,10 +47,16 @@ class AnimationHost : private NonCopyable {
     Views &views;
     AnimationGate gate;
 
+    // Shared DigitPad focus-frame visual state
+    AnimationEffects::DigitFocusAnimState digitFocusAnimState;
+
     // Animation effects
     AnimationEffects::FormulaPageSlide formulaPageSlide;
     AnimationEffects::FocusSignBreathe focusSignBreathe;
     AnimationEffects::ShiftModeSlide shiftModeSlide;
+    AnimationEffects::DigitFocusConverge digitFocusConverge;
+    AnimationEffects::DigitFocusSlide digitFocusSlide;
+    AnimationEffects::DigitFocusDiverge digitFocusDiverge;
 
     // Animation wrappers
     Animated<FormulaView> formulaAnimation;

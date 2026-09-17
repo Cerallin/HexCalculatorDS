@@ -9,10 +9,17 @@
 using namespace HexCalc;
 
 AnimationHost::AnimationHost(Views &views, ViewModel &vm)
-    : views(views), gate(), formulaPageSlide(views.GetFormulaView()),
+    : views(views), gate(), digitFocusAnimState(),
+      formulaPageSlide(views.GetFormulaView()),
       focusSignBreathe(views.GetInputViewAdapter().GetInputView(),
                        views.GetSubDisplay()),
       shiftModeSlide(views.GetInputViewAdapter().GetEditorView()),
+      digitFocusConverge(views.GetInputViewAdapter().GetEditorView(),
+                         digitFocusAnimState),
+      digitFocusSlide(views.GetInputViewAdapter().GetEditorView(),
+                      digitFocusAnimState),
+      digitFocusDiverge(views.GetInputViewAdapter().GetEditorView(),
+                        digitFocusAnimState),
       formulaAnimation(views.GetFormulaView(), gate),
       inputAnimation(views.GetInputViewAdapter(), gate) {
     bind();
@@ -32,6 +39,9 @@ AnimationHost::bind(void) {
     formulaAnimation.Add(formulaPageSlide);
     inputAnimation.Add(focusSignBreathe);
     inputAnimation.Add(shiftModeSlide);
+    inputAnimation.Add(digitFocusConverge);
+    inputAnimation.Add(digitFocusSlide);
+    inputAnimation.Add(digitFocusDiverge);
 }
 
 void
