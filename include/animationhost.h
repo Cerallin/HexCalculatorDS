@@ -55,8 +55,8 @@ class AnimationHost : private NonCopyable {
     AnimationEffects::FocusSignBreathe focusSignBreathe;
     AnimationEffects::ShiftModeSlide shiftModeSlide;
     AnimationEffects::DigitFocusConverge digitFocusConverge;
-    AnimationEffects::DigitFocusSlide digitFocusSlide;
     AnimationEffects::DigitFocusDiverge digitFocusDiverge;
+    AnimationEffects::DigitFocusSlide digitFocusSlide;
 
     // Animation wrappers
     Animated<FormulaView> formulaAnimation;

@@ -128,8 +128,8 @@ DigitPad::SnapFocusVisual(void) {
 }
 
 DigitPad::DigitPad(SubDisplay &display, ViewModel &viewModel)
-    : display(display), vm(viewModel), focus(-1, -1), digitFocus(display),
-      handler(viewModel.Cmds()) {}
+    : display(display), vm(viewModel), focus(-1, -1), focusWrapped(false),
+      digitFocus(display), handler(viewModel.Cmds()) {}
 
 bool
 DigitPad::isBitActive(int bitIndex) const {
@@ -191,6 +191,7 @@ DigitPad::HandleWidthChange(void) {
     // Drop focus if the highlighted bit is no longer in range
     if ((focus.x >= 0) && (focus.y >= 0) && !isBitActive(GetFocus())) {
         focus = Point(-1, -1);
+        focusWrapped = false;
         digitFocus.Hide();
     }
 }
@@ -202,6 +203,7 @@ DigitPad::Setup(void) {
 
     // Reset focus
     focus = Point(-1, -1);
+    focusWrapped = false;
 
     // Hide focus sprites
     digitFocus.Hide();
@@ -210,6 +212,7 @@ DigitPad::Setup(void) {
 void
 DigitPad::Teardown(void) {
     focus = Point(-1, -1);
+    focusWrapped = false;
     digitFocus.Hide();
 }
 
@@ -273,15 +276,47 @@ DigitPad::nextBitIndex(int bitIndex, Direction dir, int width) const {
     }
 }
 
+bool
+DigitPad::isWrapMove(int fromBit, Direction dir, int width) const {
+    // Bits are laid out MSB-first in row-major order (colNum wide). Adjacent
+    // bit indices can sit on opposite ends of neighboring rows (e.g. 31↔32),
+    // which must use diverge/converge instead of slide.
+    const int toBit = nextBitIndex(fromBit, dir, width);
+    if (toBit == fromBit) {
+        return false;
+    }
+
+    const Point from = bitToPoint(fromBit);
+    const Point to = bitToPoint(toBit);
+
+    switch (dir) {
+    case Direction::DirLeft:
+        // Visual left: same row, one column toward x=0.
+        return !((to.y == from.y) && (to.x == from.x - 1));
+    case Direction::DirRight:
+        return !((to.y == from.y) && (to.x == from.x + 1));
+    case Direction::DirUp:
+        // Visual up: same column, one row toward y=0.
+        return !((to.x == from.x) && (to.y == from.y - 1));
+    case Direction::DirDown:
+        return !((to.x == from.x) && (to.y == from.y + 1));
+    default:
+        return false;
+    }
+}
+
 void
 DigitPad::MoveFocus(Direction dir) {
     int width = static_cast<int>(vm.GetNumberWidth());
+    focusWrapped = false;
 
     if (focus.x < 0 && focus.y < 0) {
         // Prefer the MSB among bits that are active for the current width
         focus = bitToPoint(width - 1);
     } else {
-        focus = bitToPoint(nextBitIndex(GetFocus(), dir, width));
+        const int fromBit = GetFocus();
+        focusWrapped = isWrapMove(fromBit, dir, width);
+        focus = bitToPoint(nextBitIndex(fromBit, dir, width));
     }
 
     debugf("Focus: (%d, %d)\n", focus.x, focus.y);
@@ -297,6 +332,7 @@ DigitPad::SetFocus(int index) {
         return;
     }
 
+    focusWrapped = false;
     focus = bitToPoint(index);
     SnapFocusVisual();
 }
@@ -306,6 +342,7 @@ DigitPad::HandleButtons(const Point &touchPoint) {
     bool handled = handler.Handle(touchPoint);
     if (!handled) {
         focus = Point(-1, -1);
+        focusWrapped = false;
         digitFocus.Hide();
     }
 }

@@ -16,10 +16,10 @@ AnimationHost::AnimationHost(Views &views, ViewModel &vm)
       shiftModeSlide(views.GetInputViewAdapter().GetEditorView()),
       digitFocusConverge(views.GetInputViewAdapter().GetEditorView(),
                          digitFocusAnimState),
-      digitFocusSlide(views.GetInputViewAdapter().GetEditorView(),
-                      digitFocusAnimState),
       digitFocusDiverge(views.GetInputViewAdapter().GetEditorView(),
                         digitFocusAnimState),
+      digitFocusSlide(views.GetInputViewAdapter().GetEditorView(),
+                      digitFocusAnimState, digitFocusDiverge),
       formulaAnimation(views.GetFormulaView(), gate),
       inputAnimation(views.GetInputViewAdapter(), gate) {
     bind();

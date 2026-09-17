@@ -35,9 +35,10 @@ sign(int delta) {
 } // namespace
 
 DigitFocusSlide::DigitFocusSlide(EditorView &editorView,
-                                 DigitFocusAnimState &state)
+                                 DigitFocusAnimState &state,
+                                 DigitFocusDiverge &diverge)
     : digitPad(editorView.GetDigitPad()), digitFocus(digitPad.GetDigitFocus()),
-      state(state), phase(0), fromPx(0, 0), toPx(0, 0) {}
+      state(state), diverge(diverge), phase(0), fromPx(0, 0), toPx(0, 0) {}
 
 void
 DigitFocusSlide::AfterHandle(const Event &e, AnimationGate &gate) {
@@ -62,6 +63,12 @@ DigitFocusSlide::AfterHandle(const Event &e, AnimationGate &gate) {
 
     const Point cell = digitPad.FocusCell();
     if (Point::SamePosition(cell, state.lastCell)) {
+        return;
+    }
+
+    if ((e.type == EventType::MoveFocusEvent) && digitPad.LastFocusWrapped()) {
+        const Point fromCell = state.lastCell;
+        diverge.StartWrap(fromCell, cell, gate);
         return;
     }
 

@@ -189,11 +189,62 @@ class DigitFocusConverge : public BasicEffect {
 };
 
 /**
+ * @brief DigitPad focus lose: four-corner diverge (inverse of converge) then
+ *        Hide; or wrap navigation: diverge then converge in one NonBlocking
+ * run.
+ */
+class DigitFocusDiverge : public BasicEffect {
+  public:
+    DigitFocusDiverge(EditorView &editorView, DigitFocusAnimState &state);
+
+    void AfterHandle(const Event &e, AnimationGate &gate);
+    void Cancel(void);
+
+    /**
+     * @brief Wrap navigation: diverge at fromCell, then converge at toCell.
+     */
+    bool StartWrap(Point fromCell, Point toCell, AnimationGate &gate);
+
+  private:
+    enum class Phase : uint8_t {
+        Diverge,
+        Converge,
+    };
+
+    static constexpr uint16_t Frames = 5;
+    static constexpr int SpreadPx = 2;
+
+    DigitPad &digitPad;
+    DigitFocus &digitFocus;
+    DigitFocusAnimState &state;
+
+    Phase phaseKind;
+    bool wrapFollow;
+    uint16_t phase;
+    Point toCell;
+    Point toPx;
+    Point startCorners[DigitFocus::CornerCount];
+    Point endCorners[DigitFocus::CornerCount];
+
+    void clearVisual(AnimationGate &gate);
+    void setupDivergeCorners(Point basePx);
+    void setupConvergeCorners(Point basePx);
+    bool start(AnimationGate &gate);
+    bool Tick(void);
+    bool tickDiverge(void);
+    bool tickConverge(void);
+
+    static bool TickThunk(void *ctx);
+    static void CancelThunk(void *ctx);
+};
+
+/**
  * @brief DigitPad focus cell-to-cell slide (ease-in-out + 1px overshoot).
  */
 class DigitFocusSlide : public BasicEffect {
   public:
-    DigitFocusSlide(EditorView &editorView, DigitFocusAnimState &state);
+    DigitFocusSlide(EditorView &editorView, DigitFocusAnimState &state,
+                    DigitFocusDiverge &diverge);
 
     void AfterHandle(const Event &e, AnimationGate &gate);
     void Cancel(void);
@@ -206,6 +257,7 @@ class DigitFocusSlide : public BasicEffect {
     DigitPad &digitPad;
     DigitFocus &digitFocus;
     DigitFocusAnimState &state;
+    DigitFocusDiverge &diverge;
 
     uint16_t phase;
     Point fromPx;
@@ -214,37 +266,6 @@ class DigitFocusSlide : public BasicEffect {
     bool start(AnimationGate &gate);
     bool Tick(void);
     void snapToLogical(void);
-
-    static bool TickThunk(void *ctx);
-    static void CancelThunk(void *ctx);
-};
-
-/**
- * @brief DigitPad focus lose: four-corner diverge (inverse of converge) then
- * Hide.
- */
-class DigitFocusDiverge : public BasicEffect {
-  public:
-    DigitFocusDiverge(EditorView &editorView, DigitFocusAnimState &state);
-
-    void AfterHandle(const Event &e, AnimationGate &gate);
-    void Cancel(void);
-
-  private:
-    static constexpr uint16_t Frames = 5;
-    static constexpr int SpreadPx = 2;
-
-    DigitPad &digitPad;
-    DigitFocus &digitFocus;
-    DigitFocusAnimState &state;
-
-    uint16_t phase;
-    Point startCorners[DigitFocus::CornerCount];
-    Point endCorners[DigitFocus::CornerCount];
-
-    void clearVisual(AnimationGate &gate);
-    bool start(AnimationGate &gate);
-    bool Tick(void);
 
     static bool TickThunk(void *ctx);
     static void CancelThunk(void *ctx);

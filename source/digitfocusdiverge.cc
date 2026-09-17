@@ -34,9 +34,40 @@ lerpInt(int from, int to, uint16_t t256) {
 DigitFocusDiverge::DigitFocusDiverge(EditorView &editorView,
                                      DigitFocusAnimState &state)
     : digitPad(editorView.GetDigitPad()), digitFocus(digitPad.GetDigitFocus()),
-      state(state), phase(0), startCorners{Point(0, 0), Point(0, 0),
-                                           Point(0, 0), Point(0, 0)},
+      state(state), phaseKind(Phase::Diverge), wrapFollow(false), phase(0),
+      toCell(-1, -1), toPx(0, 0), startCorners{Point(0, 0), Point(0, 0),
+                                               Point(0, 0), Point(0, 0)},
       endCorners{Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)} {}
+
+void
+DigitFocusDiverge::setupDivergeCorners(Point basePx) {
+    Point locked[DigitFocus::CornerCount] = {Point(0, 0), Point(1, 0),
+                                             Point(0, 7), Point(1, 7)};
+    DigitFocus::LockedCornerOffsets(locked);
+    for (int i = 0; i < DigitFocus::CornerCount; i++) {
+        const int16_t x = basePx.x + locked[i].x;
+        const int16_t y = basePx.y + locked[i].y;
+        startCorners[i].x = x;
+        startCorners[i].y = y;
+        endCorners[i].x = x + kOutward[i].x * SpreadPx;
+        endCorners[i].y = y + kOutward[i].y * SpreadPx;
+    }
+}
+
+void
+DigitFocusDiverge::setupConvergeCorners(Point basePx) {
+    Point locked[DigitFocus::CornerCount] = {Point(0, 0), Point(1, 0),
+                                             Point(0, 7), Point(1, 7)};
+    DigitFocus::LockedCornerOffsets(locked);
+    for (int i = 0; i < DigitFocus::CornerCount; i++) {
+        const int16_t x = basePx.x + locked[i].x;
+        const int16_t y = basePx.y + locked[i].y;
+        endCorners[i].x = x;
+        endCorners[i].y = y;
+        startCorners[i].x = x + kOutward[i].x * SpreadPx;
+        startCorners[i].y = y + kOutward[i].y * SpreadPx;
+    }
+}
 
 void
 DigitFocusDiverge::AfterHandle(const Event &e, AnimationGate &gate) {
@@ -50,21 +81,9 @@ DigitFocusDiverge::AfterHandle(const Event &e, AnimationGate &gate) {
         }
 
         // DigitPad already Hid(); pixel cache is intact — revive and diverge.
-        const Point base = digitFocus.GetPixelPosition();
-        Point locked[DigitFocus::CornerCount] = {Point(0, 0), Point(1, 0),
-                                                 Point(0, 7), Point(1, 7)};
-        DigitFocus::LockedCornerOffsets(locked);
-        for (int i = 0; i < DigitFocus::CornerCount; i++) {
-            int16_t x = base.x + locked[i].x;
-            int16_t y = base.y + locked[i].y;
-            int16_t outwardX = kOutward[i].x * SpreadPx;
-            int16_t outwardY = kOutward[i].y * SpreadPx;
-
-            startCorners[i].x = x;
-            startCorners[i].y = y;
-            endCorners[i].x = x + outwardX;
-            endCorners[i].y = y + outwardY;
-        }
+        wrapFollow = false;
+        phaseKind = Phase::Diverge;
+        setupDivergeCorners(digitFocus.GetPixelPosition());
 
         // Mark visual focus gone so a re-focus mid-animation starts Converge.
         state.Clear();
@@ -78,6 +97,29 @@ DigitFocusDiverge::AfterHandle(const Event &e, AnimationGate &gate) {
     }
 }
 
+bool
+DigitFocusDiverge::StartWrap(Point fromCell, Point toCellArg,
+                             AnimationGate &gate) {
+    wrapFollow = true;
+    phaseKind = Phase::Diverge;
+    toCell = toCellArg;
+    toPx = DigitPad::CellToFocusPixel(toCellArg);
+
+    setupDivergeCorners(DigitPad::CellToFocusPixel(fromCell));
+    state.Clear();
+    digitFocus.SetSignColor(COLOR_COMMON_BORDER);
+    digitFocus.SetCornerPositions(startCorners);
+    digitFocus.Show();
+    if (!start(gate)) {
+        digitPad.SnapFocusVisual();
+        digitFocus.ResetSignColor();
+        state.lastCell = toCellArg;
+        wrapFollow = false;
+        return false;
+    }
+    return true;
+}
+
 void
 DigitFocusDiverge::clearVisual(AnimationGate &gate) {
     if (active) {
@@ -85,6 +127,8 @@ DigitFocusDiverge::clearVisual(AnimationGate &gate) {
     }
     active = false;
     phase = 0;
+    wrapFollow = false;
+    phaseKind = Phase::Diverge;
     state.Clear();
     digitFocus.Hide();
     digitFocus.ResetSignColor();
@@ -107,18 +151,21 @@ void
 DigitFocusDiverge::Cancel(void) {
     active = false;
     phase = 0;
-    if (!digitPad.HasFocus()) {
+    wrapFollow = false;
+    phaseKind = Phase::Diverge;
+    if (digitPad.HasFocus()) {
+        digitPad.SnapFocusVisual();
+        digitFocus.ResetSignColor();
+        state.lastCell = digitPad.FocusCell();
+    } else {
         digitFocus.Hide();
+        digitFocus.ResetSignColor();
+        state.Clear();
     }
-    digitFocus.ResetSignColor();
 }
 
 bool
-DigitFocusDiverge::Tick(void) {
-    if (!active) {
-        return false;
-    }
-
+DigitFocusDiverge::tickDiverge(void) {
     const uint16_t t256 = static_cast<uint16_t>(
         (static_cast<uint32_t>(phase + 1) * 256) / Frames);
     const uint16_t eased = EaseInOutCubicBezier(t256);
@@ -134,13 +181,66 @@ DigitFocusDiverge::Tick(void) {
         LerpRgb15(COLOR_COMMON_BORDER, COLOR_COMMON_BG, eased));
 
     phase++;
-    if (phase >= Frames) {
+    if (phase < Frames) {
+        return true;
+    }
+
+    if (!wrapFollow) {
         digitFocus.Hide();
         digitFocus.ResetSignColor();
         active = false;
         return false;
     }
+
+    // Continue in the same NonBlocking slot with converge at the destination.
+    phaseKind = Phase::Converge;
+    phase = 0;
+    setupConvergeCorners(toPx);
+    digitFocus.SetSignColor(COLOR_COMMON_BG);
+    digitFocus.SetCornerPositions(startCorners);
+    digitFocus.Show();
     return true;
+}
+
+bool
+DigitFocusDiverge::tickConverge(void) {
+    const uint16_t t256 = static_cast<uint16_t>(
+        (static_cast<uint32_t>(phase + 1) * 256) / Frames);
+    const uint16_t eased = EaseInOutCubicBezier(t256);
+
+    Point corners[DigitFocus::CornerCount] = {Point(0, 0), Point(0, 0),
+                                              Point(0, 0), Point(0, 0)};
+    for (int i = 0; i < DigitFocus::CornerCount; i++) {
+        corners[i].x = lerpInt(startCorners[i].x, endCorners[i].x, eased);
+        corners[i].y = lerpInt(startCorners[i].y, endCorners[i].y, eased);
+    }
+    digitFocus.SetCornerPositions(corners);
+    digitFocus.SetSignColor(
+        LerpRgb15(COLOR_COMMON_BG, COLOR_COMMON_BORDER, eased));
+
+    phase++;
+    if (phase >= Frames) {
+        digitFocus.SetPixelPosition(toPx);
+        digitFocus.ResetSignColor();
+        state.lastCell = toCell;
+        wrapFollow = false;
+        phaseKind = Phase::Diverge;
+        active = false;
+        return false;
+    }
+    return true;
+}
+
+bool
+DigitFocusDiverge::Tick(void) {
+    if (!active) {
+        return false;
+    }
+
+    if (phaseKind == Phase::Converge) {
+        return tickConverge();
+    }
+    return tickDiverge();
 }
 
 bool

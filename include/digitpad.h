@@ -125,6 +125,15 @@ class DigitPad : public NonCopyable {
      */
     void SnapFocusVisual(void);
 
+    /**
+     * @brief True if the most recent MoveFocus was not a visual neighbor step
+     *        (row/column edge fold or width modulo wrap).
+     */
+    bool
+    LastFocusWrapped(void) const {
+        return focusWrapped;
+    }
+
   private:
     friend class DigitFocus;
 
@@ -146,6 +155,7 @@ class DigitPad : public NonCopyable {
     ViewModel &vm;
 
     Point focus;
+    bool focusWrapped;
 
     DigitFocus digitFocus;
 
@@ -154,6 +164,7 @@ class DigitPad : public NonCopyable {
     bool isBitActive(int bitIndex) const;
     Point bitToPoint(int bitIndex) const;
     int nextBitIndex(int bitIndex, Direction dir, int width) const;
+    bool isWrapMove(int fromBit, Direction dir, int width) const;
     void updateButtons(void);
 };
 
