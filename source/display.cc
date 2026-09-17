@@ -278,6 +278,15 @@ SubDisplay::SelectButton(int index) {
 }
 
 void
+SubDisplay::SetButtonSignColor(int index, uint16_t color) {
+    constexpr size_t signOffset = 4;
+    const size_t offset =
+        MAX_4BPP_PAL_COUNT + (index * ColorCount) + signOffset;
+    uint16_t *dest = &BG_PALETTE_SUB[offset];
+    *dest = color;
+}
+
+void
 SubDisplay::UpdateWidthDrawer(NumberWidth width) {
     widthManager.DrawText(width, 0, 0);
 }

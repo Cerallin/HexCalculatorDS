@@ -445,6 +445,7 @@ class SubDisplay : public Display<SubDisplay> {
     void DisableButton(int index);
     void EnableButton(int index);
     void SelectButton(int index);
+    void SetButtonSignColor(int index, uint16_t color);
 
     void UpdateWidthDrawer(NumberWidth width);
     void UpdateSignDrawer(NumberSign sign);
