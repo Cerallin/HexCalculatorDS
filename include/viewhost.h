@@ -44,12 +44,20 @@ class InputViewAdapter : private SubView<InputViewAdapter> {
 };
 
 /**
- * @brief Default claims: no view is taken over by AnimationHost.
+ * @brief Compile-time set of view types claimed by AnimationHost
+ *        (skipped in ViewHost Subscribe/Update).
+ *
+ * Usage: ViewClaims<FormulaView, ValueView, ...>
  */
-struct NoViewClaims {
+template <typename... Claimed>
+struct ViewClaims {
     template <typename V>
-    struct IsClaimed : std::false_type {};
+    struct IsClaimed
+        : std::bool_constant<(std::is_same_v<V, Claimed> || ... || false)> {};
 };
+
+/** @brief Default claims: no view is taken over by AnimationHost. */
+using NoViewClaims = ViewClaims<>;
 
 /**
  * @brief The ViewHost class manages the views on the main and sub screens. It

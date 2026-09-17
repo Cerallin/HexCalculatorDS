@@ -10,21 +10,13 @@
 #include "formulapageslide.h"
 #include "viewhost.h"
 
-#include <type_traits>
-
 namespace HexCalc {
 
 /**
- * @brief Compile-time set of views owned by AnimationHost
- * (skip raw Subscribe/Update).
+ * @brief Views owned by AnimationHost (skip raw Subscribe/Update).
+ *        Extend with more types: ViewClaims<FormulaView, ValueView, ...>
  */
-struct AnimationViewClaims {
-    template <typename V>
-    struct IsClaimed : std::false_type {};
-};
-
-template <>
-struct AnimationViewClaims::IsClaimed<FormulaView> : std::true_type {};
+using AnimationViewClaims = ViewClaims<FormulaView>;
 
 /**
  * @brief Optional animation layer over ViewHost.
@@ -49,8 +41,22 @@ class AnimationHost : private NonCopyable {
   private:
     Views &views;
     AnimationGate gate;
+
+    // Animation effects
     AnimationEffects::FormulaPageSlide formulaPageSlide;
-    Animated<FormulaView> formulaAnim;
+
+    // Animation wrappers
+    Animated<FormulaView> formulaAnimation;
+
+    /*
+     * @brief Bind animation effects to the animation wrapper.
+     */
+    void bind(void);
+
+    /*
+     * @brief Subscribe to the animation wrapper.
+     */
+    void subscribe(EventBus &bus);
 };
 
 }; // namespace HexCalc

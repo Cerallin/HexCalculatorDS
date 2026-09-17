@@ -10,14 +10,25 @@ using namespace HexCalc;
 
 AnimationHost::AnimationHost(Views &views, ViewModel &vm)
     : views(views), gate(), formulaPageSlide(views.GetFormulaView()),
-      formulaAnim(views.GetFormulaView(), gate) {
-    formulaAnim.Add(formulaPageSlide);
-    vm.Bus().Subscribe(formulaAnim);
+      formulaAnimation(views.GetFormulaView(), gate) {
+    bind();
+    subscribe(vm.Bus());
 }
 
 void
 AnimationHost::Update(void) {
     gate.Update();
     views.Update();
-    formulaAnim.Update();
+    formulaAnimation.Update();
+}
+
+void
+AnimationHost::bind(void) {
+    // Slide the formula by page
+    formulaAnimation.Add(formulaPageSlide);
+}
+
+void
+AnimationHost::subscribe(EventBus &bus) {
+    bus.Subscribe(formulaAnimation);
 }
