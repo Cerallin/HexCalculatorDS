@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include "formulapageslide.h"
+#include "animationeffects.h"
 
 using namespace HexCalc;
 using namespace HexCalc::AnimationEffects;
@@ -18,8 +18,8 @@ constexpr int16_t kCharWidth = GlyphArray6x8<0>::CharWidth;
 
 FormulaPageSlide::FormulaPageSlide(FormulaView &view)
     : view(view), display(view.GetDisplay()), vm(view.GetVM()),
-      area(view.GetArea()), active(false), dir(DirLeft), offsetPx(0),
-      distancePx(0), baseX(0), lastStart(0), strip() {}
+      area(view.GetArea()), dir(DirLeft), offsetPx(0), distancePx(0), baseX(0),
+      lastStart(0), strip() {}
 
 bool
 FormulaPageSlide::TryHandle(const Event &e, AnimationGate &gate) {
@@ -79,21 +79,6 @@ FormulaPageSlide::TryHandle(const Event &e, AnimationGate &gate) {
 bool
 FormulaPageSlide::Suppress(const Event &e) const {
     return active && (e.type == EventType::FormulaUpdatedEvent);
-}
-
-bool
-FormulaPageSlide::IsActive(void) const {
-    return active;
-}
-
-void
-FormulaPageSlide::AfterHandle(const Event &, AnimationGate &) {
-    // do nothing
-}
-
-void
-FormulaPageSlide::Cancel(void) {
-    // Blocking animations are not cancellable
 }
 
 bool

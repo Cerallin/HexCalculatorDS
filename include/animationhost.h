@@ -7,8 +7,7 @@
 #pragma once
 
 #include "animation.h"
-#include "focussignbreathe.h"
-#include "formulapageslide.h"
+#include "animationeffects.h"
 #include "viewhost.h"
 
 namespace HexCalc {

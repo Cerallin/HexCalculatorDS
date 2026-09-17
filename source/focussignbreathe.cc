@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include "focussignbreathe.h"
+#include "animationeffects.h"
 #include "theme.h"
 
 using namespace HexCalc;
@@ -13,22 +13,7 @@ using namespace HexCalc::AnimationEffects;
 FocusSignBreathe::FocusSignBreathe(InputView &inputView, SubDisplay &display)
     : inputView(inputView), display(display),
       curve(COLOR_COMMON_BORDER, COLOR_COMMON_BG, Period, BezierTriangle),
-      active(false), buttonIndex(-1), phase(0) {}
-
-bool
-FocusSignBreathe::TryHandle(const Event &, AnimationGate &) {
-    return false;
-}
-
-bool
-FocusSignBreathe::Suppress(const Event &) const {
-    return false;
-}
-
-bool
-FocusSignBreathe::IsActive(void) const {
-    return active;
-}
+      buttonIndex(-1), phase(0) {}
 
 void
 FocusSignBreathe::AfterHandle(const Event &e, AnimationGate &gate) {
@@ -69,11 +54,6 @@ FocusSignBreathe::Cancel(void) {
             display.DisableButton(previous);
         }
     }
-}
-
-bool
-FocusSignBreathe::SuppressesViewUpdate(void) const {
-    return false;
 }
 
 void
