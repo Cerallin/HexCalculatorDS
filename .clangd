@@ -1,8 +1,47 @@
-# Prefer CMake compile_commands; strip GCC-only flags clangd rejects.
-# System includes come from --query-driver in .vscode/settings.json.
+# Prefer CMake compile_commands (--compile-commands-dir in .vscode/settings.json).
+# Strip GCC-only flags that Clang rejects.
 # Do NOT add --target=... here: query-driver passes CompileFlags to g++,
 # and arm-none-eabi-g++ does not accept Clang's -target.
+#
+# clangd 11 warns on CompileFlags.CompilationDatabase; use CLI flag instead.
 CompileFlags:
-  CompilationDatabase: build
   Remove:
     - -mthumb-interwork
+
+---
+# Project headers under include/ are C++. clangd may still infer a command from
+# generated grit .c files (gcc + C-only -isystem). GCC/Clang dedupe -isystem
+# paths, so appending C++ dirs after those C dirs breaks libstdc++ headers
+# that use #include_next <math.h>.
+#
+# Remove the C-only isystem args query-driver injects for gcc, then append the
+# full g++ sysroot list in the correct order (C++ before libc).
+If:
+  PathMatch: .*/include/.*\.h
+CompileFlags:
+  Compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-g++
+  Remove:
+    - -isystem
+    - /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/14.2.0/include
+    - -isystem
+    - /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/14.2.0/include-fixed
+    - -isystem
+    - /opt/devkitpro/devkitARM/bin/../lib/gcc/arm-none-eabi/14.2.0/../../../../arm-none-eabi/include
+    - -x
+    - c-header
+  Add:
+    - -x
+    - c++-header
+    - -std=c++17
+    - -isystem
+    - /opt/devkitpro/devkitARM/arm-none-eabi/include/c++/14.2.0
+    - -isystem
+    - /opt/devkitpro/devkitARM/arm-none-eabi/include/c++/14.2.0/arm-none-eabi
+    - -isystem
+    - /opt/devkitpro/devkitARM/arm-none-eabi/include/c++/14.2.0/backward
+    - -isystem
+    - /opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/14.2.0/include
+    - -isystem
+    - /opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/14.2.0/include-fixed
+    - -isystem
+    - /opt/devkitpro/devkitARM/arm-none-eabi/include

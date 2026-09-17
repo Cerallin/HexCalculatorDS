@@ -308,3 +308,16 @@ add_custom_command(
 )
 
 add_custom_target(nds ALL DEPENDS ${NDS_FILE})
+
+# ----------------------------------------
+# clangd: drop grit .c from compile_commands.json
+# ----------------------------------------
+# Those entries make clangd treat project headers as C (no libstdc++), which
+# breaks <array> / #include_next <math.h>. Re-run after the DB is refreshed.
+add_custom_target(filter_compile_commands ALL
+    COMMAND ${CMAKE_COMMAND}
+        -DCOMPILE_COMMANDS=${CMAKE_BINARY_DIR}/compile_commands.json
+        -P ${CMAKE_SOURCE_DIR}/cmake/filter-compile-commands.cmake
+    COMMENT "Filtering .c entries from compile_commands.json for clangd"
+    VERBATIM
+)
