@@ -15,6 +15,11 @@ namespace HexCalc {
 
 constexpr int VersionTileOffset = 16;
 constexpr int DigitFocusTileOffset = 32;
+/** Dedicated 4bpp sprite palette bank so focus color lerp does not affect
+ *  numbers / version sprites on bank 0. */
+constexpr int DigitFocusPaletteBank = 1;
+/** Tile pixels use palette index 2 (COLOR_COMMON_BORDER in subSpritePal). */
+constexpr int DigitFocusSignColorIndex = 2;
 
 class MainDisplay;
 class SubDisplay;
@@ -29,9 +34,10 @@ class Sprite {
     static constexpr auto SpriteColorFormat = SpriteColorFormat_16Color;
 
     constexpr Sprite(Point position, const uint16_t *tile, int priority,
-                     bool hFlip = false, bool vFlip = false, bool dirty = true)
-        : position(position), tile(tile), priority(priority), hFlip(hFlip),
-          vFlip(vFlip), dirty(dirty) {}
+                     bool hFlip = false, bool vFlip = false, bool dirty = true,
+                     int palette = 0)
+        : position(position), tile(tile), priority(priority), palette(palette),
+          hFlip(hFlip), vFlip(vFlip), dirty(dirty) {}
 
     constexpr Sprite(void) : Sprite(Point(0, 0), nullptr, -1) {}
 
@@ -70,6 +76,12 @@ class Sprite {
         dirty = true;
     }
 
+    void
+    SetPalette(int newPalette) {
+        palette = newPalette;
+        dirty = true;
+    }
+
     bool
     Dirty(void) const {
         return dirty;
@@ -86,7 +98,7 @@ class Sprite {
             // Debug tile
             debugf("tile: %p, hFlip: %d, vFlip: %d\n", tile, hFlip, vFlip);
 
-            oamSet(&oamState, id, position.x, position.y, priority, 0,
+            oamSet(&oamState, id, position.x, position.y, priority, palette,
                    SpriteSize, SpriteColorFormat, tile, affineIndex, false,
                    false, hFlip, vFlip, false);
         } else {
@@ -103,6 +115,7 @@ class Sprite {
     const uint16_t *tile;
 
     int priority;
+    int palette;
 
     bool hFlip;
     bool vFlip;
@@ -125,6 +138,33 @@ class SpriteManager : NonCopyable {
     }
 
     SpriteManager(void) : sprites{}, spriteCount(0) {}
+
+    static constexpr int PaletteBankSize = 16; // colors per 4bpp bank
+
+    static uint16_t *
+    PaletteBase(void) {
+        if constexpr (std::is_same_v<DisplayType, MainDisplay>) {
+            return SPRITE_PALETTE;
+        } else {
+            return SPRITE_PALETTE_SUB;
+        }
+    }
+
+    /**
+     * @brief Copy colors into a 4bpp sprite palette bank.
+     */
+    void
+    CopyPaletteBank(int bank, const void *src, size_t bytes) {
+        dmaCopy(src, PaletteBase() + (bank * PaletteBankSize), bytes);
+    }
+
+    /**
+     * @brief Set one color in a 4bpp sprite palette bank.
+     */
+    void
+    SetPaletteColor(int bank, int colorIndex, uint16_t color) {
+        PaletteBase()[(bank * PaletteBankSize) + colorIndex] = color;
+    }
 
     Sprite<DisplayType> *
     Add(Point position, int priority = 0, bool hFlip = false,

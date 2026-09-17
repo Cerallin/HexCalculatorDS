@@ -31,6 +31,8 @@ SubSpriteManager::SubSpriteManager(void) : SpriteManager<SubDisplay>() {
                       BIT(SubDisplay::Bpp),
                   "Palette size exceeds color format limit");
     dmaCopy(subSpritePal, SPRITE_PALETTE_SUB, sizeof(subSpritePal));
+    // Dedicated bank for DigitFocus sign-color animation (tiles use index 2).
+    CopyPaletteBank(DigitFocusPaletteBank, subSpritePal, sizeof(subSpritePal));
 
     constexpr auto _tileOffset = [](int count) {
         return (count * TileBytes) / sizeof(uint16_t);

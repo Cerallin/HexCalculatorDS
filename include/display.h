@@ -455,6 +455,8 @@ class SubDisplay : public Display<SubDisplay> {
     Sprite<SubDisplay> *AddSprite(Point position, int priority = 0,
                                   bool hFlip = false, bool vFlip = false);
     void ResetSprites(void);
+    void CopySpritePaletteBank(int bank, const void *src, size_t bytes);
+    void SetSpritePaletteColor(int bank, int colorIndex, uint16_t color);
 
     void CleanLayers(void);
 

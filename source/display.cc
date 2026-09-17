@@ -313,6 +313,16 @@ SubDisplay::ResetSprites(void) {
 }
 
 void
+SubDisplay::CopySpritePaletteBank(int bank, const void *src, size_t bytes) {
+    sm.CopyPaletteBank(bank, src, bytes);
+}
+
+void
+SubDisplay::SetSpritePaletteColor(int bank, int colorIndex, uint16_t color) {
+    sm.SetPaletteColor(bank, colorIndex, color);
+}
+
+void
 SubDisplay::CleanLayers(void) {
     for (int layer = 0; layer < TileBGNum; ++layer) {
         tileLayers[layer].Clear();
