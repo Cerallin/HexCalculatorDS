@@ -2,7 +2,7 @@
     "build": {
         "dockerfile": "./Dockerfile"
     },
-    "remoteUser": "user",
+    "remoteUser": "ubuntu",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -19,8 +19,8 @@
         }
     },
     "mounts": [
-        "source=${localEnv:HOME}/.ssh,target=/home/user/.ssh,type=bind,consistency=cached",
-        "source=${localEnv:HOME}/.gitconfig,target=/home/user/.gitconfig,type=bind,consistency=cached",
-        "source=${localWorkspaceFolder}/.devcontainer/cmake-tools-kits.json,target=/home/user/.local/share/CMakeTools/cmake-tools-kits.json,type=bind"
+        "source=${localEnv:HOME}/.ssh,target=/home/ubuntu/.ssh,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.gitconfig,target=/home/ubuntu/.gitconfig,type=bind,consistency=cached",
+        "source=${localWorkspaceFolder}/.devcontainer/cmake-tools-kits.json,target=/home/ubuntu/.local/share/CMakeTools/cmake-tools-kits.json,type=bind"
     ]
 }
