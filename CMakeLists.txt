@@ -209,7 +209,51 @@ add_custom_command(
 )
 
 # ----------------------------------------
-# Source files
+# ARM7 (minimal: no WiFi / maxmod)
+# ----------------------------------------
+
+add_executable(${PROJECT_NAME}.arm7.elf
+    arm7/source/main.c
+)
+
+target_include_directories(${PROJECT_NAME}.arm7.elf PRIVATE
+    ${LIBNDS}/include
+)
+
+target_compile_definitions(${PROJECT_NAME}.arm7.elf PRIVATE
+    ARM7
+)
+
+target_compile_options(${PROJECT_NAME}.arm7.elf PRIVATE
+    -mcpu=arm7tdmi
+    -mtune=arm7tdmi
+    -mthumb
+    -mthumb-interwork
+    -ffunction-sections
+    -fdata-sections
+    -fomit-frame-pointer
+    -ffast-math
+)
+
+target_link_options(${PROJECT_NAME}.arm7.elf PRIVATE
+    -mcpu=arm7tdmi
+    -mthumb
+    -mthumb-interwork
+    -Wl,--gc-sections
+    -Wl,--nmagic
+    -specs=ds_arm7.specs
+)
+
+target_link_directories(${PROJECT_NAME}.arm7.elf PRIVATE
+    ${LIBNDS}/lib
+)
+
+target_link_libraries(${PROJECT_NAME}.arm7.elf
+    nds7
+)
+
+# ----------------------------------------
+# ARM9 source files
 # ----------------------------------------
 
 file(GLOB_RECURSE SOURCES
@@ -217,7 +261,7 @@ file(GLOB_RECURSE SOURCES
     source/*.cc
 )
 
-add_executable(${PROJECT_NAME}.elf 
+add_executable(${PROJECT_NAME}.arm9.elf 
     ${SOURCES}
     ${CMAKE_CURRENT_BINARY_DIR}/mainFont.c
     ${CMAKE_CURRENT_BINARY_DIR}/subFont.c
@@ -229,21 +273,21 @@ add_executable(${PROJECT_NAME}.elf
     ${CMAKE_CURRENT_BINARY_DIR}/subscreenBinaryImage.c
 )
 
-target_include_directories(${PROJECT_NAME}.elf PRIVATE
+target_include_directories(${PROJECT_NAME}.arm9.elf PRIVATE
     include
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBNDS}/include
 )
 
 # ----------------------------------------
-# Compile Options
+# ARM9 Compile Options
 # ----------------------------------------
 
-target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
+target_compile_definitions(${PROJECT_NAME}.arm9.elf PRIVATE
     ARM9
 )
 
-target_compile_options(${PROJECT_NAME}.elf PRIVATE
+target_compile_options(${PROJECT_NAME}.arm9.elf PRIVATE
     -mcpu=arm946e-s
     -mthumb
     -mthumb-interwork
@@ -256,7 +300,7 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-fno-asynchronous-unwind-tables>
 )
 
-target_link_options(${PROJECT_NAME}.elf PRIVATE
+target_link_options(${PROJECT_NAME}.arm9.elf PRIVATE
     -mcpu=arm946e-s
     -mthumb
     -mthumb-interwork
@@ -264,21 +308,21 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
     -specs=ds_arm9.specs
 )
 
-set_target_properties(${PROJECT_NAME}.elf PROPERTIES
+set_target_properties(${PROJECT_NAME}.arm9.elf PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )
 
 # ----------------------------------------
-# Libraries
+# ARM9 Libraries
 # ----------------------------------------
 
-target_link_directories(${PROJECT_NAME}.elf PRIVATE
+target_link_directories(${PROJECT_NAME}.arm9.elf PRIVATE
     ${LIBNDS}/lib
 )
 
-target_link_libraries(${PROJECT_NAME}.elf
+target_link_libraries(${PROJECT_NAME}.arm9.elf
     nds9
 )
 
@@ -298,12 +342,13 @@ add_custom_command(
     OUTPUT ${NDS_FILE}
     COMMAND ${NDSTOOL}
         -c ${NDS_FILE}
-        -9 $<TARGET_FILE:${PROJECT_NAME}.elf>
+        -7 $<TARGET_FILE:${PROJECT_NAME}.arm7.elf>
+        -9 $<TARGET_FILE:${PROJECT_NAME}.arm9.elf>
         -b ${GAME_ICON} "${GAME_TITLE}\;v${PROJECT_VERSION}\;${GAME_AUTHOR}"
         -g CALC
         -n 2 0
         >/dev/null
-    DEPENDS ${PROJECT_NAME}.elf
+    DEPENDS ${PROJECT_NAME}.arm7.elf ${PROJECT_NAME}.arm9.elf
     COMMENT "Generating NDS ROM"
 )
 
