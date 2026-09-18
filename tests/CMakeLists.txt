@@ -18,7 +18,7 @@ include(FetchContent)
 FetchContent_Declare(
     cpputest
     GIT_REPOSITORY https://github.com/cpputest/cpputest.git
-    GIT_TAG v4.0
+    GIT_TAG latest-passing-build
 )
 
 # Disable examples
