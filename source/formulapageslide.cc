@@ -18,8 +18,8 @@ constexpr int16_t kCharWidth = GlyphArray6x8<0>::CharWidth;
 
 FormulaPageSlide::FormulaPageSlide(FormulaView &view)
     : view(view), display(view.GetDisplay()), vm(view.GetVM()),
-      area(view.GetArea()), dir(DirLeft), offsetPx(0), distancePx(0), baseX(0),
-      lastStart(0), strip() {}
+      area(view.GetInnerArea()), dir(DirLeft), offsetPx(0), distancePx(0),
+      baseX(0), lastStart(0), strip() {}
 
 bool
 FormulaPageSlide::TryHandle(const Event &e, AnimationGate &gate) {

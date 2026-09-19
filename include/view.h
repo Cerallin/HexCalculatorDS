@@ -188,6 +188,22 @@ class FormulaView : public MainView<FormulaView, AlignRight> {
     static constexpr int16_t lineWidth = 30;
 
     /**
+     * @brief Formula glyph band, excluding left/right page arrows.
+     *
+     * GetArea() spans the whole FormulaView, including the <- / -> pagination
+     * indicators drawn at the edges. Page-slide (and similar) animations must
+     * clear and paint only this inner band so scrolling glyphs do not cover
+     * those arrows. Two CharWidth columns are reserved on each side; the
+     * resulting width matches FormulaManager::MaxPageGlyphs in 6x8 cells.
+     */
+    Area
+    GetInnerArea(void) const {
+        constexpr int16_t inset = 2 * CharWidth;
+        return Area(viewArea.x + inset, viewArea.y, viewArea.w - inset,
+                    viewArea.h);
+    }
+
+    /**
      * @brief 6x8 font.
      *
      */
