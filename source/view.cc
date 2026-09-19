@@ -499,31 +499,40 @@ IndicatorView::HandleEvent(const Event &e) {
     return Skipped;
 }
 
+IndicatorView::IndicatorView(MainDisplay &display, ViewModel &vm)
+    : MainView(Area(barOffsetX, indicatorAreaY, TileWidth,
+                    indicatorAreaHeight * TileHeight),
+               display, vm),
+      currentBase(vm.GetNumberBase()), barY(0), barSprites{} {
+    for (size_t i = 0; i < BarTileCount; i++) {
+        barSprites[i] = this->display.AddSprite(Point(barOffsetX, 0));
+        assert(barSprites[i] != nullptr);
+        barSprites[i]->SetTileOffset(IndicatorBarTileOffset +
+                                     static_cast<int>(i));
+    }
+    SetBarY(IndicatorY(currentBase));
+}
+
+void
+IndicatorView::SetBarY(int16_t y) {
+    barY = y;
+    for (size_t i = 0; i < BarTileCount; i++) {
+        barSprites[i]->SetPosition(barOffsetX,
+                                   static_cast<int16_t>(y + (i * TileHeight)));
+    }
+}
+
 void
 IndicatorView::ForceUpdate(void) {
     debugf("IndicatorView refreshed\n");
 
-    auto x = viewArea.x;
-    auto previousY = getIndicatorY(currentBase);
-
-    for (size_t j = 0; j < BarTileCount; j++) {
-        auto y = previousY + j * TileHeight;
-        this->display.PutTile(x, y, FontEmpty);
-    }
-
     auto nextBase = vm.GetNumberBase();
-    auto indicatorY = getIndicatorY(nextBase);
-
-    for (size_t j = 0; j < BarTileCount; j++) {
-        auto y = indicatorY + j * TileHeight;
-        this->display.PutTile(x, y, BarTiles[j]);
-    }
-
+    SetBarY(IndicatorY(nextBase));
     currentBase = nextBase;
 }
 
 int16_t
-IndicatorView::getIndicatorY(NumberBase base) const {
+IndicatorView::IndicatorY(NumberBase base) const {
     int16_t line = HexView::line;
     int16_t height = HexView::height;
 

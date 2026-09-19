@@ -359,24 +359,40 @@ class IndicatorView : public MainView<IndicatorView, AlignLeft> {
     static constexpr auto TileHeight = MainDisplay::TileHeight;
     static constexpr auto TileWidth = MainDisplay::TileWidth;
 
-    IndicatorView(MainDisplay &display, ViewModel &vm)
-        : MainView(Area(barOffsetX, indicatorAreaY, TileWidth,
-                        indicatorAreaHeight * TileHeight),
-                   display, vm),
-          currentBase(vm.GetNumberBase()) {}
+    IndicatorView(MainDisplay &display, ViewModel &vm);
 
     EventResult HandleEvent(const Event &e);
 
     void ForceUpdate(void);
 
-  private:
+    int16_t
+    GetBarY(void) const {
+        return barY;
+    }
+
+    void SetBarY(int16_t y);
+
+    NumberBase
+    GetCurrentBase(void) const {
+        return currentBase;
+    }
+
+    void
+    SetCurrentBase(NumberBase base) {
+        currentBase = base;
+    }
+
+    int16_t IndicatorY(NumberBase base) const;
+
     static constexpr int16_t barOffsetX = 2;
+
+  private:
     static constexpr int16_t indicatorAreaY = 8 * TileHeight;
     static constexpr int16_t indicatorAreaHeight = 15;
 
     NumberBase currentBase;
-
-    int16_t getIndicatorY(NumberBase base) const;
+    int16_t barY;
+    Sprite<MainDisplay> *barSprites[BarTileCount];
 };
 
 template <class Derived>
