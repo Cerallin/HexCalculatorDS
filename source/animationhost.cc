@@ -22,8 +22,10 @@ AnimationHost::AnimationHost(Views &views, ViewModel &vm)
                       digitFocusAnimState, digitFocusDiverge),
       digitFocusPress(views.GetInputViewAdapter().GetEditorView(),
                       digitFocusAnimState),
+      indicatorBarSlide(views.GetIndicatorView()),
       formulaAnimation(views.GetFormulaView(), gate),
-      inputAnimation(views.GetInputViewAdapter(), gate) {
+      inputAnimation(views.GetInputViewAdapter(), gate),
+      indicatorAnimation(views.GetIndicatorView(), gate) {
     bind();
     subscribe(vm.Bus());
 }
@@ -33,6 +35,7 @@ AnimationHost::Update(void) {
     views.Update();
     formulaAnimation.Update();
     inputAnimation.Update();
+    indicatorAnimation.Update();
     gate.Update();
 }
 
@@ -47,10 +50,12 @@ AnimationHost::bind(void) {
     inputAnimation.Add(digitFocusConverge);
     inputAnimation.Add(digitFocusSlide);
     inputAnimation.Add(digitFocusDiverge);
+    indicatorAnimation.Add(indicatorBarSlide);
 }
 
 void
 AnimationHost::subscribe(EventBus &bus) {
     bus.Subscribe(formulaAnimation);
     bus.Subscribe(inputAnimation);
+    bus.Subscribe(indicatorAnimation);
 }

@@ -303,4 +303,32 @@ class DigitFocusPress : public BasicEffect {
     static void CancelThunk(void *ctx);
 };
 
+/**
+ * @brief Indicator bar slide: Bezier-eased Y move between number-base slots.
+ */
+class IndicatorBarSlide : public BasicEffect {
+  public:
+    explicit IndicatorBarSlide(IndicatorView &view);
+
+    bool TryHandle(const Event &e, AnimationGate &gate);
+    bool SuppressesViewUpdate(void) const;
+    void Cancel(void);
+
+  private:
+    static constexpr uint16_t MoveFrames = 7;
+
+    IndicatorView &view;
+    NumberBase targetBase;
+    int16_t fromY;
+    int16_t toY;
+    uint16_t phase;
+
+    bool start(AnimationGate &gate);
+    bool Tick(void);
+    void snapToTarget(void);
+
+    static bool TickThunk(void *ctx);
+    static void CancelThunk(void *ctx);
+};
+
 }; // namespace HexCalc::AnimationEffects

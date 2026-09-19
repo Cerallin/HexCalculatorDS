@@ -16,7 +16,8 @@ namespace HexCalc {
  * @brief Views owned by AnimationHost (skip raw Subscribe/Update).
  *        Extend with more types: ViewClaims<FormulaView, ValueView, ...>
  */
-using AnimationViewClaims = ViewClaims<FormulaView, InputViewAdapter>;
+using AnimationViewClaims =
+    ViewClaims<FormulaView, InputViewAdapter, IndicatorView>;
 
 /**
  * @brief Optional animation layer over ViewHost.
@@ -58,10 +59,12 @@ class AnimationHost : private NonCopyable {
     AnimationEffects::DigitFocusDiverge digitFocusDiverge;
     AnimationEffects::DigitFocusSlide digitFocusSlide;
     AnimationEffects::DigitFocusPress digitFocusPress;
+    AnimationEffects::IndicatorBarSlide indicatorBarSlide;
 
     // Animation wrappers
     Animated<FormulaView> formulaAnimation;
     Animated<InputViewAdapter> inputAnimation;
+    Animated<IndicatorView> indicatorAnimation;
 
     /*
      * @brief Bind animation effects to the animation wrapper.
