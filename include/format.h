@@ -414,10 +414,6 @@ GlyphFormatSize(size_t digitCount) {
     }
 }
 
-constexpr size_t MaxDisplayDigits =
-    max(GlyphFormatSize<Binary>(Number::MaxBinDigits),
-        GlyphFormatSize<Octal>(Number::MaxOctDigits),
-        GlyphFormatSize<Decimal>(Number::MaxDecDigits),
-        GlyphFormatSize<Hexadecimal>(Number::MaxHexDigits));
+constexpr size_t MaxDisplayDigits = 29;
 
 }; // namespace HexCalc

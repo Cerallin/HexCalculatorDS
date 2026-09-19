@@ -103,18 +103,26 @@ class MainView : public BasicView<Derived, MainDisplay> {
     void
     PrintFormattedGlyphs(GlyphArray8x8<N> glyphs,
                          bool underline = false) const {
-        Point start(viewArea.x, viewArea.y);
+        // Cut the glyphs max to MaxDisplayDigits glyphs
+        auto size = glyphs.Size();
+        size_t offset =
+            (size < MaxDisplayDigits) ? 0 : (size - MaxDisplayDigits);
+        GlyphArray8x8<N> cutted(glyphs, offset, MaxDisplayDigits);
+
+        constexpr int charWidth = glyphs.CharWidth;
         constexpr bool alignLeft = (Derived::viewAlign == AlignLeft);
+
+        Point start(viewArea.x, viewArea.y);
+
         if constexpr (alignLeft) {
-            this->display.ClearLine(start, glyphs.CharWidth, underline);
-            this->display.PrintLine(glyphs, start);
+            this->display.ClearLine(start, charWidth, underline);
+            this->display.PrintLine(cutted, start);
         } else {
             Area8x8 area(viewArea);
-            auto skipGlyphs = area.w - glyphs.Size();
-            Point glyphStart(viewArea.x + (skipGlyphs * glyphs.CharWidth),
-                             viewArea.y);
-            this->display.ClearLine(start, glyphs.CharWidth, underline);
-            this->display.PrintLine(glyphs, glyphStart);
+            auto skipGlyphs = area.w - cutted.Size();
+            Point glyphStart(viewArea.x + (skipGlyphs * charWidth), viewArea.y);
+            this->display.ClearLine(start, charWidth, underline);
+            this->display.PrintLine(cutted, glyphStart);
         }
     }
 
