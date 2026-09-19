@@ -61,7 +61,20 @@ MainDisplay::MainDisplay(void)
     SetBackdrop(COLOR_COMMON_BG);
 
     // cope font tiles
-    decompress(mainFontTiles, bgGetGfxPtr(this->layers[0].GetBg()), LZ77Vram);
+    auto *fontGfx = bgGetGfxPtr(this->layers[0].GetBg());
+    decompress(mainFontTiles, fontGfx, LZ77Vram);
+    // Indicator bar sprites share the same glyph pixels as BG BarTiles.
+    sm.LoadBarTiles(fontGfx);
+}
+
+Sprite<MainDisplay> *
+MainDisplay::AddSprite(Point position, int priority, bool hFlip, bool vFlip) {
+    return sm.Add(position, priority, hFlip, vFlip);
+}
+
+void
+MainDisplay::ResetSprites(void) {
+    sm.Reset();
 }
 
 void

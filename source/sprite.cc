@@ -18,7 +18,25 @@
 using namespace HexCalc;
 
 MainSpriteManager::MainSpriteManager(void) : SpriteManager<MainDisplay>() {
-    // not implemented yet
+    vramSetBankE(VRAM_E_MAIN_SPRITE);
+    oamInit(&oamState, SpriteMapping_1D_256, false);
+    static_assert((sizeof(mainPal) / sizeof(uint16_t)) <= BIT(MainDisplay::Bpp),
+                  "Palette size exceeds color format limit");
+    dmaCopy(mainPal, SPRITE_PALETTE, sizeof(mainPal));
+    oamEnable(&oamState);
+}
+
+void
+MainSpriteManager::LoadBarTiles(const uint16_t *bgGfx) {
+    assert(bgGfx != nullptr);
+    auto *gfx = reinterpret_cast<uint8_t *>(SpriteGfx());
+    auto *dstBase = &gfx[IndicatorBarTileOffset * TileBytes];
+    const auto *srcBase = reinterpret_cast<const uint8_t *>(bgGfx);
+    for (size_t i = 0; i < BarTileCount; i++) {
+        const size_t srcIndex = static_cast<size_t>(BarTiles[i]);
+        dmaCopy(&srcBase[srcIndex * TileBytes], &dstBase[i * TileBytes],
+                TileBytes);
+    }
 }
 
 SubSpriteManager::SubSpriteManager(void) : SpriteManager<SubDisplay>() {

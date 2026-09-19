@@ -20,6 +20,9 @@ constexpr int DigitFocusTileOffset = 32;
 constexpr int DigitFocusPaletteBank = 1;
 /** Tile pixels use palette index 2 (COLOR_COMMON_BORDER in subSpritePal). */
 constexpr int DigitFocusSignColorIndex = 2;
+/** Main-screen indicator bar tiles occupy sprite gfx indices 0..BarTileCount-1.
+ */
+constexpr int IndicatorBarTileOffset = 0;
 
 class MainDisplay;
 class SubDisplay;
@@ -243,6 +246,13 @@ class SubDisplay;
 class MainSpriteManager : public SpriteManager<MainDisplay> {
   public:
     MainSpriteManager(void);
+
+    /**
+     * @brief Copy indicator bar tiles from main BG font gfx into sprite VRAM.
+     *
+     * @param bgGfx Pointer returned by bgGetGfxPtr for the main font bank.
+     */
+    void LoadBarTiles(const uint16_t *bgGfx);
 };
 
 class SubSpriteManager : public SpriteManager<SubDisplay> {

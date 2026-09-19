@@ -360,6 +360,10 @@ class MainDisplay : public Display<MainDisplay> {
     void ClearLineBand(const Point &start, int pixelWidth,
                        bool underline = false) const;
 
+    Sprite<MainDisplay> *AddSprite(Point position, int priority = 0,
+                                   bool hFlip = false, bool vFlip = false);
+    void ResetSprites(void);
+
     static constexpr int Bpp = 4;
     static constexpr int TileWidth = 8;
     static constexpr int TileHeight = 8;

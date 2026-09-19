@@ -128,6 +128,7 @@ class ViewHost : private NonCopyable {
         // Must be called once per frame --said libnds
         bgUpdate();
 
+        mainDisplay.UpdateSprites();
         subDisplay.UpdateSprites();
     }
 
