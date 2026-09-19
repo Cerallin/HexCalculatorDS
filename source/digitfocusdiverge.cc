@@ -26,8 +26,8 @@ DigitFocusDiverge::DigitFocusDiverge(EditorView &editorView,
                                      DigitFocusAnimState &state)
     : digitPad(editorView.GetDigitPad()), digitFocus(digitPad.GetDigitFocus()),
       state(state), phaseKind(Phase::Diverge), wrapFollow(false), phase(0),
-      toCell(-1, -1), toPx(0, 0), startCorners{Point(0, 0), Point(0, 0),
-                                               Point(0, 0), Point(0, 0)},
+      toCell(-1, -1), toPx(0, 0),
+      startCorners{Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)},
       endCorners{Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)} {}
 
 void
@@ -224,10 +224,6 @@ DigitFocusDiverge::tickConverge(void) {
 
 bool
 DigitFocusDiverge::Tick(void) {
-    if (!active) {
-        return false;
-    }
-
     if (phaseKind == Phase::Converge) {
         return tickConverge();
     }

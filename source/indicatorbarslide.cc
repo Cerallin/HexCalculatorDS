@@ -79,10 +79,6 @@ IndicatorBarSlide::snapToTarget(void) {
 
 bool
 IndicatorBarSlide::Tick(void) {
-    if (!active) {
-        return false;
-    }
-
     phase++;
     if (phase >= MoveFrames) {
         snapToTarget();

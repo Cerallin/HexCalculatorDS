@@ -113,10 +113,6 @@ DigitFocusSlide::snapToLogical(void) {
 
 bool
 DigitFocusSlide::Tick(void) {
-    if (!active) {
-        return false;
-    }
-
     const int sx = sign(toPx.x - fromPx.x);
     const int sy = sign(toPx.y - fromPx.y);
     const Point overshoot(toPx.x + sx, toPx.y + sy);

@@ -82,10 +82,6 @@ DigitFocusPress::snapToLogical(void) {
 
 bool
 DigitFocusPress::Tick(void) {
-    if (!active) {
-        return false;
-    }
-
     const Point pressed(basePx.x, basePx.y + PressOffsetY);
 
     if (phase < DownFrames) {

@@ -25,9 +25,8 @@ constexpr Point kOutward[DigitFocus::CornerCount] = {
 DigitFocusConverge::DigitFocusConverge(EditorView &editorView,
                                        DigitFocusAnimState &state)
     : digitPad(editorView.GetDigitPad()), digitFocus(digitPad.GetDigitFocus()),
-      state(state), phase(0),
-      toPx(0, 0), startCorners{Point(0, 0), Point(0, 0), Point(0, 0),
-                               Point(0, 0)},
+      state(state), phase(0), toPx(0, 0),
+      startCorners{Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)},
       endCorners{Point(0, 0), Point(0, 0), Point(0, 0), Point(0, 0)} {}
 
 void
@@ -115,10 +114,6 @@ DigitFocusConverge::snapToLogical(void) {
 
 bool
 DigitFocusConverge::Tick(void) {
-    if (!active) {
-        return false;
-    }
-
     const uint16_t t256 = static_cast<uint16_t>(
         (static_cast<uint32_t>(phase + 1) * 256) / Frames);
     const uint16_t eased = EaseInOutCubicBezier(t256);

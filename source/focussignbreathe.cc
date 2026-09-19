@@ -93,12 +93,6 @@ FocusSignBreathe::sync(AnimationGate &gate) {
 
 bool
 FocusSignBreathe::Tick(void) {
-    // If the animation is not active or the button index is invalid, do
-    // nothing
-    if (!active || buttonIndex < 0) {
-        return false;
-    }
-
     display.SetButtonSignColor(buttonIndex, curve.At(phase));
     phase = static_cast<uint16_t>((phase + 1) % curve.Period());
     return true;
