@@ -110,6 +110,8 @@ FormulaModel::HandleEvent(const Event &e) {
 
 bool
 FormulaModel::flipBit(int index) {
+    assert(index >= 0 && index < config.Width());
+
     auto number = currentNumber;
 
     auto bitMask = NumberDataType(1) << index;
