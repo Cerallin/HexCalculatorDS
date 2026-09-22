@@ -23,7 +23,7 @@ FormulaModel::HandleEvent(const Event &e) {
         } else { // inputState == InputNumber
             // remove the last digit
             auto base = config.Base();
-            currentNumber /= base;
+            currentNumber = DivBase(currentNumber, base);
         }
         valueChanged = true;
     } else if (e.type == InputEvent) {
@@ -287,7 +287,7 @@ FormulaModel::handleInput(const Event &e) {
             // reject
         } else {
             // join the new digit to the current number
-            currentNumber = (currentNumber * base) + digit;
+            currentNumber = MulBase(currentNumber, base) + digit;
             valueChanged = true;
         }
     }

@@ -63,13 +63,51 @@ WidthMask(NumberWidth w) {
 }
 
 /**
+ * @brief Multiply by a supported radix. Powers of two are shifts.
+ */
+constexpr NumberDataType
+MulBase(NumberDataType v, NumberBase base) {
+    switch (base) {
+    case Binary:
+        return v << 1;
+    case Octal:
+        return v << 3;
+    case Hexadecimal:
+        return v << 4;
+    case Decimal:
+        return v * 10;
+    default:
+        return 0;
+    }
+}
+
+/**
+ * @brief Divide by a supported radix. Powers of two are shifts.
+ */
+constexpr NumberDataType
+DivBase(NumberDataType v, NumberBase base) {
+    switch (base) {
+    case Binary:
+        return v >> 1;
+    case Octal:
+        return v >> 3;
+    case Hexadecimal:
+        return v >> 4;
+    case Decimal:
+        return v / 10;
+    default:
+        return 0;
+    }
+}
+
+/**
  * @brief Whether appending @p digit in @p base would exceed the current width.
  */
 constexpr bool
 WouldOverflowDigit(NumberDataType current, NumberDataType digit,
                    NumberBase base, NumberWidth width) {
     const NumberDataType maxValue = WidthMask(width);
-    return current > (maxValue - digit) / static_cast<NumberDataType>(base);
+    return current > DivBase(maxValue - digit, base);
 }
 
 enum Digit : int8_t {
@@ -155,31 +193,101 @@ class Number {
             return digits;
         }
 
-        size_t count = 0;
-        DigitArray<N> digits;
-        if ((sign == Signed) && (base == Decimal)) {
-            // Use unsigned two's-complement abs so INT*_MIN (e.g.
-            // 0x8000000000000000) does not invoke signed negation UB.
-            auto widthMask = WidthMask(width);
-            const bool negative = (v & (NumberDataType(1) << (width - 1))) != 0;
-            if (negative) {
-                v = ((v ^ widthMask) + 1) & widthMask;
-            }
-            digits.negative = negative;
+        switch (base) {
+        case Binary:
+            return transcodeShift<N, 1>(v);
+        case Octal:
+            return transcodeShift<N, 3>(v);
+        case Hexadecimal:
+            return transcodeShift<N, 4>(v);
+        case Decimal:
+            return transcodeDecimal<N>(v);
+        default:
+            return transcodeDiv<N>(v, base, false);
         }
+    }
+
+  private:
+    template <size_t N, unsigned Shift>
+    static DigitArray<N>
+    transcodeShift(NumberDataType v) {
+        static_assert(Shift > 0 && Shift < 64, "digit shift out of range");
+        constexpr NumberDataType digitMask = (NumberDataType(1) << Shift) - 1;
+        DigitArray<N> digits;
+        size_t count = 0;
         for (size_t i = 0; i < N; ++i) {
             if (v == 0) {
                 break;
             }
-            digits[i] = static_cast<Digit>(v % base);
-            v /= base;
-            count++;
+            digits[i] = static_cast<Digit>(v & digitMask);
+            v >>= Shift;
+            ++count;
         }
         digits.size = count;
         return digits;
     }
 
-  private:
+    template <size_t N>
+    DigitArray<N>
+    transcodeDecimal(NumberDataType v) const {
+        bool negative = false;
+        if (sign == Signed) {
+            // Use unsigned two's-complement abs so INT*_MIN (e.g.
+            // 0x8000000000000000) does not invoke signed negation UB.
+            const auto widthMask = WidthMask(width);
+            negative = (v & (NumberDataType(1) << (width - 1))) != 0;
+            if (negative) {
+                v = ((v ^ widthMask) + 1) & widthMask;
+            }
+        }
+
+        DigitArray<N> digits;
+        digits.negative = negative;
+        size_t count = 0;
+        // Values that fit in 32 bits avoid a 64-bit soft division per digit.
+        if ((v >> 32) == 0) {
+            auto n = static_cast<uint32_t>(v);
+            for (size_t i = 0; i < N; ++i) {
+                if (n == 0) {
+                    break;
+                }
+                digits[i] = static_cast<Digit>(n % 10u);
+                n /= 10u;
+                ++count;
+            }
+        } else {
+            for (size_t i = 0; i < N; ++i) {
+                if (v == 0) {
+                    break;
+                }
+                digits[i] = static_cast<Digit>(v % 10u);
+                v /= 10u;
+                ++count;
+            }
+        }
+        digits.size = count;
+        return digits;
+    }
+
+    template <size_t N>
+    static DigitArray<N>
+    transcodeDiv(NumberDataType v, NumberBase base, bool negative) {
+        DigitArray<N> digits;
+        digits.negative = negative;
+        size_t count = 0;
+        const auto divisor = static_cast<NumberDataType>(base);
+        for (size_t i = 0; i < N; ++i) {
+            if (v == 0) {
+                break;
+            }
+            digits[i] = static_cast<Digit>(v % divisor);
+            v /= divisor;
+            ++count;
+        }
+        digits.size = count;
+        return digits;
+    }
+
     NumberDataType value{};
     NumberWidth width;
     NumberSign sign;
