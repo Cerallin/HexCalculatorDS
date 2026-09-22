@@ -21,7 +21,7 @@ p=sys.argv[1];\
 db=json.load(open(p));\
 kept=[e for e in db if not str(e.get('file','')).endswith('.c')];\
 json.dump(kept, open(p,'w'), indent=2);\
-print(len(kept))"
+print(len(kept), end='')"
     ${COMPILE_COMMANDS}
   RESULT_VARIABLE _filter_rc
   OUTPUT_VARIABLE _filter_out
