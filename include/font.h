@@ -164,7 +164,7 @@ class Glyph {
                     bool downVFlip = false, bool underBaseline = false)
         : upper(upper), lower(lower), upHFlip(upHFlip), upVFlip(upVFlip),
           downHFlip(downHFlip), downVFlip(downVFlip),
-          underBaseline(underBaseline) {}
+          underBaseline(underBaseline), padding(0) {}
     constexpr Glyph(void) : Glyph(FontEmpty, FontEmpty) {}
 
     /**
@@ -219,7 +219,18 @@ class Glyph {
     bool downHFlip : 1;
     bool downVFlip : 1;
     bool underBaseline : 1;
+
+    // padding to make the struct size 4 bytes
+    uint8_t padding;
 };
+
+/**
+ * @brief Assert the size of Glyph is 4 bytes.
+ * This is to ensure the size of Glyph is 4 bytes, so that we can use
+ * assembly string to copy the glyph instead of memcpy.
+ *
+ */
+static_assert(sizeof(Glyph) == 4, "Glyph must be a 4-byte value");
 
 class GlyphOO : public Glyph {};
 
@@ -275,7 +286,7 @@ constexpr Glyph InvalidGlyph = Glyph();
 
 constexpr Glyph::Glyph(FontType font)
     : upper(FontEmpty), lower(FontEmpty), upHFlip(false), upVFlip(false),
-      downHFlip(false), downVFlip(false), underBaseline(false) {
+      downHFlip(false), downVFlip(false), underBaseline(false), padding(0) {
     switch (font) {
     case Font6x8A:
         *this = Glyph(0, 1);
