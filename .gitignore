@@ -3,3 +3,4 @@ reports/*.md
 reports/*.txt
 build*/
 **/__pycache__/
+.venv/
