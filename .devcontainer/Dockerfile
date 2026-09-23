@@ -33,17 +33,20 @@ ENV DEVKITARM=${DEVKITPRO}/devkitARM
 
 ENV DEVKIT_SOURCE=/build
 
+## devkitARM
+RUN mkdir -p ${DEVKIT_SOURCE}
+RUN git clone --depth 1 https://github.com/devkitPro/buildscripts.git ${DEVKIT_SOURCE}/buildscripts -b 9b57a02
+COPY ./dkpro-config.sh ${DEVKIT_SOURCE}/buildscripts/config.sh
+COPY ./buildscripts-fetch-from-github.patch ${DEVKIT_SOURCE}/buildscripts-fetch-from-github.patch
+RUN cd ${DEVKIT_SOURCE}/buildscripts && \
+    patch -p1 < ${DEVKIT_SOURCE}/buildscripts-fetch-from-github.patch && \
+    MAKE="make -j$(nproc)" ./build-devkit.sh
+
+## Versions
 ENV GRIT_VERSION=v0.10.0
 ENV GENERAL_TOOLS_VERSION=v1.4.4
 ENV NDSTOOL_VERSION=v2.3.1
 ENV LIBNDS_VERSION=v1.8.3
-
-## devkitARM
-RUN mkdir -p ${DEVKIT_SOURCE}
-RUN git clone --depth 1 https://github.com/devkitPro/buildscripts.git ${DEVKIT_SOURCE}/buildscripts
-COPY ./dkpro-config.sh ${DEVKIT_SOURCE}/buildscripts/config.sh
-COPY ./build-devkit.sh ${DEVKIT_SOURCE}/buildscripts/build-devkit.sh
-RUN cd ${DEVKIT_SOURCE}/buildscripts && MAKE="make -j$(nproc)" ./build-devkit.sh
 
 ## grit
 RUN git clone -b ${GRIT_VERSION} --depth 1 https://github.com/devkitPro/grit.git ${DEVKIT_SOURCE}/grit

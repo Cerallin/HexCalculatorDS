@@ -1,0 +1,101 @@
+diff --git a/build-devkit.sh b/build-devkit.sh
+index 613090a..89aedc0 100755
+--- a/build-devkit.sh
++++ b/build-devkit.sh
+@@ -100,15 +100,83 @@ INSTALLDIR=/opt/devkitpro
+ 
+ [ ! -z "$INSTALLDIR" ] && mkdir -p $INSTALLDIR && touch $INSTALLDIR/nonexistantfile && rm $INSTALLDIR/nonexistantfile || exit 1;
+ 
+-if test "`wget -V`"; then
+-	FETCH='wget -U "dkp-buildscript"'
+-elif test "`curl -V`"; then
+-	FETCH="curl -f -L -O"
++if curl -V >/dev/null 2>&1; then
++        FETCH_HAS_WGET=0
++elif wget -V >/dev/null 2>&1; then
++        FETCH_HAS_WGET=1
+ else
+         echo "ERROR: Please make sure you have wget or curl installed."
+         exit 1
+ fi
+ 
++# pkg.devkitpro.org sits behind Cloudflare and often returns 403 to wget/curl
++# even with a browser User-Agent. When the challenge is passed it just 302s to
++# GitHub (or GNU/sourceware), so fetch those origins first.
++fetch_url() {
++        local dest="$1"
++        local url="$2"
++        echo "  trying $url"
++        if [ "$FETCH_HAS_WGET" = 1 ]; then
++                wget -U "dkp-buildscript" -O "$dest" "$url"
++        else
++                curl -f -L -A "dkp-buildscript" -o "$dest" "$url"
++        fi
++}
++
++download_archive() {
++        local archive="$1"
++        local urls=()
++        local url
++        local base ver repo
++
++        case "$archive" in
++                gcc-*.tar.xz)
++                        urls=(
++                                "https://github.com/devkitPro/buildscripts/releases/download/sources/${archive}"
++                                "https://ftp.gnu.org/gnu/gcc/${archive%.tar.xz}/${archive}"
++                                "https://downloads.devkitpro.org/${archive}"
++                        )
++                        ;;
++                binutils-*.tar.xz|binutils-*.tar.bz2)
++                        urls=(
++                                "https://github.com/devkitPro/buildscripts/releases/download/sources/${archive}"
++                                "https://ftp.gnu.org/gnu/binutils/${archive}"
++                                "https://downloads.devkitpro.org/${archive}"
++                        )
++                        ;;
++                newlib-*.tar.gz)
++                        urls=(
++                                "https://github.com/devkitPro/buildscripts/releases/download/sources/${archive}"
++                                "https://sourceware.org/pub/newlib/${archive}"
++                                "https://downloads.devkitpro.org/${archive}"
++                        )
++                        ;;
++                devkitarm-rules-*.tar.gz|devkitppc-rules-*.tar.gz|devkita64-rules-*.tar.gz|devkitarm-crtls-*.tar.gz|devkitppc-crtls-*.tar.gz)
++                        base="${archive%.tar.gz}"
++                        ver="${base##*-}"
++                        repo="${base%-${ver}}"
++                        urls=(
++                                "https://github.com/devkitPro/${repo}/archive/refs/tags/v${ver}.tar.gz"
++                                "https://downloads.devkitpro.org/${archive}"
++                        )
++                        ;;
++                *)
++                        urls=(
++                                "https://github.com/devkitPro/buildscripts/releases/download/sources/${archive}"
++                                "https://downloads.devkitpro.org/${archive}"
++                        )
++                        ;;
++        esac
++
++        for url in "${urls[@]}"; do
++                if fetch_url "$archive" "$url"; then
++                        return 0
++                fi
++                rm -f "$archive"
++        done
++        return 1
++}
++
+ 
+ #---------------------------------------------------------------------------------
+ # find proper make
+@@ -216,7 +284,7 @@ for archive in $archives
+ do
+         echo $archive
+         if [ ! -f $archive ]; then
+-		$FETCH https://downloads.devkitpro.org/$archive || { echo "Error: Failed to download $archive"; exit 1; }
++                download_archive "$archive" || { echo "Error: Failed to download $archive"; exit 1; }
+         fi
+ done
+ 
